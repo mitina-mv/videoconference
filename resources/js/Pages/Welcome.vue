@@ -17,6 +17,47 @@ defineProps({
         required: true,
     },
 });
+
+// Создание сессии
+/* fetch('/create-session', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        // Другие заголовки, если необходимо
+    },
+    // Тело запроса, если необходимо передать данные
+    body: JSON.stringify({
+        // Данные, если необходимо
+    })
+})
+.then(response => response.json())
+.then(data => {
+    // Обработка успешного ответа */
+    // console.log('Session created:', data);
+
+    let sessionId = 'ses_Ck1O71uur2';
+    // Подключение к сессии
+    fetch(`/сonnect/${sessionId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            // Другие заголовки, если необходимо
+        },
+    })
+    .then(response => response.json())
+    .then(connectData => {
+        // Обработка успешного подключения
+        console.log('Connected to session:', connectData);
+    })
+    .catch(error => {
+        // Обработка ошибки подключения
+        console.error('Connection error:', error);
+    });
+/* })
+.catch(error => {
+    // Обработка ошибки создания сессии
+    console.error('Session creation error:', error);
+}); */
 </script>
 
 <template>
