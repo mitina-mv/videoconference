@@ -20,10 +20,10 @@ defineProps({
     },
 });
 
-const mySessionId = 'ses_Xi6VhOjbFi'
+const mySessionId = 'ses_KnGw9s04cI'
 const myUserName = "Participant" + Math.floor(Math.random() * 100)
-const myConnectionId = "con_YAqGEegcch"
-const mytoken = "wss://conference.otisnth.ru:1343?sessionId=ses_Xi6VhOjbFi&token=tok_G8p02HaaclHMeueD"
+const myConnectionId = "con_H6uS6TJ2xi"
+const mytoken = "wss://conference.otisnth.ru:443?sessionId=ses_GOzynfU5WH&token=tok_P8vNLqP9BnW78G6m&secret="
 
 const OV = new OpenVidu();
 const session = ref(null);
@@ -33,7 +33,7 @@ const publisher = ref(null);
 const initSession = () => {
     console.log("we in func initSession");
     session.value = OV.initSession();
-    session.value.connect(mytoken)
+    session.value.connect(mytoken, { clientData: myUserName } )
         .then(() => {
             console.log("Connected to session");
 
@@ -75,6 +75,47 @@ onMounted(() => {
     initSession();
 });
 
+/* // Создание сессии
+fetch('/create-session', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        // Другие заголовки, если необходимо
+    },
+    // Тело запроса, если необходимо передать данные
+    body: JSON.stringify({
+        // Данные, если необходимо
+    })
+})
+.then(response => response.json())
+.then(data => {
+    // Обработка успешного ответа
+    console.log('Session created:', data);
+
+    // let sessionId = 'ses_Xi6VhOjbFi';
+    // "con_YAqGEegcch"
+    // Подключение к сессии
+    fetch(`/сonnect/${data.sessionId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            // Другие заголовки, если необходимо
+        },
+    })
+    .then(response => response.json())
+    .then(connectData => {
+        // Обработка успешного подключения
+        console.log('Connected to session:', connectData);
+    })
+    .catch(error => {
+        // Обработка ошибки подключения
+        console.error('Connection error:', error);
+    });
+})
+.catch(error => {
+    // Обработка ошибки создания сессии
+    console.error('Session creation error:', error);
+}); */
 </script>
 
 <template>
