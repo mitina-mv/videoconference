@@ -29,6 +29,22 @@ const session = ref(null);
 const publisher = ref(null);
 const subscribers = ref([]);
 
+session.value = OV.initSession();
+
+session.value.on('streamCreated', ({ stream }) => {
+    console.warn("tyk", stream);
+});
+
+session.value.on('streamDestroyed', (event) => {
+
+    // Remove the stream from 'subscribers' array
+    const index = subscribers.value.indexOf(stream.streamManager, 0);
+    if (index >= 0) {
+        subscribers.value.splice(index, 1);
+    }
+});
+
+
 // Инициализация OpenVidu сессии
 const joinSession = () => {
   fetch(`/сonnect/${mySessionId}`, {
@@ -40,23 +56,6 @@ const joinSession = () => {
   .then(response => response.json())
   .then(connectData => {
       const mytoken = connectData.token;
-
-        session.value = OV.initSession();
-
-        session.value.on('streamCreated', ({ stream }) => {
-            let subscriber = session.value.subscribe(stream, undefined);
-            subscribers.value.push(subscriber);
-        });
-
-        session.value.on('streamDestroyed', (event) => {
-
-            // Remove the stream from 'subscribers' array
-            const index = subscribers.value.indexOf(stream.streamManager, 0);
-            if (index >= 0) {
-                subscribers.value.splice(index, 1);
-            }
-        });
-
 
       session.value.connect(mytoken, { clientData: myUserName })
         .then(() => {
@@ -71,13 +70,13 @@ const joinSession = () => {
             mirror: true
           });
 
-        //   publisher.value.once('accessAllowed', () => {
-        //     const videoElement = document.createElement('video');
-        //     videoElement.autoplay = true;
-        //     videoElement.muted = true;
-        //     videoElement.srcObject = publisher.value.stream.getMediaStream();
-        //     document.getElementById('video-container').appendChild(videoElement);
-        //   });
+          publisher.value.once('accessAllowed', () => {
+            const videoElement = document.createElement('video');
+            videoElement.autoplay = true;
+            videoElement.muted = true;
+            videoElement.srcObject = publisher.value.stream.getMediaStream();
+            document.getElementById('video-container').appendChild(videoElement);
+          });
 
           session.value.publish(publisher.value);
         })
@@ -90,13 +89,6 @@ const joinSession = () => {
   });
 };
 
-// session.value.on('streamCreated', (event) => {
-//     const subscriber = session.value.subscribe(event.stream, undefined);
-//     const subscriberVideo = document.createElement('video');
-//     subscriberVideo.autoplay = true;
-//     subscriberVideo.srcObject = subscriber.stream.getMediaStream();
-//     document.getElementById('video-container').appendChild(subscriberVideo);
-//     });
 
 const disconnectFromSession = () => {
     // Отключаемся от сессии и выполняем другие необходимые действия
@@ -106,47 +98,6 @@ const disconnectFromSession = () => {
     // Дополнительные действия, если требуется
 };
 
-/* // Создание сессии
-fetch('/create-session', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        // Другие заголовки, если необходимо
-    },
-    // Тело запроса, если необходимо передать данные
-    body: JSON.stringify({
-        // Данные, если необходимо
-    })
-})
-.then(response => response.json())
-.then(data => {
-    // Обработка успешного ответа
-    console.log('Session created:', data);
-
-    // let sessionId = 'ses_Xi6VhOjbFi';
-    // "con_YAqGEegcch"
-    // Подключение к сессии
-    fetch(`/сonnect/${data.sessionId}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            // Другие заголовки, если необходимо
-        },
-    })
-    .then(response => response.json())
-    .then(connectData => {
-        // Обработка успешного подключения
-        console.log('Connected to session:', connectData);
-    })
-    .catch(error => {
-        // Обработка ошибки подключения
-        console.error('Connection error:', error);
-    });
-})
-.catch(error => {
-    // Обработка ошибки создания сессии
-    console.error('Session creation error:', error);
-}); */
 </script>
 
 <template>
@@ -158,10 +109,11 @@ fetch('/create-session', {
         <button @click="joinSession">Join Session</button>
         
         
-        <div id="video-container" class="col-md-6">
-            <user-video :stream-manager="publisher" />
-            <user-video v-for="sub in subscribers" :key="sub.stream.connection.connectionId" :stream-manager="sub" />
+        <div id="video-container">
+            
         </div>
+
+        <video v-for="sub in subscribers" :key="sub.stream.connection.connectionId" :srcObject="sub.stream.getMediaStream()" autoplay />
     
     </div>
 </template>
