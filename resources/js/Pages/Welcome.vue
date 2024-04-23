@@ -2,6 +2,7 @@
 import { Head, Link } from '@inertiajs/vue3';
 import { OpenVidu } from 'openvidu-browser';
 import { ref, onMounted } from 'vue';
+import UserVideo from '@/Components/UserVideo.vue'
 
 defineProps({
     canLogin: {
@@ -20,60 +21,90 @@ defineProps({
     },
 });
 
-const mySessionId = 'ses_KnGw9s04cI'
+const mySessionId = 'ses_KbtRqyPshV'
 const myUserName = "Participant" + Math.floor(Math.random() * 100)
-const myConnectionId = "con_H6uS6TJ2xi"
-const mytoken = "wss://conference.otisnth.ru:443?sessionId=ses_GOzynfU5WH&token=tok_P8vNLqP9BnW78G6m&secret="
 
 const OV = new OpenVidu();
 const session = ref(null);
 const publisher = ref(null);
+const subscribers = ref([]);
 
 // Инициализация OpenVidu сессии
-const initSession = () => {
-    console.log("we in func initSession");
-    session.value = OV.initSession();
-    session.value.connect(mytoken, { clientData: myUserName } )
+const joinSession = () => {
+  fetch(`/сonnect/${mySessionId}`, {
+      method: 'GET',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+  })
+  .then(response => response.json())
+  .then(connectData => {
+      const mytoken = connectData.token;
+
+        session.value = OV.initSession();
+
+        session.value.on('streamCreated', ({ stream }) => {
+            let subscriber = session.value.subscribe(stream, undefined);
+            subscribers.value.push(subscriber);
+        });
+
+        session.value.on('streamDestroyed', (event) => {
+
+            // Remove the stream from 'subscribers' array
+            const index = subscribers.value.indexOf(stream.streamManager, 0);
+            if (index >= 0) {
+                subscribers.value.splice(index, 1);
+            }
+        });
+
+
+      session.value.connect(mytoken, { clientData: myUserName })
         .then(() => {
-            console.log("Connected to session");
+          console.log("Connected to session");
 
-            // Получение видеопотока с веб-камеры
-            publisher.value = OV.initPublisher(undefined, {
-                videoSource: undefined,
-                audioSource: undefined,
-                publishAudio: true,
-                publishVideo: true,
-                mirror: true
-            });
+          publisher.value = OV.initPublisher(undefined, {
+            videoSource: undefined,
+            audioSource: undefined,
+            publishAudio: true,
+            publishVideo: true,
+            resolution: "640x480",
+            mirror: true
+          });
 
-            console.log(publisher.value);
+        //   publisher.value.once('accessAllowed', () => {
+        //     const videoElement = document.createElement('video');
+        //     videoElement.autoplay = true;
+        //     videoElement.muted = true;
+        //     videoElement.srcObject = publisher.value.stream.getMediaStream();
+        //     document.getElementById('video-container').appendChild(videoElement);
+        //   });
 
-            // Отображение видеопотока
-            publisher.value.once('accessAllowed', () => {
-                const videoElement = document.createElement('video');
-                videoElement.autoplay = true;
-                videoElement.muted = true; // Можно отключить звук во избежание эха
-                videoElement.srcObject = publisher.value.stream.getMediaStream();
-                document.getElementById('video-container').appendChild(videoElement);
-            });
-
-            // Отображение видеопотока
-            session.value.publish(publisher.value);
+          session.value.publish(publisher.value);
         })
         .catch(error => {
-            console.log("we have error");
-            console.error("Error connecting to session:", error);
+          console.error("Error connecting to session:", error);
         });
+  })
+  .catch(error => {
+      console.error('Connection error:', error);
+  });
 };
 
-// Публикация видеопотока
-const publishVideo = () => {
-    session.value.publish(publisher.value);
-};
+// session.value.on('streamCreated', (event) => {
+//     const subscriber = session.value.subscribe(event.stream, undefined);
+//     const subscriberVideo = document.createElement('video');
+//     subscriberVideo.autoplay = true;
+//     subscriberVideo.srcObject = subscriber.stream.getMediaStream();
+//     document.getElementById('video-container').appendChild(subscriberVideo);
+//     });
 
-onMounted(() => {
-    initSession();
-});
+const disconnectFromSession = () => {
+    // Отключаемся от сессии и выполняем другие необходимые действия
+    if (session.value) {
+        session.value.disconnect();
+    }
+    // Дополнительные действия, если требуется
+};
 
 /* // Создание сессии
 fetch('/create-session', {
@@ -124,18 +155,20 @@ fetch('/create-session', {
     <div
         class="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-dots-darker bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white"
     >
-        <div id="video-container"></div>
+        <button @click="joinSession">Join Session</button>
+        
+        
+        <div id="video-container" class="col-md-6">
+            <user-video :stream-manager="publisher" />
+            <user-video v-for="sub in subscribers" :key="sub.stream.connection.connectionId" :stream-manager="sub" />
+        </div>
     
     </div>
 </template>
 
 <style>
-.bg-dots-darker {
-    background-image: url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.22676 0C1.91374 0 2.45351 0.539773 2.45351 1.22676C2.45351 1.91374 1.91374 2.45351 1.22676 2.45351C0.539773 2.45351 0 1.91374 0 1.22676C0 0.539773 0.539773 0 1.22676 0Z' fill='rgba(0,0,0,0.07)'/%3E%3C/svg%3E");
-}
-@media (prefers-color-scheme: dark) {
-    .dark\:bg-dots-lighter {
-        background-image: url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.22676 0C1.91374 0 2.45351 0.539773 2.45351 1.22676C2.45351 1.91374 1.91374 2.45351 1.22676 2.45351C0.539773 2.45351 0 1.91374 0 1.22676C0 0.539773 0.539773 0 1.22676 0Z' fill='rgba(255,255,255,0.07)'/%3E%3C/svg%3E");
-    }
+#video-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
 }
 </style>

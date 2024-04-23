@@ -72,6 +72,13 @@ class ConferenceController extends Controller
             // Преобразуем JSON ответа в массив
             $responseData = json_decode($body, true);
 
+            // исправляем токен для корректного подключения
+            $token = $responseData['token'];
+            $token = str_replace(':1343', ':443', $token);
+            $token = $token . '&secret=' . $openviduApiToken;
+
+            $responseData['token'] = $token;
+
             // Возвращаем успешный ответ с данными о подключении
             return response()->json($responseData);
         } catch (\Exception $e) {
