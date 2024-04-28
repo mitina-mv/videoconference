@@ -29,22 +29,6 @@ const session = ref(null);
 const publisher = ref(null);
 const subscribers = ref([]);
 
-session.value = OV.initSession();
-
-session.value.on('streamCreated', ({ stream }) => {
-    console.warn("tyk", stream);
-});
-
-session.value.on('streamDestroyed', (event) => {
-
-    // Remove the stream from 'subscribers' array
-    const index = subscribers.value.indexOf(stream.streamManager, 0);
-    if (index >= 0) {
-        subscribers.value.splice(index, 1);
-    }
-});
-
-
 // Инициализация OpenVidu сессии
 const joinSession = () => {
   fetch(`/сonnect/${mySessionId}`, {
@@ -57,9 +41,24 @@ const joinSession = () => {
   .then(connectData => {
       const mytoken = connectData.token;
 
+      session.value = OV.initSession();
+
       session.value.connect(mytoken, { clientData: myUserName })
         .then(() => {
           console.log("Connected to session");
+
+          // Подписываемся на события после успешного подключения к сессии
+          session.value.on('streamCreated', ({ stream }) => {
+              console.log("tyk", stream);
+          });
+
+          session.value.on('streamDestroyed', (event) => {
+              // Удаление потока из списка подписчиков
+              const index = subscribers.value.findIndex(sub => sub.stream.streamId === event.stream.streamId);
+              if (index >= 0) {
+                  subscribers.value.splice(index, 1);
+              }
+          });
 
           publisher.value = OV.initPublisher(undefined, {
             videoSource: undefined,
@@ -113,7 +112,7 @@ const disconnectFromSession = () => {
             
         </div>
 
-        <video v-for="sub in subscribers" :key="sub.stream.connection.connectionId" :srcObject="sub.stream.getMediaStream()" autoplay />
+        <video v-for="sub in subscribers" :key="sub.stream.streamId" :srcObject="sub.stream.getMediaStream()" autoplay />
     
     </div>
 </template>
