@@ -1,8 +1,8 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
-import { OpenVidu } from 'openvidu-browser';
-import { ref, onMounted } from 'vue';
-import UserVideo from '@/Components/UserVideo.vue'
+import { Head, Link } from "@inertiajs/vue3";
+import { OpenVidu } from "openvidu-browser";
+import { ref, onMounted } from "vue";
+import UserVideo from "@/Components/UserVideo.vue";
 
 defineProps({
     canLogin: {
@@ -21,105 +21,131 @@ defineProps({
     },
 });
 
-const mySessionId = 'ses_KbtRqyPshV'
-const myUserName = "Participant" + Math.floor(Math.random() * 100)
+const mySessionId = "ses_U3MbT6TBlv";
+const myUserName = "Participant" + Math.floor(Math.random() * 100);
 
 const OV = new OpenVidu();
-const session = ref(null);
+const session = ref(OV.initSession());
 const publisher = ref(null);
 const subscribers = ref([]);
 
+// Подписываемся на события после успешного подключения к сессии
+session.value.on("streamCreated", (event) => {
+    const subscriber = session.value.subscribe(event.stream);
+    subscribers.value.push(subscriber);  
+    console.warn("streamCreated",  subscribers.value);              
+});
+
 // Инициализация OpenVidu сессии
 const joinSession = () => {
-  fetch(`/сonnect/${mySessionId}`, {
-      method: 'GET',
-      headers: {
-          'Content-Type': 'application/json',
-      },
-  })
-  .then(response => response.json())
-  .then(connectData => {
-      const mytoken = connectData.token;
+    fetch(`/сonnect/${mySessionId}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+        .then((response) => response.json())
+        .then((connectData) => {
+            const mytoken = connectData.token;
 
-      session.value = OV.initSession();
+            // session.value = OV.initSession();
 
-      session.value.connect(mytoken, { clientData: myUserName })
-        .then(() => {
-          console.log("Connected to session");
+            session.value.on("connectionCreated", (event) => {
+                console.log('Connection ' + event.connection.connectionId + ' created');
+            });
 
-          // Подписываемся на события после успешного подключения к сессии
-          session.value.on('streamCreated', ({ stream }) => {
-              console.log("tyk", stream);
-          });
+            // Подписываемся на события после успешного подключения к сессии
+            session.value.on("videoElementCreated", (event) => {
+                console.log("videoElementCreated",  event);
+            });
 
-          session.value.on('streamDestroyed', (event) => {
-              // Удаление потока из списка подписчиков
-              const index = subscribers.value.findIndex(sub => sub.stream.streamId === event.stream.streamId);
-              if (index >= 0) {
-                  subscribers.value.splice(index, 1);
-              }
-          });
+            session.value.on("connectionPropertyChanged", (event) => {
+                console.log("connectionPropertyChanged",  event);
+            });
 
-          publisher.value = OV.initPublisher(undefined, {
-            videoSource: undefined,
-            audioSource: undefined,
-            publishAudio: true,
-            publishVideo: true,
-            resolution: "640x480",
-            mirror: true
-          });
+            session.value.on("streamDestroyed", (event) => {
+                // Удаление потока из списка подписчиков
+                // const index = subscribers.value.findIndex(
+                //     (sub) => sub.stream.streamId === event.stream.streamId
+                // );
+                // if (index >= 0) {
+                //     subscribers.value.splice(index, 1);
+                // }
 
-          publisher.value.once('accessAllowed', () => {
-            const videoElement = document.createElement('video');
-            videoElement.autoplay = true;
-            videoElement.muted = true;
-            videoElement.srcObject = publisher.value.stream.getMediaStream();
-            document.getElementById('video-container').appendChild(videoElement);
-          });
+                console.log("streamDestroyed",  event);
+            });
 
-          session.value.publish(publisher.value);
+            session.value
+                .connect(mytoken, { clientData: myUserName })
+                .then(() => {
+                    console.log("Connected to session");
+
+                    publisher.value = OV.initPublisher(undefined, {
+                        videoSource: undefined,
+                        audioSource: undefined,
+                        publishAudio: true,
+                        publishVideo: true,
+                        resolution: "640x480",
+                        insertMode: "APPEND",
+                        mirror: true,
+                    })
+
+                    session.value.publish(publisher.value);
+                    const videoElement = publisher.value.createVideoElement(document.getElementById("video-container"))
+                    publisher.value.addVideoElement(videoElement);
+
+                    // Подписываемся на события после успешного подключения к сессии
+                    publisher.value.on("streamPropertyChanged", (event) => {
+                        console.log("streamPropertyChanged",  event);
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error connecting to session:", error);
+                });
         })
-        .catch(error => {
-          console.error("Error connecting to session:", error);
+        .catch((error) => {
+            console.error("Connection error:", error);
         });
-  })
-  .catch(error => {
-      console.error('Connection error:', error);
-  });
 };
 
-
-const disconnectFromSession = () => {
+const leaveSession = () => {
     // Отключаемся от сессии и выполняем другие необходимые действия
     if (session.value) {
         session.value.disconnect();
     }
     // Дополнительные действия, если требуется
 };
-
 </script>
 
 <template>
     <Head title="Welcome" />
 
     <div
-        class="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-dots-darker bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white"
+        class=""
     >
         <button @click="joinSession">Join Session</button>
-        
-        
-        <div id="video-container">
-            
-        </div>
 
-        <video v-for="sub in subscribers" :key="sub.stream.streamId" :srcObject="sub.stream.getMediaStream()" autoplay />
-    
+        <div id="video-container"></div>
+        <p>{{ myUserName }}</p>
+        <button @click="leaveSession">Leave Session</button>
+        
+        <div class="grid">
+            <video
+                v-for="sub in subscribers"
+                :key="sub.stream.streamId"
+                :srcObject="sub.stream.getMediaStream()"
+                :id="sub.stream.streamId"
+                autoplay
+            />
+        </div>
+        
     </div>
 </template>
 
 <style>
-#video-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+#video-container, .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1em;
 }
 </style>

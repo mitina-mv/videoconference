@@ -73,11 +73,11 @@ class ConferenceController extends Controller
             $responseData = json_decode($body, true);
 
             // исправляем токен для корректного подключения
-            $token = $responseData['token'];
+            /* $token = $responseData['token'];
             $token = str_replace(':1343', ':443', $token);
             $token = $token . '&secret=' . $openviduApiToken;
 
-            $responseData['token'] = $token;
+            $responseData['token'] = $token; */
 
             // Возвращаем успешный ответ с данными о подключении
             return response()->json($responseData);
