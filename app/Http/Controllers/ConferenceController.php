@@ -48,6 +48,7 @@ class ConferenceController extends Controller
     // Метод для подключения к сессии конференции
     public function connectToSession(Request $request, $sessionId)
     {
+        // dd($request);
         // Адрес API OpenVidu для подключения к сессии
         $openviduApiUrl = env('OPENVIDU_SERVER') . '/openvidu/api/sessions/' . $sessionId . '/connection';
 
@@ -71,13 +72,6 @@ class ConferenceController extends Controller
 
             // Преобразуем JSON ответа в массив
             $responseData = json_decode($body, true);
-
-            // исправляем токен для корректного подключения
-            /* $token = $responseData['token'];
-            $token = str_replace(':1343', ':443', $token);
-            $token = $token . '&secret=' . $openviduApiToken;
-
-            $responseData['token'] = $token; */
 
             // Возвращаем успешный ответ с данными о подключении
             return response()->json($responseData);

@@ -17,6 +17,9 @@ use Inertia\Inertia;
 |
 */
 
+Route::get('/connection/{sessionId}', [ConferenceController::class, 'connectToSession']);
+Route::post('/create-session', [ConferenceController::class, 'createSession']);
+
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -36,7 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::post('/create-session', [ConferenceController::class, 'createSession']);
-Route::get('/сonnect/{sessionId}', [ConferenceController::class, 'connectToSession']);
+
+
 
 require __DIR__.'/auth.php';

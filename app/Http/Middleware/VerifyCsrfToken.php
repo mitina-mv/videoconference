@@ -13,6 +13,6 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         '/create-session',
-        '/сonnect-to-session/{sessionId}',
+        '/сon/{sessionId}',
     ];
 }

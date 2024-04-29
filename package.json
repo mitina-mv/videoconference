@@ -18,6 +18,8 @@
         "vue": "^3.4.0"
     },
     "dependencies": {
-        "openvidu-browser": "^2.29.1"
+        "openvidu-browser": "^2.29.1",
+        "primeicons": "^7.0.0",
+        "primevue": "^3.52.0"
     }
 }

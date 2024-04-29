@@ -1,133 +1,133 @@
 <template>
-    <div class="room">
+    <div class="room" ref="roomConteiner">
         <div class="video-container" ref="videoContainer"></div>
         <div class="controls">
-            <button @click="toggleVideo">Включить/выключить видео</button>
-            <button @click="toggleAudio">Включить/выключить аудио</button>
-            <button @click="toggleFullScreen">На весь экран / Свернуть</button>
-            <button @click="leaveConference">Покинуть конференцию</button>
+            <Button @click="toggleVideo" :class="toggleVideo ? 'btn_off' : 'btn_on'" rounded icon="pi pi-video" />
+            <!-- <button @click="toggleVideo" :class="toggleVideo ? 'btn_off' : 'btn_on'">
+                <i class="pi pi-video"></i>
+            </button> -->
+            
+            <Button @click="toggleAudio" :class="toggleAudio ? 'btn_off' : 'btn_on'" rounded icon="pi pi-microphone" />
+            <!-- <button @click="toggleAudio" :class="toggleAudio ? 'btn_off' : 'btn_on'">
+                <i class="pi pi-microphone"></i>
+            </button> -->
+            <Button @click="toggleFullScreen" class="btn_screen" rounded :icon="'pi ' + (fullScreen ? 'pi-window-minimize' : 'pi-window-maximize')" />
+            <!-- <button @click="toggleFullScreen" class="btn_screen">
+                <i class="pi" :class="fullScreen ? 'pi-window-minimize' : 'pi-window-maximize'"></i>
+            </button> -->
+            <Button @click="leaveConference" class="btn_leave" rounded icon="pi pi-stop-circle" />
         </div>
     </div>
 </template>
 
-<script>
-import { OpenVidu } from "openvidu-browser";
+<script setup>
+import { ref, onMounted } from "vue";
 import axios from "axios";
+import { OpenVidu } from "openvidu-browser";
+import Button from 'primevue/button';
 
-export default {
-    data() {
-        return {
-            publisher: null,
-            session: null,
-            subscribers: [],
-            videoEnabled: true,
-            audioEnabled: true,
-            fullScreen: false,
-        };
-    },
-    methods: {
-        toggleVideo() {
-            this.videoEnabled = !this.videoEnabled;
-            if (this.publisher) {
-                this.publisher.publishVideo(this.videoEnabled);
-            }
-        },
-        toggleAudio() {
-            this.audioEnabled = !this.audioEnabled;
-            if (this.publisher) {
-                this.publisher.publishAudio(this.audioEnabled);
-            }
-        },
-        toggleFullScreen() {
-            const videoContainer = this.$refs.videoContainer;
-            if (!this.fullScreen) {
-                if (videoContainer.requestFullscreen) {
-                    videoContainer.requestFullscreen();
-                } else if (videoContainer.mozRequestFullScreen) {
-                    /* Firefox */
-                    videoContainer.mozRequestFullScreen();
-                } else if (videoContainer.webkitRequestFullscreen) {
-                    /* Chrome, Safari & Opera */
-                    videoContainer.webkitRequestFullscreen();
-                } else if (videoContainer.msRequestFullscreen) {
-                    /* IE/Edge */
-                    videoContainer.msRequestFullscreen();
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    /* Firefox */
-                    document.mozCancelFullScreen();
-                } else if (document.webkitExitFullscreen) {
-                    /* Chrome, Safari & Opera */
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    /* IE/Edge */
-                    document.msExitFullscreen();
-                }
-            }
-            this.fullScreen = !this.fullScreen;
-        },
-        leaveConference() {
-            if (this.session) {
-                this.session.disconnect();
-            }
-        },
-        joinSession() {
-            axios
-                .get(`/connect/${mySessionId}`)
-                .then((response) => {
-                    const connectData = response.data;
-                    const myToken = connectData.token;
+const OV = new OpenVidu();
+const videoContainer = ref(null);
+const roomConteiner = ref(null);
+const subscribers = ref([]);
+const publisher = ref(null);
+const session = ref(null);
+const videoEnabled = ref(true);
+const audioEnabled = ref(true);
+const fullScreen = ref(false);
+const mySessionId = "ses_EtTToJZqM8";
 
-                    this.session.on("streamCreated", ({ stream }) => {
-                        const subscriber = this.session.subscribe(
-                            stream,
-                            this.$refs.videoContainer,
-                            { insertMode: "APPEND" }
-                        );
-                        this.subscribers.push(subscriber);
-                    });
+const joinSession = async () => {
+    try {
+        const response = await axios.get(`/connection/${mySessionId}`);
+        const connectData = response.data;
+        const myToken = connectData.token;
 
-                    this.session
-                        .connect(myToken)
-                        .then(() => {
-                            console.log("Connected to session");
+        session.value.on("streamCreated", ({ stream }) => {
+            const subscriber = session.value.subscribe(
+                stream,
+                videoContainer.value,
+                { insertMode: "APPEND" }
+            );
+            subscribers.value.push(subscriber);
+        });
 
-                            this.publisher = OV.initPublisher(undefined, {
-                                videoSource: undefined,
-                                audioSource: undefined,
-                                publishAudio: this.audioEnabled,
-                                publishVideo: this.videoEnabled,
-                                resolution: "640x480",
-                                insertMode: "APPEND",
-                                mirror: true,
-                            });
+        await session.value.connect(myToken);
 
-                            this.session.publish(this.publisher);
-                        })
-                        .catch((error) => {
-                            console.error(
-                                "Error connecting to session:",
-                                error
-                            );
-                        });
-                })
-                .catch((error) => {
-                    console.error("Connection error:", error);
-                });
-        },
-    },
-    mounted() {
-        // Initialize OpenVidu
-        const OV = new OpenVidu();
-        this.session = OV.initSession();
+        console.log("Connected to session");
 
-        // Join session
-        this.joinSession();
-    },
+        publisher.value = OV.initPublisher(videoContainer.value, {
+            videoSource: undefined,
+            audioSource: undefined,
+            publishAudio: audioEnabled.value,
+            publishVideo: videoEnabled.value,
+            resolution: "640x480",
+            insertMode: "APPEND",
+            mirror: true,
+        });
+
+        session.value.publish(publisher.value);
+    } catch (error) {
+        console.error("Connection error:", error);
+    }
 };
+
+const toggleVideo = () => {
+    videoEnabled.value = !videoEnabled.value;
+    if (publisher.value) {
+        publisher.value.publishVideo(videoEnabled.value);
+    }
+};
+
+const toggleAudio = () => {
+    audioEnabled.value = !audioEnabled.value;
+    if (publisher.value) {
+        publisher.value.publishAudio(audioEnabled.value);
+    }
+};
+
+const toggleFullScreen = () => {
+    const container = roomConteiner.value;
+    if (!fullScreen.value) {
+        if (container.requestFullscreen) {
+            container.requestFullscreen();
+        } else if (container.mozRequestFullScreen) {
+            /* Firefox */
+            container.mozRequestFullScreen();
+        } else if (container.webkitRequestFullscreen) {
+            /* Chrome, Safari & Opera */
+            container.webkitRequestFullscreen();
+        } else if (container.msRequestFullscreen) {
+            /* IE/Edge */
+            container.msRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            /* Firefox */
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+            /* Chrome, Safari & Opera */
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            /* IE/Edge */
+            document.msExitFullscreen();
+        }
+    }
+    fullScreen.value = !fullScreen.value;
+};
+
+const leaveConference = () => {
+    if (session.value) {
+        session.value.disconnect();
+    }
+};
+
+onMounted(() => {
+    session.value = OV.initSession();
+    joinSession();
+})
 </script>
 
 <style scoped>
@@ -144,15 +144,32 @@ export default {
     width: 100%;
     height: 100%;
     background-color: black;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1em
 }
 
 .controls {
     position: absolute;
     bottom: 20px;
     left: 20px;
+    z-index: 1000;
+    background: #fff;
+    display: flex;
+    gap: 1em;
 }
 
-.controls button {
-    margin-right: 10px;
+/* .btn_off {
+    background: var(--primary-50);
+}
+.btn_on {
+    background: var(--primary-600);
+} */
+.btn_screen{
+
+}
+.btn_leave {
+    background: var(--red-600);
+
 }
 </style>
