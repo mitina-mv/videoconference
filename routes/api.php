@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Orion\Facades\Orion;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,4 +24,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/test', function(Request $request) {
         return '111';
     });
+});
+
+Route::group(['as' => 'api.'], function() {
+    Orion::resource('users', UserController::class)->withSoftDeletes();
 });
