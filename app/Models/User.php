@@ -55,11 +55,11 @@ class User extends Authenticatable
     ];
 
     // Виртуальный атрибут для главной фотографии объявления
-    /* protected $appends = ['photo_path'];
+    protected $appends = ['full_name'];
 
-    public function getPhotoPathAttribute()
+    public function getFullNameAttribute()
     {
-        $picture = $this->picture()->first();
-        return $picture ? asset(Storage::url($picture->path)) : null;
-    } */
+        return $this->lastname . " " . $this->name 
+        . ($this->patronymic ? ' ' . $this->patronymic : '');
+    }
 }

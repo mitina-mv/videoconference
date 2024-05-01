@@ -10,6 +10,9 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import PrimeVue from 'primevue/config';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const token = '2|ili21N0SHxEAblrDNqqG6onl5pkfZ0SE839l6cEO395b616c'
+
+axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
