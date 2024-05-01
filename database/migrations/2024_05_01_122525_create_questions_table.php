@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
             $table->boolean('is_private')->default(0);
-            $table->string('text', 511);
+            $table->string('text', 512);
+            $table->double('mark')
+                ->nullable();
             $table->jsonb('settings')->default("{}");
             $table->foreignId('org_id')
                 ->constrained('orgs');

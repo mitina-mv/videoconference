@@ -11,10 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('disciplines', function (Blueprint $table) {
+        Schema::create('answerlogs', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('code')->nullable()->unique();
+            $table->timestamps();
+            $table->decimal('mark')->nullable();
+            $table->foreignId('question_id')
+                ->constrained('questions');
+            $table->foreignId('testlog_id')
+                ->constrained('testlogs');
         });
     }
 
@@ -23,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('disciplines');
+        Schema::dropIfExists('answelogs');
     }
 };

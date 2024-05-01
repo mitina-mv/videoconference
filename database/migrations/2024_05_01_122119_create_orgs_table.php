@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('address');
-            $table->jsonb('info');
+            $table->jsonb('info')->default("{}");
         });
     }
 

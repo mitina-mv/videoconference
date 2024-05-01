@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('studgroups', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('org_id')->constrained('orgs');
             $table->string('name');
+            $table->softDeletes();
         });
     }
 
