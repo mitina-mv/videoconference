@@ -5,16 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class File extends Model
+class Org extends Model
 {
     use HasFactory;
-    protected $table = 'files';
-    protected $primaryKey = 'id';
-    public $timestamps = false;
 
     protected $fillable = [
-        'path',
-        'videoconference_id',
+        'name',
+        'address',
+        'info'
     ];
 
+    public $timestamps = false;
+    protected $table = 'orgs';
+    protected $primaryKey = 'id';
 }

@@ -7,12 +7,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
     use SoftDeletes;
+
+    protected $table = 'users';
+    public $timestamps = true;
+    protected $primaryKey = 'id';
 
     /**
      * The attributes that are mass assignable.
@@ -46,4 +51,13 @@ class User extends Authenticatable
         // 'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    // Виртуальный атрибут для главной фотографии объявления
+    /* protected $appends = ['photo_path'];
+
+    public function getPhotoPathAttribute()
+    {
+        $picture = $this->picture()->first();
+        return $picture ? asset(Storage::url($picture->path)) : null;
+    } */
 }

@@ -18,8 +18,6 @@ return new class extends Migration
             $table->double('mark')
                 ->nullable();
             $table->jsonb('settings')->default("{}");
-            $table->foreignId('org_id')
-                ->constrained('orgs');
             $table->foreignId('user_id')
                 ->constrained('users');
             $table->foreignId('discipline_id')
