@@ -11,11 +11,9 @@ const teachers = ref(null)
 const studentsColumns = [
     {
         code: 'full_name',
-        label: 'Имя'
     },
     {
         code: 'email',
-        label: 'Email'
     },
 ]
 
@@ -65,15 +63,19 @@ onMounted(() => {
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <user-table v-if="students" :tableData="students" :routeName="'api.users'" :columns="studentsColumns"></user-table>
+                    <user-table v-if="students" :tableData="students" :routeName="'api.users'" :columns="studentsColumns" :labelgroup="'students'"></user-table>
                 </div>
             </div>
 
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <user-table v-if="teachers" :tableData="teachers" :routeName="'api.users'" :columns="studentsColumns"></user-table>
+                    <user-table v-if="teachers" :tableData="teachers" :routeName="'api.users'" :columns="studentsColumns" :labelgroup="'teachers'"></user-table>
                 </div>
             </div>
+            <Button
+                    icon="pi pi-trash"
+                    severity="danger"
+                ></Button>
         </div>
     </AuthenticatedLayout>
 </template>

@@ -1,13 +1,16 @@
 import './bootstrap';
-import '../css/app.css';
-import 'primevue/resources/themes/aura-light-indigo/theme.css'
+import 'primevue/resources/themes/aura-light-green/theme.css'
 import 'primeicons/primeicons.css'
+import '../css/app.css';
+
 
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
+
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const token = '2|ili21N0SHxEAblrDNqqG6onl5pkfZ0SE839l6cEO395b616c'
@@ -22,9 +25,10 @@ createInertiaApp({
             .use(plugin)
             .use(ZiggyVue)
             .use(PrimeVue)
+            .use(ToastService)
             .mount(el);
     },
     progress: {
-        color: '#4B5563',
+        color: '#188a42',
     },
 });
