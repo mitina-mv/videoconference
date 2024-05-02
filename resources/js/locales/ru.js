@@ -36,9 +36,11 @@ export default {
         },
         studgroup: {
             title: 'Группа',
+            placeholder: 'Выберите группу из списка',
         },
         studgroups: {
             title: 'Группы',
+            placeholder: 'Выберите группы из списка',
         }
     }
 };

@@ -38,6 +38,7 @@ Route::get('/dashboard', function () {
 
 Route::group(['prefix' => 'admin'], function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin.index');
+    Route::get('/edit/{id}', [AdminController::class, 'edit'])->name('admin.edit');
 });
 
 Route::middleware('auth')->group(function () {

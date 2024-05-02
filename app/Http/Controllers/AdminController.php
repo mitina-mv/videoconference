@@ -11,4 +11,11 @@ class AdminController extends Controller
     {
         return Inertia::render('Admin/Index', []);
     }
+
+    public function edit(string $id)
+    {
+        return Inertia::render('Admin/EditUser', [
+            'id' => $id
+        ]);
+    }
 }

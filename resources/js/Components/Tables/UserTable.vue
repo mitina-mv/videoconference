@@ -100,7 +100,6 @@ const deleteItem = () => {
 <template>
     <DataTable
         v-model:editingRows="editingRows"
-        editMode="row"
         dataKey="id"
         @row-edit-save="onRowEditSave"
         tableClass="editable-cells-table"
@@ -113,26 +112,22 @@ const deleteItem = () => {
             :key="index"
             :field="column.code"
             sortable
-            :header="(labels.user_fields[column.code].title)"
+            :header="labels.user_fields[column.code].title"
             :style="column?.style"
-        >
-            <template #editor="{ data, field }">
-                <InputText v-model="data[field]" /> 
-            </template>
-        </Column>
-
-        <Column
-            :rowEditor="true"
-            v-if="includeCrudActions"
-            style="width: 10%; min-width: 8rem"
-            bodyStyle="text-align:center"
         ></Column>
 
         <Column :exportable="false" v-if="includeCrudActions">
             <template #body="row">
+                <a :href="route('admin.edit', row.data.id)">
+                    <Button
+                        icon="pi pi-pencil"
+                        text
+                    ></Button>
+                </a>
                 <Button
                     icon="pi pi-trash"
                     severity="danger"
+                    text
                     @click="confirmDelete(row.data)"
                 ></Button>
             </template>

@@ -1,7 +1,7 @@
 import './bootstrap';
+import '../css/app.css';
 import 'primevue/resources/themes/aura-light-green/theme.css'
 import 'primeicons/primeicons.css'
-import '../css/app.css';
 
 
 import { createApp, h } from 'vue';

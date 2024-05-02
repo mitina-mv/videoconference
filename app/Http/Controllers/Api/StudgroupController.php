@@ -14,4 +14,14 @@ class StudgroupController extends Controller
     protected $model = Studgroup::class;
     protected $policy = AdminPolicy::class;
 
+    public function limit() : int
+    {
+        return 50;
+    }
+
+    public function maxLimit() : int
+    {
+        return 100;
+    }
+
 }
