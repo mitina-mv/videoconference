@@ -67,6 +67,15 @@
 .buttons-group {
     display: flex;
     gap: .5em;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.table__empty-block{
+    color: var(--gray-400);
+    text-align: center;
+    padding: 1em;
+    font-weight: 500;
 }
 
 .mb-1 {

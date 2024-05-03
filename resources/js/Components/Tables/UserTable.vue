@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Button from "primevue/button";
@@ -35,6 +35,7 @@ const tableData = ref(props.tableData)
 const columns = ref(props.columns)
 const deleteRow = ref(null)
 const deleteDialog = ref(false)
+const dataNotFound = ref(tableData.value.length == 0);
 
 const onRowEditSave = (event) => {
     let { newData, index } = event;
@@ -96,6 +97,16 @@ const deleteItem = () => {
 const fetchData = (id) => {
     emit('fetchData')
 }
+
+watch(() => props.tableData, (newValue) => {
+    tableData.value = newValue;
+
+    if (newValue && newValue.length > 0) {
+        dataNotFound.value = false;
+    } else {
+        dataNotFound.value = true;
+    }
+})
 </script>
 
 <template>
@@ -107,7 +118,7 @@ const fetchData = (id) => {
             <a :href="route('admin.new',labelgroup)">
                 <Button :label="'Добавить ' + labels[labelgroup].case[1]" icon="pi pi-plus" severity="success" class="mr-2" />
             </a>
-            <Button label="Обновить" icon="pi pi-reload" severity="secondary" @click="fetchData"/>
+            <Button label="Обновить" icon="pi pi-refresh" severity="secondary" @click="fetchData"/>
         </template>
     </Toolbar>
 
@@ -145,7 +156,12 @@ const fetchData = (id) => {
                 ></Button>
             </template>
         </Column>
+
+        <template #empty>
+            <div class="table__empty-block">Данные не найдены</div>
+        </template>
     </DataTable>
+
 
     <Dialog
         v-model:visible="deleteDialog"

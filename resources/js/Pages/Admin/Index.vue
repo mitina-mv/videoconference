@@ -4,77 +4,77 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage } from "@inertiajs/vue3";
 import UserTable from "@/Components/Tables/UserTable.vue";
 import axios from "axios";
-import StudgroupsFilter from '@/Components/Admin/StudgroupsFilter.vue'
+import StudgroupsFilter from "@/Components/Admin/StudgroupsFilter.vue";
 
-const students = ref(null)
-const teachers = ref(null)
-const studgroups = ref(null)
-const activeStudgroup = ref(null)
+const students = ref(null);
+const teachers = ref(null);
+const studgroups = ref(null);
+const activeStudgroup = ref(null);
 
 const studentsColumns = [
     {
-        code: 'full_name',
+        code: "full_name",
     },
     {
-        code: 'email',
+        code: "email",
     },
-]
+];
 
 onMounted(async () => {
     await fetchStudgroups();
     fetchStudents();
-    fetchTeachers()
-})
+    fetchTeachers();
+});
 
 const toggleStudgroup = (id) => {
-    activeStudgroup.value = id
-}
+    activeStudgroup.value = id;
+    fetchStudents()
+};
 
 const fetchStudgroups = async () => {
-    await axios.get('/api/studgroups/')
-    .then((response) => {
-        studgroups.value = response.data.data
-        if(response.data.data)
-            activeStudgroup.value = response.data.data[0].id
-        // addToast(`получили`)
-    })
-    .catch((error) => {
-        // addToast(`Неудачно`)
-    })
-}
+    await axios
+        .get("/api/studgroups/")
+        .then((response) => {
+            studgroups.value = response.data.data;
+            if (response.data.data)
+                activeStudgroup.value = response.data.data[0].id;
+            // addToast(`получили`)
+        })
+        .catch((error) => {
+            // addToast(`Неудачно`)
+        });
+};
 
 const fetchStudents = () => {
-    axios.post('/api/users/search', {
-        "filters" : [
-            {"field" : "role_id", "operator" : "=", "value" : "3"},
-            {"field" : "studgroup_id", "operator" : "=", "value" : activeStudgroup.value},
-        ],        
-        "sort" : [
-            {"field" : "lastname", "direction" : "asc"},
-        ],
-    }, )
-    .then((response) => {
-        students.value = response.data.data
-    })
-    .catch((error) => {
-    })
-}
+    axios
+        .post("/api/users/search", {
+            filters: [
+                { field: "role_id", operator: "=", value: "3" },
+                {
+                    field: "studgroup_id",
+                    operator: "=",
+                    value: activeStudgroup.value,
+                },
+            ],
+            sort: [{ field: "lastname", direction: "asc" }],
+        })
+        .then((response) => {
+            students.value = response.data.data;
+        })
+        .catch((error) => {});
+};
 
 const fetchTeachers = () => {
-    axios.post('/api/users/search', {
-        "filters" : [
-            {"field" : "role_id", "operator" : "=", "value" : "2"},
-        ],        
-        "sort" : [
-            {"field" : "lastname", "direction" : "asc"},
-        ],
-    }, )
-    .then((response) => {
-        teachers.value = response.data.data
-    })
-    .catch((error) => {
-    })
-}
+    axios
+        .post("/api/users/search", {
+            filters: [{ field: "role_id", operator: "=", value: "2" }],
+            sort: [{ field: "lastname", direction: "asc" }],
+        })
+        .then((response) => {
+            teachers.value = response.data.data;
+        })
+        .catch((error) => {});
+};
 </script>
 
 <template>
@@ -90,14 +90,32 @@ const fetchTeachers = () => {
         <div class="d-grid gap-4 content">
             <div class="content__container">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <studgroups-filter :studgroups="studgroups" :active="activeStudgroup" @toggleStudgroup="toggleStudgroup" ></studgroups-filter>
-                    <user-table v-if="students" :tableData="students" :routeName="'api.users'" :columns="studentsColumns" :labelgroup="'students'" @fetchData="fetchStudents"></user-table>
+                    <studgroups-filter
+                        :studgroups="studgroups"
+                        :active="activeStudgroup"
+                        @toggleStudgroup="toggleStudgroup"
+                    ></studgroups-filter>
+                    <user-table
+                        v-if="students"
+                        :tableData="students"
+                        :routeName="'api.users'"
+                        :columns="studentsColumns"
+                        :labelgroup="'students'"
+                        @fetchData="fetchStudents"
+                    ></user-table>
                 </div>
             </div>
 
             <div class="content__container">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <user-table v-if="teachers" :tableData="teachers" :routeName="'api.users'" :columns="studentsColumns" :labelgroup="'teachers'" @fetchData="fetchTeachers"></user-table>
+                    <user-table
+                        v-if="teachers"
+                        :tableData="teachers"
+                        :routeName="'api.users'"
+                        :columns="studentsColumns"
+                        :labelgroup="'teachers'"
+                        @fetchData="fetchTeachers"
+                    ></user-table>
                 </div>
             </div>
         </div>
