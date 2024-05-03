@@ -30,7 +30,7 @@ const toggleStudgroup = (id) => {
         />
 
         <a :href="route('admin.reference.studgroups')">
-            <Button label="Добавить" severity="success" icon="pi pi-plus" />
+            <Button label="Добавить группу" severity="success" icon="pi pi-plus" />
         </a>
     </div>
 
