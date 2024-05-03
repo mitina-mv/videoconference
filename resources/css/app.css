@@ -8,3 +8,44 @@
  @tailwind components;
  @tailwind utilities;
 }
+
+.d-grid {
+    display: grid;
+}
+
+.gap-1 {
+    gap: .25em;
+}
+
+.gap-2 {
+    gap: .5em;
+}
+
+.gap-3 {
+    gap: .75em;
+}
+
+.gap-4 {
+    gap: 1em;
+}
+
+.grid-col-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-col-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-col-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.grid-col-6 {
+    grid-template-columns: repeat(6, 1fr);
+}
+
+.form-control{
+    display: grid;
+    gap: .25em;
+}

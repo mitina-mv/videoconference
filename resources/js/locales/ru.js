@@ -42,5 +42,20 @@ export default {
             title: 'Группы',
             placeholder: 'Выберите группы из списка',
         }
+    },
+    reference_fields: {
+        name: {
+            title: 'Название',
+        },
+        code: {
+            title: 'Код',
+        }
+    },
+    page_titles: {
+        users: 'Пользователи',
+        groups: 'Группы',
+        teachers: 'Преподаватели',
+        reference_studgroups: 'Список групп',
+        reference_disciplines: 'Список дисциплин',
     }
 };

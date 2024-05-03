@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\StudgroupRequest;
 use App\Models\Studgroup;
 use App\Policies\AdminPolicy;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,7 @@ class StudgroupController extends Controller
 
     protected $model = Studgroup::class;
     protected $policy = AdminPolicy::class;
+    protected $request = StudgroupRequest::class;
 
     public function limit() : int
     {

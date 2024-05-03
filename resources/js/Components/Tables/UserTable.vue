@@ -34,10 +34,6 @@ const columns = ref(props.columns)
 const deleteRow = ref(null)
 const deleteDialog = ref(false)
 
-onMounted(() => {
-    console.log(labels);
-})
-
 const onRowEditSave = (event) => {
     let { newData, index } = event;
     let rowData = tableData.value[index];

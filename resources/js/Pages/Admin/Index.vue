@@ -4,9 +4,12 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage } from "@inertiajs/vue3";
 import UserTable from "@/Components/Tables/UserTable.vue";
 import axios from "axios";
+import StudgroupsFilter from '@/Components/Admin/StudgroupsFilter.vue'
 
 const students = ref(null)
 const teachers = ref(null)
+const studgroups = ref(null)
+const activeStudgroup = ref(null)
 
 const studentsColumns = [
     {
@@ -46,8 +49,26 @@ onMounted(() => {
     .catch((error) => {
     })
     
+    fetchStudgroups();
 
 })
+
+const toggleStudgroup = (id) => {
+    activeStudgroup.value = id
+}
+
+const fetchStudgroups = () => {
+    axios.get('/api/studgroups/')
+    .then((response) => {
+        studgroups.value = response.data.data
+        if(response.data.data)
+            activeStudgroup.value = response.data.data[0]
+        // addToast(`получили`)
+    })
+    .catch((error) => {
+        // addToast(`Неудачно`)
+    })
+}
 </script>
 
 <template>
@@ -63,6 +84,7 @@ onMounted(() => {
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                    <studgroups-filter :studgroups="studgroups" :active="activeStudgroup" ></studgroups-filter>
                     <user-table v-if="students" :tableData="students" :routeName="'api.users'" :columns="studentsColumns" :labelgroup="'students'"></user-table>
                 </div>
             </div>
@@ -72,10 +94,6 @@ onMounted(() => {
                     <user-table v-if="teachers" :tableData="teachers" :routeName="'api.users'" :columns="studentsColumns" :labelgroup="'teachers'"></user-table>
                 </div>
             </div>
-            <Button
-                    icon="pi pi-trash"
-                    severity="danger"
-                ></Button>
         </div>
     </AuthenticatedLayout>
 </template>

@@ -18,4 +18,11 @@ class AdminController extends Controller
             'id' => $id
         ]);
     }
+
+    public function studgroups()
+    {
+        return Inertia::render('Admin/Reference', [
+            'entity' => 'studgroups'
+        ]);
+    }
 }

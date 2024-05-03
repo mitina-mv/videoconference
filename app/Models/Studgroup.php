@@ -10,6 +10,7 @@ class Studgroup extends Model
     use HasFactory;
     protected $fillable = [
         'name',
+        'code',
     ];
     public $timestamps = false;
     protected $table = 'studgroups';
