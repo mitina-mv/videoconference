@@ -8,8 +8,13 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
+
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const token = import.meta.env.TOKEN_APP
+
+axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -19,9 +24,10 @@ createInertiaApp({
             .use(plugin)
             .use(ZiggyVue)
             .use(PrimeVue)
+            .use(ToastService)
             .mount(el);
     },
     progress: {
-        color: '#4B5563',
+        color: '#188a42',
     },
 });

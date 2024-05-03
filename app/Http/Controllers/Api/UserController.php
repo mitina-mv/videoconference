@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\UserRequest;
 use App\Models\User;
 use App\Policies\AdminPolicy;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,7 @@ class UserController extends Controller
 
     protected $model = User::class;
     protected $policy = AdminPolicy::class;
+    protected $request = UserRequest::class;
 
     public function filterableBy() : array
     {
@@ -28,5 +30,10 @@ class UserController extends Controller
     public function sortableBy() : array
     {
          return ['id', 'name', 'lastname', ];
+    }
+
+    public function includes() : array
+    {
+        return ['studgroups'];
     }
 }
