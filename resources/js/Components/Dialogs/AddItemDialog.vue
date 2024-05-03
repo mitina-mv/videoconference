@@ -1,5 +1,5 @@
 <template>
-    <Dialog :visible="visible" @update:visible="updateVisible" header="Добавление записи">
+    <Dialog :visible="visible" @update:visible="updateVisible" header="Добавление записи" :style="{ width: '40vw' }">
         <form class="d-grid gap-2">
             <div class="form-control" v-for="(field, code) in labels.reference_fields"
             :key="code">
@@ -30,7 +30,7 @@
                 icon="pi pi-times"
                 severity="danger"
                 text
-                @click="updateVisible"
+                @click.enter="updateVisible"
             />
         </template>
     </Dialog>

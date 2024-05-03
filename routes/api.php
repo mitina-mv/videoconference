@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\DisciplineController;
 use App\Http\Controllers\Api\StudgroupController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -30,4 +31,5 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 Route::group(['as' => 'api.'], function() {
     Orion::resource('users', UserController::class)->withSoftDeletes();
     Orion::resource('studgroups', StudgroupController::class)->withSoftDeletes();
+    Orion::resource('disciplines', DisciplineController::class)->withSoftDeletes();
 });

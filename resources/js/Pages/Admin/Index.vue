@@ -21,23 +21,12 @@ const studentsColumns = [
 ]
 
 onMounted(() => {
-    axios.post('/api/users/search', {
-        "filters" : [
-            {"field" : "role_id", "operator" : "=", "value" : "2"},
-        ],        
-        "sort" : [
-            {"field" : "lastname", "direction" : "asc"},
-        ],
-    }, )
-    .then((response) => {
-        students.value = response.data.data
-    })
-    .catch((error) => {
-    })
+    fetchStudgroups();
+    fetchStudents();
 
     axios.post('/api/users/search', {
         "filters" : [
-            {"field" : "role_id", "operator" : "=", "value" : "3"},
+            {"field" : "role_id", "operator" : "=", "value" : "2"},
         ],        
         "sort" : [
             {"field" : "lastname", "direction" : "asc"},
@@ -49,7 +38,6 @@ onMounted(() => {
     .catch((error) => {
     })
     
-    fetchStudgroups();
 
 })
 
@@ -62,11 +50,28 @@ const fetchStudgroups = () => {
     .then((response) => {
         studgroups.value = response.data.data
         if(response.data.data)
-            activeStudgroup.value = response.data.data[0]
+            activeStudgroup.value = response.data.data[0].id
         // addToast(`получили`)
     })
     .catch((error) => {
         // addToast(`Неудачно`)
+    })
+}
+
+const fetchStudents = () => {
+    axios.post('/api/users/search', {
+        "filters" : [
+            {"field" : "role_id", "operator" : "=", "value" : "3"},
+            {"field" : "studgroup_id", "operator" : "=", "value" : activeStudgroup.value},
+        ],        
+        "sort" : [
+            {"field" : "lastname", "direction" : "asc"},
+        ],
+    }, )
+    .then((response) => {
+        students.value = response.data.data
+    })
+    .catch((error) => {
     })
 }
 </script>
@@ -84,7 +89,7 @@ const fetchStudgroups = () => {
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <studgroups-filter :studgroups="studgroups" :active="activeStudgroup" ></studgroups-filter>
+                    <studgroups-filter :studgroups="studgroups" :active="activeStudgroup" @toggleStudgroup="toggleStudgroup" ></studgroups-filter>
                     <user-table v-if="students" :tableData="students" :routeName="'api.users'" :columns="studentsColumns" :labelgroup="'students'"></user-table>
                 </div>
             </div>

@@ -25,4 +25,11 @@ class AdminController extends Controller
             'entity' => 'studgroups'
         ]);
     }
+
+    public function disciplines()
+    {
+        return Inertia::render('Admin/Reference', [
+            'entity' => 'disciplines'
+        ]);
+    }
 }

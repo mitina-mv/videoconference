@@ -1,6 +1,9 @@
 <template>
-    <Button severity="danger" :disabled="selectedItems == null || selectedItems.length === 0" label="Удалить" @click="deleteSelectedItems" />
-    <Button label="Добавить" @click="showAddDialog" />
+    <div class="buttons-group mb-2">
+        <Button severity="danger" :disabled="selectedItems == null || selectedItems.length === 0" label="Удалить" @click="deleteSelectedItems" />
+        <Button label="Добавить" @click="showAddDialog" />
+    </div>
+
     <DataTable v-model:selection="selectedItems" :value="data" dataKey="id" editMode="row" @row-edit-save="onRowEditSave" v-model:editingRows="editingRows">
         <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
         <Column
@@ -84,17 +87,13 @@ const sendData = (obj) => {
 }
 
 const onRowEditSave = (event) => {
-    // if (editingRows.value.length === 0) {
-    //     return;
-    // }
-    console.log(editingRows.value);
     let { newData, index } = event;
     let rowData = data.value[index];
 
     if(rowData == newData) return;
 
     axios.put(
-            `/api/${props.entity}/${item.id}`,
+            `/api/${props.entity}/${rowData.id}`,
             newData
         )
         .then((response) => {

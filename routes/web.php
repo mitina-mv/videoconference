@@ -42,6 +42,7 @@ Route::group(['prefix' => 'admin'], function () {
 
     Route::group(['prefix' => 'reference'], function () {
         Route::get('/studgroups', [AdminController::class, 'studgroups'])->name('admin.reference.studgroups');
+        Route::get('/disciplines', [AdminController::class, 'disciplines'])->name('admin.reference.disciplines');
     });
 });
 
