@@ -140,7 +140,7 @@ watch(() => props.tableData, (newValue) => {
             :style="column?.style"
         ></Column>
 
-        <Column :exportable="false" v-if="includeCrudActions">
+        <Column :exportable="false" v-if="includeCrudActions" header="Управление" :style="{width: '5%'}">
             <template #body="row">
                 <a :href="route('admin.edit', row.data.id)">
                     <Button

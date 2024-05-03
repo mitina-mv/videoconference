@@ -31,4 +31,9 @@ class UserController extends Controller
     {
          return ['id', 'name', 'lastname', ];
     }
+
+    public function includes() : array
+    {
+        return ['studgroups'];
+    }
 }

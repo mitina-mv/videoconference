@@ -5,6 +5,7 @@ import { Head, usePage } from "@inertiajs/vue3";
 import UserTable from "@/Components/Tables/UserTable.vue";
 import axios from "axios";
 import StudgroupsFilter from "@/Components/Admin/StudgroupsFilter.vue";
+import { addToast } from '@/modules/toast';
 
 const students = ref(null);
 const teachers = ref(null);
@@ -14,11 +15,24 @@ const activeStudgroup = ref(null);
 const studentsColumns = [
     {
         code: "full_name",
+        style: {
+            width: '45%',
+        }
     },
     {
         code: "email",
     },
 ];
+
+const teacterColumns = [
+    ...studentsColumns,
+    {
+        code: "studgroups",
+        style: {
+            width: '25%',
+        }
+    }
+]
 
 onMounted(async () => {
     await fetchStudgroups();
@@ -69,21 +83,27 @@ const fetchTeachers = () => {
         .post("/api/users/search", {
             filters: [{ field: "role_id", operator: "=", value: "2" }],
             sort: [{ field: "lastname", direction: "asc" }],
+            includes: [{"relation" : "studgroups"}]
         })
         .then((response) => {
             teachers.value = response.data.data;
+
+            teachers.value.forEach((element, index) => {
+                let namesString = element.studgroups.map((sg) => sg.name).join(', ');
+                teachers.value[index].studgroups = namesString;
+            });
         })
         .catch((error) => {});
 };
 </script>
 
 <template>
-    <Head title="Profile" />
+    <Head title="Админ-панель" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Profile
+                Админ-панель
             </h2>
         </template>
 
@@ -112,7 +132,7 @@ const fetchTeachers = () => {
                         v-if="teachers"
                         :tableData="teachers"
                         :routeName="'api.users'"
-                        :columns="studentsColumns"
+                        :columns="teacterColumns"
                         :labelgroup="'teachers'"
                         @fetchData="fetchTeachers"
                     ></user-table>
