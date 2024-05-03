@@ -9,6 +9,16 @@
  @tailwind utilities;
 }
 
+.content {
+    width: 70vw;
+    margin: 5em auto;
+}
+
+.content__container.mx-auto {
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .d-grid {
     display: grid;
 }
@@ -48,6 +58,10 @@
 .form-control{
     display: grid;
     gap: .25em;
+}
+
+.form-footer {
+    grid-column: 1/-1;
 }
 
 .buttons-group {

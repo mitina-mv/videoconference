@@ -62,4 +62,10 @@ class User extends Authenticatable
         return $this->lastname . " " . $this->name 
         . ($this->patronymic ? ' ' . $this->patronymic : '');
     }
+
+    // relationships
+    public function studgroups()
+    {
+        return $this->belongsToMany(Studgroup::class, 'users_studgroups');
+    }
 }

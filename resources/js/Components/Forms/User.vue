@@ -13,7 +13,7 @@ const props = defineProps({
         req: false
     }, 
     role: {
-        type: String,
+        type: Number,
         req: false
     },
     studgroups: {
@@ -21,8 +21,10 @@ const props = defineProps({
         req: false
     }
 })
+const emit = defineEmits(['sendData'])
 
-const role = props?.data.role_id || props?.role;
+const role = ref(props?.data?.role_id || props?.role);
+const id = ref(props?.data?.id || null);
 const textFields = [
     {
         code: 'name',
@@ -41,31 +43,86 @@ const textFields = [
     },
     {
         code: 'email',
-        title: labels.user_fields.patronymic.title,
+        title: labels.user_fields.email.title,
         req: true,
     },
 ];
-const fieldData = {
-    name: props?.data.name || null,
-    lastname: props?.data.lastname || null,
-    patronymic: props?.data.patronymic || null,
-    email: props?.data.email || null,
-    studgroup_id: props?.data.role_id || null,
-}
+const fieldData = ref({
+    name: props?.data?.name || null,
+    lastname: props?.data?.lastname || null,
+    patronymic: props?.data?.patronymic || null,
+    email: props?.data?.email || null,
+    studgroup_id: props?.data?.studgroup_id || null,
+    role_id: role.value
+})
 const teachStudgroups = ref(props?.data?.studgroups || null)
 const errors = ref({});
+
+const sendData = () => {
+    console.log(fieldData.value);
+    if (!fieldData.value.name || !fieldData.value.lastname || !fieldData.value.email) {
+        console.error('Не все обязательные поля заполнены');
+        return;
+    }
+
+    if(!id.value)
+        fieldData.value.password = fieldData.value.email;
+
+    if (fieldData.value.role_id === 3 && !fieldData.value.studgroup_id) {
+        console.error('Не указана группа для студента');
+        return;
+    }
+
+    const url = id.value ? `/api/users/${id.value}` : '/api/users/';
+
+    axios({
+        method: id.value != null ? 'put' : 'post',
+        url: url,
+        data: fieldData.value
+    })
+    .then(response => {
+        console.log('Данные успешно отправлены');
+        if (fieldData.value.role_id === 2 && teachStudgroups.value) {
+            axios.patch(`/api/users/${response.data.data.id}/studgroups/sync`, {resources: teachStudgroups.value})
+                .then(response => {
+                    console.log('Группы студентов успешно синхронизированы');
+                    window.location = route('admin.index')
+                })
+                .catch(error => {
+                    console.error('Ошибка при синхронизации групп студентов:', error);
+                });
+        } else {
+            window.location = route('admin.index')
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка при отправке данных:', error);
+    });
+}
 </script>
 
 <template>
     <form
         @submit.prevent="sendData"
-        class="form"
+        class="form d-grid gap-3 grid-col-2"
     >
+        <div class="form-control" v-for="field in textFields" :key="field.code">
+            <label :for="field.code + '_input'">{{ field.title }}</label>
+            <InputText
+                :id="field.code + '_input'"
+                v-model="fieldData[field.code]"
+                type="text"
+                :class="{ 'p-invalid': errors[field.code] }"
+            />
+            <small class="p-error" v-if="errors[field.code]">{{
+                errors[field.code] ? errors[field.code][0] : "&nbsp;"
+            }}</small>
+        </div>
 
         <template v-if="role == 3">
             <div class="form-control">
                 <label for="studgroup_id">{{ labels.user_fields.studgroup.title }}</label>
-                <Dropdown v-model="fieldData.studgroup_id" :options="studgroups" optionLabel="name"  optionValue="id" placeholder="Выбор группы" />
+                <Dropdown v-model="fieldData.studgroup_id" :options="studgroups" optionLabel="name"  optionValue="id" placeholder="Выбор группы" filter  />
                 <small class="p-error"
                     >{{ errors.studgroup_id ? errors.studgroup_id[0] : "&nbsp;" }}</small
                 >
@@ -80,20 +137,10 @@ const errors = ref({});
             </div>
         </template>
 
-        <div class="form-control" v-for="field in textFields" :key="field.code">
-            <label :for="field.code + '_input'">{{ field.title }}</label>
-            <InputText
-                :id="field.code + '_input'"
-                v-model="fieldData[field.code]"
-                type="text"
-                :class="{ 'p-invalid': errors[field.code] }"
-            />
-            <small class="p-error">{{
-                errors[field.code] ? errors[field.code][0] : "&nbsp;"
-            }}</small>
+        <div class='form-footer mt-2'>
+            <Button @click="sendData" label="Сохранить">
+            </Button>
         </div>
-
-        
 
     </form>
 </template>

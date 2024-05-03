@@ -53,6 +53,7 @@ export default {
     },
     page_titles: {
         users: 'Пользователи',
+        users: 'Пользователи',
         groups: 'Группы',
         teachers: 'Преподаватели',
         reference_studgroups: 'Список групп',

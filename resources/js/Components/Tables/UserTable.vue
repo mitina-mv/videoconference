@@ -8,6 +8,7 @@ import InputText from "primevue/inputtext";
 import labels from '@/locales/ru.js';
 import DeleteDialog from '@/Components/Dialogs/DeleteDialog.vue'
 import Dialog from "primevue/dialog";
+import Toolbar from 'primevue/toolbar';
 
 const props = defineProps({
     tableData: {
@@ -27,6 +28,7 @@ const props = defineProps({
         default: true
     }
 })
+const emit = defineEmits(['fetchData'])
 
 const editingRows = ref([]);
 const tableData = ref(props.tableData)
@@ -91,9 +93,24 @@ const deleteItem = () => {
         });
 };
 
+const fetchData = (id) => {
+    emit('fetchData')
+}
 </script>
 
 <template>
+    <Toolbar class="mb-4">
+        <template #start>
+            <h4 class="m-0">{{ labels[labelgroup].title }}</h4>
+        </template>
+        <template #end>
+            <a :href="route('admin.new',labelgroup)">
+                <Button :label="'Добавить ' + labels[labelgroup].case[1]" icon="pi pi-plus" severity="success" class="mr-2" />
+            </a>
+            <Button label="Обновить" icon="pi pi-reload" severity="secondary" @click="fetchData"/>
+        </template>
+    </Toolbar>
+
     <DataTable
         v-model:editingRows="editingRows"
         dataKey="id"

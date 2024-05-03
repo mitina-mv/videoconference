@@ -23,22 +23,7 @@ const studentsColumns = [
 onMounted(async () => {
     await fetchStudgroups();
     fetchStudents();
-
-    axios.post('/api/users/search', {
-        "filters" : [
-            {"field" : "role_id", "operator" : "=", "value" : "2"},
-        ],        
-        "sort" : [
-            {"field" : "lastname", "direction" : "asc"},
-        ],
-    }, )
-    .then((response) => {
-        teachers.value = response.data.data
-    })
-    .catch((error) => {
-    })
-    
-
+    fetchTeachers()
 })
 
 const toggleStudgroup = (id) => {
@@ -74,6 +59,22 @@ const fetchStudents = () => {
     .catch((error) => {
     })
 }
+
+const fetchTeachers = () => {
+    axios.post('/api/users/search', {
+        "filters" : [
+            {"field" : "role_id", "operator" : "=", "value" : "2"},
+        ],        
+        "sort" : [
+            {"field" : "lastname", "direction" : "asc"},
+        ],
+    }, )
+    .then((response) => {
+        teachers.value = response.data.data
+    })
+    .catch((error) => {
+    })
+}
 </script>
 
 <template>
@@ -86,17 +87,17 @@ const fetchStudents = () => {
             </h2>
         </template>
 
-        <div class="py-12 d-grid gap-4">
-            <div class="container mx-auto">
+        <div class="d-grid gap-4 content">
+            <div class="content__container">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <studgroups-filter :studgroups="studgroups" :active="activeStudgroup" @toggleStudgroup="toggleStudgroup" ></studgroups-filter>
-                    <user-table v-if="students" :tableData="students" :routeName="'api.users'" :columns="studentsColumns" :labelgroup="'students'"></user-table>
+                    <user-table v-if="students" :tableData="students" :routeName="'api.users'" :columns="studentsColumns" :labelgroup="'students'" @fetchData="fetchStudents"></user-table>
                 </div>
             </div>
 
-            <div class="container mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="content__container">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <user-table v-if="teachers" :tableData="teachers" :routeName="'api.users'" :columns="studentsColumns" :labelgroup="'teachers'"></user-table>
+                    <user-table v-if="teachers" :tableData="teachers" :routeName="'api.users'" :columns="studentsColumns" :labelgroup="'teachers'" @fetchData="fetchTeachers"></user-table>
                 </div>
             </div>
         </div>

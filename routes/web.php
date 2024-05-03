@@ -39,6 +39,7 @@ Route::get('/dashboard', function () {
 Route::group(['prefix' => 'admin'], function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin.index');
     Route::get('/edit/{id}', [AdminController::class, 'edit'])->name('admin.edit');
+    Route::get('/new/{role}', [AdminController::class, 'create'])->name('admin.new');
 
     Route::group(['prefix' => 'reference'], function () {
         Route::get('/studgroups', [AdminController::class, 'studgroups'])->name('admin.reference.studgroups');
