@@ -25,13 +25,8 @@ class Question extends Model
         
     public function user()
     {
-        return $this->hasOne(User::class);
-    }  
-
-    public function org()
-    {
-        return $this->hasOne(Org::class);
-    } 
+        return $this->belongsTo(User::class);
+    }
 
     public function discipline()
     {
@@ -40,11 +35,11 @@ class Question extends Model
 
     public function answers()
     {
-        return $this->hasMany(Answer::class, 'question_id');
+        return $this->hasMany(Answer::class);
     }
 
     public function correct_answers()
     {
-        return $this->hasMany(Answer::class, 'question_id')->where('answer_status', true);
+        return $this->hasMany(Answer::class, 'question_id')->where('status', true);
     }
 }

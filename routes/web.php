@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ConferenceController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QuestionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -45,7 +46,11 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('/studgroups', [AdminController::class, 'studgroups'])->name('admin.reference.studgroups');
         Route::get('/disciplines', [AdminController::class, 'disciplines'])->name('admin.reference.disciplines');
     });
-});
+})->middleware(['auth']);
+
+Route::group(['prefix' => 'questions'], function () {
+    Route::get('/', [QuestionController::class, 'index'])->name('admin.index');
+})->middleware(['auth']);
 
 Route::middleware('auth')->group(function () {
 

@@ -15,6 +15,14 @@ export default {
             'преподавателем','преподавателе'
         ],
     }, 
+    questions: {
+        title: 'Вопросы пользователя',
+        case: [
+            'вопрос', 'вопроса',
+            'вопросу', 'вопрос', 
+            'вопросом','вопросе'
+        ],
+    }, 
     user_fields: {
         name: {
             title: 'Имя',
@@ -58,5 +66,20 @@ export default {
         teachers: 'Преподаватели',
         reference_studgroups: 'Список групп',
         reference_disciplines: 'Список дисциплин',
+        questions: 'Банк заданий',
+    }, 
+    questions_fields: {
+        text: {
+            title: 'Вопрос',
+        },
+        answers: {
+            title: 'Варианты ответов',
+        }, 
+        is_private: {
+            title: 'Приватность',
+        },
+        mark: {
+            title: 'Стоимость',
+        }
     }
 };

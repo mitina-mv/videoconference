@@ -116,7 +116,7 @@ watch(() => props.tableData, (newValue) => {
         </template>
         <template #end>
             <a :href="route('admin.new',labelgroup)">
-                <Button :label="'Добавить ' + labels[labelgroup].case[1]" icon="pi pi-plus" severity="success" class="mr-2" />
+                <Button :label="'Добавить ' + labels[labelgroup].case[3]" icon="pi pi-plus" class="mr-2" />
             </a>
             <Button label="Обновить" icon="pi pi-refresh" severity="secondary" @click="fetchData"/>
         </template>
@@ -135,8 +135,8 @@ watch(() => props.tableData, (newValue) => {
             v-for="(column, index) in columns"
             :key="index"
             :field="column.code"
-            sortable
-            :header="labels.user_fields[column.code].title"
+            :sortable="column?.sort"
+            :header="column.title"
             :style="column?.style"
         ></Column>
 
@@ -145,6 +145,7 @@ watch(() => props.tableData, (newValue) => {
                 <a :href="route('admin.edit', row.data.id)">
                     <Button
                         icon="pi pi-pencil"
+                        severity="secondary"
                         text
                     ></Button>
                 </a>
