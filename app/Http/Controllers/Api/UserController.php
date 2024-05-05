@@ -17,6 +17,16 @@ class UserController extends Controller
     protected $policy = AdminPolicy::class;
     protected $request = UserRequest::class;
 
+    public function limit() : int
+    {
+        return 25;
+    }
+
+    public function maxLimit() : int
+    {
+        return 100;
+    }
+
     public function filterableBy() : array
     {
         return ['role_id', 'studgroup_id', ];

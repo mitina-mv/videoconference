@@ -10,7 +10,6 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
 
-
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const token = import.meta.env.TOKEN_APP
 

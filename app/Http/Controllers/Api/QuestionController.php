@@ -19,7 +19,7 @@ class QuestionController extends Controller
 
     public function limit() : int
     {
-        return 50;
+        return 25;
     }
 
     public function maxLimit() : int

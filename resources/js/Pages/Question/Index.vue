@@ -6,6 +6,7 @@ import UserTable from "@/Components/Tables/UserTable.vue";
 import axios from "axios";
 import labels from '@/locales/ru.js';
 import LoadingSpinner from "@/Components/Common/LoadingSpinner.vue";
+import toastService from "@/Services/toastService";
 
 const tableColumns = [
     {
@@ -19,6 +20,7 @@ const tableColumns = [
     {
         code: "answers",
         title: labels.questions_fields.answers.title,
+        type: 'html',
         sort: false,
     },
     {
@@ -30,9 +32,11 @@ const tableColumns = [
         sort: true,
         code: "is_private",
         title: labels.questions_fields.is_private.title,
+        type: 'bool',
     },
 ];
 const tableData = ref(null);
+const totalPage = ref(null);
 
 onMounted(async () => {
     await fetchData()
@@ -43,12 +47,35 @@ const fetchData = async () => {
         .get("/api/questions/?include=answers")
         .then((response) => {
             tableData.value = response.data.data;
-            // addToast(`получили`)
+
+            tableData.value.forEach((element, index) => {
+                let namesString = element.answers.map((a) => a. status ? `<i class='table-value__green'>${a.name}</i>` : a.name).join(', ');
+                tableData.value[index].answers = namesString;
+            });
+            totalPage.value = response.data.meta.total
+            toastService.showInfoToast("Заголовок", "Текст")
         })
         .catch((error) => {
-            // addToast(`Неудачно`)
+            toastService.showInfoToast("Заголовок", "Текст")
         });
 };
+
+const fetchPageData = async (page, limit) => {
+    await axios
+        .get(`/api/questions/?include=answers&page=${page + 1}&limit=${limit}`,)
+        .then((response) => {
+            tableData.value = response.data.data;
+
+            tableData.value.forEach((element, index) => {
+                let namesString = element.answers.map((a) => a. status ? `<i class='table-value__green'>${a.name}</i>` : a.name).join(', ');
+                tableData.value[index].answers = namesString;
+            });
+            toastService.showInfoToast("Заголовок", "Текст")
+        })
+        .catch((error) => {
+            toastService.showInfoToast("Заголовок", "Текст")
+        });
+}
 </script>
 
 <template>
@@ -72,6 +99,8 @@ const fetchData = async () => {
                         :columns="tableColumns"
                         :labelgroup="'questions'"
                         @fetchData="fetchData"
+                        @getPage="fetchPageData"
+                        :total="totalPage"
                     ></user-table>
                 </div>
             </div>

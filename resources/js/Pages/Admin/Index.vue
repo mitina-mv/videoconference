@@ -10,7 +10,9 @@ import LoadingSpinner from "@/Components/Common/LoadingSpinner.vue";
 import labels from '@/locales/ru.js';
 
 const students = ref(null);
+const studentsTotal = ref(null);
 const teachers = ref(null);
+const teachersTotal = ref(null);
 const studgroups = ref(null);
 const activeStudgroup = ref(null);
 
@@ -67,7 +69,7 @@ const fetchStudgroups = async () => {
         });
 };
 
-const fetchStudents = () => {
+const fetchStudents = (params = {}) => {
     axios
         .post("/api/users/search", {
             filters: [
@@ -79,19 +81,22 @@ const fetchStudents = () => {
                 },
             ],
             sort: [{ field: "lastname", direction: "asc" }],
+            ...params
         })
         .then((response) => {
             students.value = response.data.data;
+            studentsTotal.value = response.data.meta.total
         })
         .catch((error) => {});
 };
 
-const fetchTeachers = () => {
+const fetchTeachers = (params = {}) => {
     axios
         .post("/api/users/search", {
             filters: [{ field: "role_id", operator: "=", value: "2" }],
             sort: [{ field: "lastname", direction: "asc" }],
-            includes: [{"relation" : "studgroups"}]
+            includes: [{"relation" : "studgroups"}],
+            ...params
         })
         .then((response) => {
             teachers.value = response.data.data;
@@ -100,9 +105,25 @@ const fetchTeachers = () => {
                 let namesString = element.studgroups.map((sg) => sg.name).join(', ');
                 teachers.value[index].studgroups = namesString;
             });
+
+            teachersTotal.value = response.data.meta.total
         })
         .catch((error) => {});
 };
+
+const fetchTeachersPageData = (page, limit) => {
+    fetchTeachers({
+        page: page + 1,
+        limit: limit
+    })
+}
+
+const fetchStudentsPageData = (page, limit) => {
+    fetchStudents({
+        page: page + 1,
+        limit: limit
+    })
+}
 </script>
 
 <template>
@@ -132,6 +153,8 @@ const fetchTeachers = () => {
                             :columns="studentsColumns"
                             :labelgroup="'students'"
                             @fetchData="fetchStudents"
+                            @getPage="fetchStudentsPageData"
+                            :total="studentsTotal"
                         ></user-table>
                     </div>
                 </div>
@@ -147,6 +170,8 @@ const fetchTeachers = () => {
                         :columns="teacterColumns"
                         :labelgroup="'teachers'"
                         @fetchData="fetchTeachers"
+                        @getPage="fetchTeachersPageData"
+                        :total="teachersTotal"
                     ></user-table>
                 </div>
             </div>
