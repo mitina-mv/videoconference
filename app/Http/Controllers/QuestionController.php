@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Theme;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -16,12 +17,14 @@ class QuestionController extends Controller
     {
         return Inertia::render('Question/Form', [
             'id' => $id,
+            'themes' => Theme::all(),
         ]);
     }
 
-    public function create(string $role)
+    public function create()
     {
         return Inertia::render('Question/Form', [
+            'themes' => Theme::all(),
         ]);
     }
 }

@@ -3,12 +3,15 @@ import { ref, onMounted } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage } from "@inertiajs/vue3";
 import toastService from "@/Services/toastService";
+import Question from "@/Components/Forms/Question.vue";
+import LoadingSpinner from "@/Components/Common/LoadingSpinner.vue";
 
 const props = defineProps({
     id: {
         type: String,
         req: false
     },
+    themes: Array
 })
 
 const id = props?.id || null
@@ -24,6 +27,8 @@ onMounted(() => {
                 toastService.showErrorToast(`Редактирование данных`, "Не удалось получить данные.")
             })
     }
+
+
 })
 </script>
 
@@ -40,6 +45,8 @@ onMounted(() => {
         <div class="d-grid gap-4 content">
             <div class="content__container">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                    <question v-if="(id && data && themes) || (!id && themes)" :data="data" :themes="themes"></question>
+                    <loading-spinner v-else></loading-spinner>
                 </div>
             </div>
         </div>
