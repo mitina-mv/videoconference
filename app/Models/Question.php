@@ -16,7 +16,8 @@ class Question extends Model
         'text',
         'settings',
         'user_id',
-        'discipline_id',
+        'theme_id',
+        'type', // 'single', 'multiple', 'text'
         'mark'
     ];
     public $timestamps = false;

@@ -6,6 +6,7 @@ use App\Http\Requests\QuestionRequest;
 use App\Models\Question;
 use App\Policies\TruePolicy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Orion\Http\Controllers\Controller;
 use Orion\Http\Requests\Request as Request;
 
@@ -46,6 +47,16 @@ class QuestionController extends Controller
     public function includes() : array
     {
         return ['answers'];
+    }
+
+    protected function performStore(Request $request, Model $entity, array $attributes): void
+    {
+        if ($this->resolveUser()->hasRole('admin')) {
+            $entity->forceFill($attributes);
+        } else {
+            $entity->fill($attributes);
+        }
+        $entity->save();
     }
 
 }

@@ -49,7 +49,9 @@ Route::group(['prefix' => 'admin'], function () {
 })->middleware(['auth']);
 
 Route::group(['prefix' => 'questions'], function () {
-    Route::get('/', [QuestionController::class, 'index'])->name('admin.index');
+    Route::get('/', [QuestionController::class, 'index'])->name('questions.index');
+    Route::get('/edit/{id}', [QuestionController::class, 'edit'])->name('questions.edit');
+    Route::get('/new', [QuestionController::class, 'create'])->name('questions.new');
 })->middleware(['auth']);
 
 Route::middleware('auth')->group(function () {

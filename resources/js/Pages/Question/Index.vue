@@ -101,6 +101,8 @@ const fetchPageData = async (page, limit) => {
                         @fetchData="fetchData"
                         @getPage="fetchPageData"
                         :total="totalPage"
+                        routeNameForm="questions.new"
+                        routeNameEdit="questions.edit"
                     ></user-table>
                 </div>
             </div>

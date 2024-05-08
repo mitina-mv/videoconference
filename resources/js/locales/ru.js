@@ -80,6 +80,14 @@ export default {
         },
         mark: {
             title: 'Стоимость',
+        },
+        type: {
+            title: 'Тип вопроса',
+            values: {
+                single: "Одиночный выбор",
+                multiple: "Множественный выбор",
+                text: "Текстовый ответ",
+            }
         }
     }
 };

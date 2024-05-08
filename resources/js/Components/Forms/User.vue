@@ -21,7 +21,6 @@ const props = defineProps({
         req: false
     }
 })
-const emit = defineEmits(['sendData'])
 
 const role = ref(props?.data?.role_id || props?.role);
 const id = ref(props?.data?.id || null);

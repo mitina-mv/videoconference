@@ -11,4 +11,17 @@ class QuestionController extends Controller
     {
         return Inertia::render('Question/Index', []);
     }
+
+    public function edit(string $id)
+    {
+        return Inertia::render('Question/Form', [
+            'id' => $id,
+        ]);
+    }
+
+    public function create(string $role)
+    {
+        return Inertia::render('Question/Form', [
+        ]);
+    }
 }

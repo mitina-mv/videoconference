@@ -33,6 +33,14 @@ const props = defineProps({
         type: Number,
         default: 25,
     },
+    routeNameForm: {
+        type: String,
+        default: 'admin.new',
+    },
+    routeNameEdit: {
+        type: String,
+        default: 'admin.edit',
+    },
 });
 const emit = defineEmits(["fetchData", "getPage"]);
 
@@ -129,7 +137,7 @@ watch(
             <h4 class="m-0">{{ labels[labelgroup].title }}</h4>
         </template>
         <template #end>
-            <a :href="route('admin.new', labelgroup)">
+            <a :href="route(routeNameForm, labelgroup)">
                 <Button
                     :label="'Добавить ' + labels[labelgroup].case[3]"
                     icon="pi pi-plus"
@@ -201,7 +209,7 @@ watch(
             :style="{ width: '5%' }"
         >
             <template #body="row">
-                <a :href="route('admin.edit', row.data.id)">
+                <a :href="route(routeNameEdit, row.data.id)">
                     <Button
                         icon="pi pi-pencil"
                         severity="secondary"
