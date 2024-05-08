@@ -66,6 +66,7 @@ export default {
         teachers: 'Преподаватели',
         reference_studgroups: 'Список групп',
         reference_disciplines: 'Список дисциплин',
+        reference_themes: 'Список тем занятий',
         questions: 'Банк заданий',
     }, 
     questions_fields: {

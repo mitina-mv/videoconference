@@ -8,4 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class Theme extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'code',
+        'name',
+        'discipline_id',
+    ];
+    protected $table = 'themes';
+    protected $primaryKey = 'id';
+    public $timestamps = false;
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\DisciplineController;
 use App\Http\Controllers\Api\QuestionController;
 use App\Http\Controllers\Api\StudgroupController;
+use App\Http\Controllers\Api\ThemeController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserStudgroupsController;
 use Illuminate\Http\Request;
@@ -35,6 +36,7 @@ Route::group(['as' => 'api.'], function() {
     Orion::belongsToManyResource('users', 'studgroups', UserStudgroupsController::class);
     Orion::resource('studgroups', StudgroupController::class)->withSoftDeletes();
     Orion::resource('disciplines', DisciplineController::class)->withSoftDeletes();
+    Orion::resource('themes', ThemeController::class)->withSoftDeletes();
     
     Orion::resource('questions', QuestionController::class)->withSoftDeletes();
 });
