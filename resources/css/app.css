@@ -55,6 +55,10 @@
     grid-template-columns: repeat(6, 1fr);
 }
 
+.grif-self-col-1 {
+    grid-column: 1/-1;
+}
+
 .form-control{
     display: grid;
     gap: .25em;

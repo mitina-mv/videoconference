@@ -70,6 +70,7 @@ export default {
         reference_disciplines: "Список дисциплин",
         reference_themes: "Список тем занятий",
         questions: "Банк заданий",
+        answers: "Варианты ответов",
     },
     questions_fields: {
         text: {
@@ -95,5 +96,13 @@ export default {
                 { id: "text", name: "Текстовый ответ" },
             ],
         },
+    },
+    answers_fields: {
+        status: {
+            title: "Правильность",
+        },
+        name: {
+            title: "Текст ответа",
+        }
     },
 };
