@@ -49,14 +49,14 @@ class QuestionController extends Controller
         return ['answers'];
     }
 
-    protected function performStore(Request $request, Model $entity, array $attributes): void
-    {
-        if ($this->resolveUser()->hasRole('admin')) {
-            $entity->forceFill($attributes);
-        } else {
-            $entity->fill($attributes);
-        }
-        $entity->save();
-    }
+    // protected function performStore(Request $request, Model $entity, array $attributes): void
+    // {
+    //     if ($this->resolveUser()->hasRole('admin')) {
+    //         $entity->forceFill($attributes);
+    //     } else {
+    //         $entity->fill($attributes);
+    //     }
+    //     $entity->save();
+    // }
 
 }

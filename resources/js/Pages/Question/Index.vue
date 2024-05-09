@@ -50,10 +50,9 @@ const fetchData = async () => {
 
             tableData.value.forEach((element, index) => {
                 let namesString = element.answers.map((a) => a. status ? `<i class='table-value__green'>${a.name}</i>` : a.name).join(', ');
-                tableData.value[index].answers = namesString;
+                tableData.value[index].answers = namesString == '' ? "<b class='table-value__red'>Нет ответов!</b>" : namesString ;
             });
             totalPage.value = response.data.meta.total
-            toastService.showInfoToast("Заголовок", "Текст")
         })
         .catch((error) => {
             toastService.showInfoToast("Заголовок", "Текст")
@@ -68,9 +67,8 @@ const fetchPageData = async (page, limit) => {
 
             tableData.value.forEach((element, index) => {
                 let namesString = element.answers.map((a) => a. status ? `<i class='table-value__green'>${a.name}</i>` : a.name).join(', ');
-                tableData.value[index].answers = namesString;
+                tableData.value[index].answers = namesString == '' ? "<b class='table-value__red'>Нет ответов!</b>" : namesString ;
             });
-            toastService.showInfoToast("Заголовок", "Текст")
         })
         .catch((error) => {
             toastService.showInfoToast("Заголовок", "Текст")

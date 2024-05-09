@@ -51,7 +51,6 @@ const answersData = ref([]);
 let answerNull = {
     status: false,
     name: null,
-    question_id: props?.data?.id
 };
 const answerField = {
     status: {
@@ -73,11 +72,10 @@ onMounted(() => {
 });
 
 const sendData = () => {
-    console.log(fieldData.value);
     if (
-        !fieldData.value.name ||
-        !fieldData.value.lastname ||
-        !fieldData.value.email
+        !fieldData.value.text.value ||
+        !fieldData.value.theme_id.value ||
+        !fieldData.value.type.value
     ) {
         toastService.showWarnToast(
             `Сохранение данных`,
@@ -86,14 +84,21 @@ const sendData = () => {
         return;
     }
 
+    let data = {};
+    for(let code in fieldData.value) {
+        data[code] = fieldData.value[code].value
+    }
+
     const url = "/api/questions" + (id.value ? `/${id.value}` : "");
 
     axios({
         method: id.value != null ? "put" : "post",
         url: url,
-        data: fieldData.value,
+        data: data,
     })
-        .then((response) => {})
+        .then((response) => {
+            id.value = response.data.data.id
+        })
         .catch((error) => {
             toastService.showErrorToast(
                 `Сохранение данных`,
@@ -104,14 +109,17 @@ const sendData = () => {
 };
 
 const addAnswerForm = () => {
-    if(!props.data || ! props.data.id) {
-        toastService.showErrorToast(
+    if(!id.value) {
+        toastService.showWarnToast(
                 `Создание вопроса`,
                 "Нельзя создать ответ для несохранненого вопроса"
             );
         return;
     }
-    answersData.value.push(answerNull)
+    answersData.value.push({
+        ...answerNull,
+        question_id: id.value
+    })
 }
 </script>
 
@@ -235,6 +243,9 @@ const addAnswerForm = () => {
             </div>
         </form>
         </div>
-        <div v-else>Ответы сможете добавить после создания вопроса</div>
+        <div v-else>
+            <span v-if="!id">Ответы сможете добавить после создания вопроса</span>
+            <span v-else>Добавьте варианты ответа</span>
+        </div>
     </div>
 </template>

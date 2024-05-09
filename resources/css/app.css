@@ -91,6 +91,10 @@
     color: var(--green-600);
 }
 
+.table-value__red{
+    color: var(--red-600);
+}
+
 .mb-1 {
     margin-bottom: .25em;
 }
