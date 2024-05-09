@@ -29,9 +29,9 @@ class Question extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function discipline()
+    public function theme()
     {
-        return $this->hasOne(Discipline::class);
+        return $this->belongsTo(Theme::class);
     } 
 
     public function answers()

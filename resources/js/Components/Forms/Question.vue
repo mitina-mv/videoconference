@@ -98,6 +98,7 @@ const sendData = () => {
     })
         .then((response) => {
             id.value = response.data.data.id
+            errors.value = []
         })
         .catch((error) => {
             toastService.showErrorToast(

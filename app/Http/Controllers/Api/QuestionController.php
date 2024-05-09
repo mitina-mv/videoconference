@@ -45,7 +45,7 @@ class QuestionController extends Controller
 
     public function includes() : array
     {
-        return ['answers'];
+        return ['answers', 'theme'];
     }
 
     // protected function performStore(Request $request, Model $entity, array $attributes): void

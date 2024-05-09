@@ -4,15 +4,16 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage } from "@inertiajs/vue3";
 import UserTable from "@/Components/Tables/UserTable.vue";
 import axios from "axios";
-import labels from '@/locales/ru.js';
+import labels from "@/locales/ru.js";
 import LoadingSpinner from "@/Components/Common/LoadingSpinner.vue";
 import toastService from "@/Services/toastService";
+import theme from "tailwindcss/defaultTheme";
 
 const tableColumns = [
     {
         code: "text",
         style: {
-            width: '35%',
+            width: "35%",
         },
         sort: true,
         title: labels.questions_fields.text.title,
@@ -20,10 +21,18 @@ const tableColumns = [
     {
         code: "answers",
         title: labels.questions_fields.answers.title,
-        type: 'html',
+        type: "html",
         sort: false,
         style: {
-            width: '30%',
+            width: "25%",
+        },
+    },
+    {
+        code: "theme",
+        sort: true,
+        title: labels.questions_fields.theme.title,
+        style: {
+            width: "20%",
         },
     },
     {
@@ -35,48 +44,76 @@ const tableColumns = [
         sort: true,
         code: "is_private",
         title: labels.questions_fields.is_private.title,
-        type: 'bool',
+        type: "bool",
     },
 ];
 const tableData = ref(null);
 const totalPage = ref(null);
 
 onMounted(async () => {
-    await fetchData()
+    await fetchData();
 });
 
 const fetchData = async () => {
     await axios
-        .get("/api/questions/?include=answers")
+        .get("/api/questions/?include=answers,theme")
         .then((response) => {
             tableData.value = response.data.data;
 
             tableData.value.forEach((element, index) => {
-                let namesString = element.answers.map((a) => a. status ? `<i class='table-value__green'>${a.name}</i>` : a.name).join(', ');
-                tableData.value[index].answers = namesString == '' ? "<b class='table-value__red'>Нет ответов!</b>" : namesString ;
+                let namesString = element.answers
+                    .map((a) =>
+                        a.status
+                            ? `<i class='table-value__green'>${a.name}</i>`
+                            : a.name
+                    )
+                    .join(", ");
+
+                tableData.value[index].answers =
+                    namesString == ""
+                        ? "<b class='table-value__red'>Нет ответов!</b>"
+                        : namesString;
+
+                tableData.value[index].theme = element?.theme?.name || "Не указано";
             });
-            totalPage.value = response.data.meta.total
+            totalPage.value = response.data.meta.total;
         })
         .catch((error) => {
-            toastService.showInfoToast("Заголовок", "Текст")
+            toastService.showInfoToast("Заголовок", "Текст");
         });
 };
 
 const fetchPageData = async (page, limit) => {
     await axios
-        .get(`/api/questions/?include=answers&page=${page + 1}&limit=${limit}`,)
+        .get(
+            `/api/questions/?include=answers,theme&page=${
+                page + 1
+            }&limit=${limit}`
+        )
         .then((response) => {
             tableData.value = response.data.data;
 
             tableData.value.forEach((element, index) => {
-                let namesString = element.answers.map((a) => a. status ? `<i class='table-value__green'>${a.name}</i>` : a.name).join(', ');
-                tableData.value[index].answers = namesString == '' ? "<b class='table-value__red'>Нет ответов!</b>" : namesString ;
+                let namesString = element.answers
+                    .map((a) =>
+                        a.status
+                            ? `<i class='table-value__green'>${a.name}</i>`
+                            : a.name
+                    )
+                    .join(", ");
+
+                tableData.value[index].answers =
+                    namesString == ""
+                        ? "<b class='table-value__red'>Нет ответов!</b>"
+                        : namesString;
+
+                tableData.value[index].theme = element?.theme?.name || "Не указано";
             });
         })
         .catch((error) => {
-            toastService.showInfoToast("Заголовок", "Текст")
+            toastService.showInfoToast("Заголовок", "Текст");
         });
-}
+};
 </script>
 
 <template>

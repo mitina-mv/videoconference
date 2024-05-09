@@ -85,6 +85,9 @@ export default {
         mark: {
             title: "Стоимость",
         },
+        theme: {
+            title: "Тема",
+        },
         theme_id: {
             title: "Тема",
         },
