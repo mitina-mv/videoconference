@@ -6,7 +6,6 @@ use App\Http\Requests\QuestionRequest;
 use App\Models\Question;
 use App\Policies\TruePolicy;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Orion\Http\Controllers\Controller;
 use Orion\Http\Requests\Request as Request;
 
@@ -16,7 +15,7 @@ class QuestionController extends Controller
 
     protected $model = Question::class;
     protected $policy = TruePolicy::class;
-    // protected $request = QuestionRequest::class;
+    protected $request = QuestionRequest::class;
 
     public function limit() : int
     {

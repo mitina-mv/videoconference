@@ -12,7 +12,7 @@ const tableColumns = [
     {
         code: "text",
         style: {
-            width: '45%',
+            width: '35%',
         },
         sort: true,
         title: labels.questions_fields.text.title,
@@ -22,6 +22,9 @@ const tableColumns = [
         title: labels.questions_fields.answers.title,
         type: 'html',
         sort: false,
+        style: {
+            width: '30%',
+        },
     },
     {
         code: "mark",

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AnswerController;
 use App\Http\Controllers\Api\DisciplineController;
 use App\Http\Controllers\Api\QuestionController;
 use App\Http\Controllers\Api\StudgroupController;
@@ -39,4 +40,5 @@ Route::group(['as' => 'api.'], function() {
     Orion::resource('themes', ThemeController::class)->withSoftDeletes();
     
     Orion::resource('questions', QuestionController::class)->withSoftDeletes();
+    Orion::resource('answers', AnswerController::class)->withSoftDeletes();
 });

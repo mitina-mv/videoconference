@@ -121,6 +121,53 @@ const addAnswerForm = () => {
         question_id: id.value
     })
 }
+
+const deleteAnswer = (index) => {
+    let item = answersData.value[index]
+    if(item.id) {
+        axios.delete('/api/answers/' + item.id)
+        .then((response) => {
+            answersData.value.splice(index, 1);
+        })
+        .catch((error) => {
+            toastService.showErrorToast(
+                `Удаление ответа`,
+                "Ошибка при отправке данных. Ознакомьтесь с ошибками и попробуйте заново."
+            );
+            errors.value = error.response.data.errors;
+        });
+    } else {
+        answersData.value.splice(index, 1);
+    }
+}
+
+const sendAnswer = (index) => {
+    let item = answersData.value[index]
+    if (!item.name) {
+        toastService.showWarnToast(
+            `Сохранение ответа`,
+            "Не все обязательные поля заполнены"
+        );
+        return;
+    }
+    const url = "/api/answers" + (item.id ? `/${item.id}` : "");
+
+    axios({
+        method: item.id != null ? "put" : "post",
+        url: url,
+        data: item,
+    })
+        .then((response) => {
+            answersData.value[index].id = response.data.data.id
+        })
+        .catch((error) => {
+            toastService.showErrorToast(
+                `Сохранение ответа`,
+                "Ошибка при отправке данных. Ознакомьтесь с ошибками и попробуйте заново."
+            );
+            errors.value = error.response.data.errors;
+        });
+}
 </script>
 
 <template>
@@ -228,8 +275,8 @@ const addAnswerForm = () => {
 
             <div class="buttons-group mt-3">
                 <Button
-                    @click="sendData"
-                    label="Сохранить"
+                    @click="sendAnswer(index)"
+                    :label="answer.id ? 'Сохранить' : 'Создать'"
                     size="small"
                     severity="success"
                     outlined
@@ -239,6 +286,7 @@ const addAnswerForm = () => {
                     size="small"
                     severity="danger"
                     outlined
+                    @click="deleteAnswer(index)"
                 />
             </div>
         </form>
