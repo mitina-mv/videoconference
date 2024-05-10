@@ -16,11 +16,15 @@ class Test extends Model
         'settings',
         'name',
         'user_id',
-        'discipline_id'
+        'theme_id'
     ];
     public $timestamps = true;
     protected $table = 'tests';
     protected $primaryKey = 'id';
+
+    protected $casts = [
+        'settings' => 'array'
+    ];
 
     public function user()
     {
