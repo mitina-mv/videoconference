@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import InputText from "primevue/inputtext";
 import InputNumber from "primevue/inputnumber";
 import MultiSelect from "primevue/multiselect";
@@ -10,6 +10,7 @@ import toastService from "@/Services/toastService";
 import InputSwitch from "primevue/inputswitch";
 import Textarea from "primevue/textarea";
 import Toolbar from "primevue/toolbar";
+import Message from "primevue/message";
 
 const props = defineProps({
     data: {
@@ -61,7 +62,7 @@ const answerField = {
     name: {
         code: "name",
         title: labels.answers_fields.name.title,
-        type: 'text',
+        type: "text",
     },
 };
 
@@ -85,8 +86,8 @@ const sendData = () => {
     }
 
     let data = {};
-    for(let code in fieldData.value) {
-        data[code] = fieldData.value[code].value
+    for (let code in fieldData.value) {
+        data[code] = fieldData.value[code].value;
     }
 
     const url = "/api/questions" + (id.value ? `/${id.value}` : "");
@@ -101,8 +102,8 @@ const sendData = () => {
                 `Сохранение данных`,
                 "Успешно сохранили!"
             );
-            id.value = response.data.data.id
-            errors.value = []
+            id.value = response.data.data.id;
+            errors.value = [];
         })
         .catch((error) => {
             toastService.showErrorToast(
@@ -114,40 +115,41 @@ const sendData = () => {
 };
 
 const addAnswerForm = () => {
-    if(!id.value) {
+    if (!id.value) {
         toastService.showWarnToast(
-                `Создание вопроса`,
-                "Нельзя создать ответ для несохранненого вопроса"
-            );
+            `Создание вопроса`,
+            "Нельзя создать ответ для несохранненого вопроса"
+        );
         return;
     }
     answersData.value.push({
         ...answerNull,
-        question_id: id.value
-    })
-}
+        question_id: id.value,
+    });
+};
 
 const deleteAnswer = (index) => {
-    let item = answersData.value[index]
-    if(item.id) {
-        axios.delete('/api/answers/' + item.id)
-        .then((response) => {
-            answersData.value.splice(index, 1);
-        })
-        .catch((error) => {
-            toastService.showErrorToast(
-                `Удаление ответа`,
-                "Ошибка при отправке данных. Ознакомьтесь с ошибками и попробуйте заново."
-            );
-            errors.value = error.response.data.errors;
-        });
+    let item = answersData.value[index];
+    if (item.id) {
+        axios
+            .delete("/api/answers/" + item.id)
+            .then((response) => {
+                answersData.value.splice(index, 1);
+            })
+            .catch((error) => {
+                toastService.showErrorToast(
+                    `Удаление ответа`,
+                    "Ошибка при отправке данных. Ознакомьтесь с ошибками и попробуйте заново."
+                );
+                errors.value = error.response.data.errors;
+            });
     } else {
         answersData.value.splice(index, 1);
     }
-}
+};
 
 const sendAnswer = (index) => {
-    let item = answersData.value[index]
+    let item = answersData.value[index];
     if (!item.name) {
         toastService.showWarnToast(
             `Сохранение ответа`,
@@ -163,8 +165,8 @@ const sendAnswer = (index) => {
         data: item,
     })
         .then((response) => {
-            answersData.value[index].id = response.data.data.id
-            
+            answersData.value[index].id = response.data.data.id;
+
             toastService.showSuccessToast(
                 `Сохранение ответа`,
                 "Успешно сохранили!"
@@ -177,7 +179,21 @@ const sendAnswer = (index) => {
             );
             errors.value = error.response.data.errors;
         });
-}
+};
+
+const showErrorMessage = computed(() => {
+    const correctAnswersCount = answersData.value.filter(
+        (answer) => answer.status === true
+    ).length;
+
+    if (fieldData.value.type.value === "single") {
+        return correctAnswersCount > 1 || correctAnswersCount == 0;
+    } else if (fieldData.value.type.value === "text") {
+        return correctAnswersCount != answersData.value.length
+    } else {
+        return correctAnswersCount == 0
+    }
+});
 </script>
 
 <template>
@@ -251,58 +267,66 @@ const sendAnswer = (index) => {
             </template>
         </Toolbar>
 
-        <div class=" d-grid grid-col-3 gap-4" v-if="answersData.length > 0">
-        <form v-for="(answer, index) in answersData" :key="index">
-            <b>Ответ {{ index + 1 }}</b>
-            <div
-                class="form-control"
-                v-for="(field, code) in answerField"
-                :key="code + '_' + index"
-            >
-                <label :for="code + '_input' + index">{{ field.title }}</label>
-                <InputSwitch
-                    v-if="field.type == 'bool'"
-                    v-model="answer[code]"
-                    :invalid="errors[code] ? true : false"
-                />
+        <Message v-if="showErrorMessage" :closable="false" severity="warn"
+            >{{ labels.info_messages.answer_error }}</Message
+        >
 
-                <Textarea
-                    v-else-if="field.type == 'text'"
-                    v-model="answer[code]"
-                />
+        <div class="d-grid grid-col-3 gap-4" v-if="answersData.length > 0">
+            <form v-for="(answer, index) in answersData" :key="index">
+                <b>Ответ {{ index + 1 }}</b>
+                <div
+                    class="form-control"
+                    v-for="(field, code) in answerField"
+                    :key="code + '_' + index"
+                >
+                    <label :for="code + '_input' + index">{{
+                        field.title
+                    }}</label>
+                    <InputSwitch
+                        v-if="field.type == 'bool'"
+                        v-model="answer[code]"
+                        :invalid="errors[code] ? true : false"
+                    />
 
-                <InputText
-                    v-else
-                    :id="code + '_input' + index"
-                    v-model="answer[code]"
-                    type="text"
-                    :class="{ 'p-invalid': errors[`${code}`] }"
-                />
-                <small class="p-error" v-if="errors[code]">{{
-                    errors[code] ? errors[code][0] : "&nbsp;"
-                }}</small>
-            </div>
+                    <Textarea
+                        v-else-if="field.type == 'text'"
+                        v-model="answer[code]"
+                    />
 
-            <div class="buttons-group mt-3">
-                <Button
-                    @click="sendAnswer(index)"
-                    :label="answer.id ? 'Сохранить' : 'Создать'"
-                    size="small"
-                    severity="success"
-                    outlined
-                />
-                <Button
-                    label="Удалить"
-                    size="small"
-                    severity="danger"
-                    outlined
-                    @click="deleteAnswer(index)"
-                />
-            </div>
-        </form>
+                    <InputText
+                        v-else
+                        :id="code + '_input' + index"
+                        v-model="answer[code]"
+                        type="text"
+                        :class="{ 'p-invalid': errors[`${code}`] }"
+                    />
+                    <small class="p-error" v-if="errors[code]">{{
+                        errors[code] ? errors[code][0] : "&nbsp;"
+                    }}</small>
+                </div>
+
+                <div class="buttons-group mt-3">
+                    <Button
+                        @click="sendAnswer(index)"
+                        :label="answer.id ? 'Сохранить' : 'Создать'"
+                        size="small"
+                        severity="success"
+                        outlined
+                    />
+                    <Button
+                        label="Удалить"
+                        size="small"
+                        severity="danger"
+                        outlined
+                        @click="deleteAnswer(index)"
+                    />
+                </div>
+            </form>
         </div>
         <div v-else>
-            <span v-if="!id">Ответы сможете добавить после создания вопроса</span>
+            <span v-if="!id"
+                >Ответы сможете добавить после создания вопроса</span
+            >
             <span v-else>Добавьте варианты ответа</span>
         </div>
     </div>
