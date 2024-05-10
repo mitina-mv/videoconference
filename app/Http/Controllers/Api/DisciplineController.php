@@ -25,4 +25,13 @@ class DisciplineController extends Controller
         return Discipline::all(['id'])->count();
     }
 
+    public function filterableBy() : array
+    {
+        return ['id', ];
+    }
+
+    public function sortableBy() : array
+    {
+         return ['id', 'name', ];
+    }
 }

@@ -4,10 +4,9 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage } from "@inertiajs/vue3";
 import UserTable from "@/Components/Tables/UserTable.vue";
 import axios from "axios";
-import StudgroupsFilter from "@/Components/Admin/StudgroupsFilter.vue";
-import { addToast } from '@/modules/toast';
 import LoadingSpinner from "@/Components/Common/LoadingSpinner.vue";
 import labels from '@/locales/ru.js';
+import ReferenceFilter from "@/Components/Admin/ReferenceFilter.vue";
 
 const students = ref(null);
 const studentsTotal = ref(null);
@@ -141,11 +140,12 @@ const fetchStudentsPageData = (page, limit) => {
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <loading-spinner v-if="studgroups == null || students == null"></loading-spinner>
                     <div v-else>
-                        <studgroups-filter
-                            :studgroups="studgroups"
+                        <reference-filter
+                            :items="studgroups"
                             :active="activeStudgroup"
-                            @toggleStudgroup="toggleStudgroup"
-                        ></studgroups-filter>
+                            @toggleItem="toggleStudgroup"
+                            addRoute="admin.reference.studgroups"
+                        ></reference-filter>
                         <user-table
                             v-if="students"
                             :tableData="students"
