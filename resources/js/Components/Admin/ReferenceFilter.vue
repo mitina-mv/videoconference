@@ -5,7 +5,7 @@
             :key="item.id"
             :label="item.name"
             outlined
-            :severity="active.id === item.id ? '' : 'secondary'"
+            :severity="activeId && activeId === item.id ? '' : 'secondary'"
             @click="toggleItem(item.id)"
         />
         <a v-if="addRoute" :href="addRoute">
@@ -33,9 +33,11 @@ const props = defineProps({
     },
 });
 
-const { emit } = defineEmits(["toggleItem"]);
+const emit = defineEmits(["toggleItem"]);
+const activeId = ref(props.active)
 
 const toggleItem = (id) => {
     emit("toggleItem", id);
+    activeId.value = id
 };
 </script>

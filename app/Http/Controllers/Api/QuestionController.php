@@ -48,6 +48,11 @@ class QuestionController extends Controller
         return ['answers', 'theme'];
     }
 
+    public function filterableBy() : array
+    {
+        return ['theme.discipline_id', ];
+    }
+
     // protected function performStore(Request $request, Model $entity, array $attributes): void
     // {
     //     if ($this->resolveUser()->hasRole('admin')) {

@@ -54,15 +54,26 @@ const tableColumns = [
 const tableData = ref(null);
 const totalPage = ref(null);
 const disciplines = ref(props?.disciplines || null);
-const activeDiscipline = ref(props?.disciplines[0] || null);
+const activeDiscipline = ref(null);
 
 onMounted(async () => {
     await fetchData();
 });
 
 const fetchData = async () => {
+    let params = {
+        includes: [
+            {"relation" : "answers"}, 
+            {"relation" : "theme"}
+        ],
+    }
+
+    if (activeDiscipline.value) {
+        params.filters = [{ field: "theme.discipline_id", operator: "=", value: activeDiscipline.value }]
+    }
+
     try {
-        const response = await axios.get("/api/questions/?include=answers,theme");
+        const response = await axios.post(`/api/questions/search`, params);
         tableData.value = response.data.data;
         processTableData(tableData.value);
         totalPage.value = response.data.meta.total;
@@ -72,8 +83,22 @@ const fetchData = async () => {
 };
 
 const fetchPageData = async (page, limit) => {
+    let params = {
+        page: page + 1,
+        limit: limit,
+        includes: [
+            {"relation" : "answers"}, 
+            {"relation" : "theme"}
+        ],
+    }
+
+    if (activeDiscipline.value) {
+        params.filters = [{ field: "theme.discipline_id", operator: "=", value: activeDiscipline.value }]
+    }
+
     try {
-        const response = await axios.get(`/api/questions/?include=answers,theme&page=${page + 1}&limit=${limit}`);
+        const response = await axios.post(`/api/questions/search`, params);
+        // const response = await axios.get(`/api/questions/?include=answers,theme&page=${page + 1}&limit=${limit}`);
         tableData.value = response.data.data;
         processTableData(tableData.value);
     } catch (error) {
