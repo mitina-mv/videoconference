@@ -5,7 +5,7 @@
             :key="item.id"
             :label="item.name"
             outlined
-            :severity="active === item.id ? '' : 'secondary'"
+            :severity="active.id === item.id ? '' : 'secondary'"
             @click="toggleItem(item.id)"
         />
         <a v-if="addRoute" :href="addRoute">
@@ -20,11 +20,11 @@ import Button from "primevue/button";
 
 const props = defineProps({
     items: {
-        type: Array,
+        type: [Array, Object],
         required: true,
     },
     active: {
-        type: [Number, String],
+        type: [Number, String, Object],
         default: null,
     },
     addRoute: {
@@ -34,7 +34,6 @@ const props = defineProps({
 });
 
 const { emit } = defineEmits(["toggleItem"]);
-const active = ref(null);
 
 const toggleItem = (id) => {
     emit("toggleItem", id);

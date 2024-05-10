@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Question;
 use App\Models\Theme;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -10,7 +11,15 @@ class QuestionController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Question/Index', []);
+        $disciplines = Question::where('user_id', auth()->id())
+            ->with('theme.discipline')
+            ->get()
+            ->pluck('theme.discipline')
+            ->unique();
+
+        return Inertia::render('Question/Index', [
+            'disciplines' => array_values($disciplines->toArray()),
+        ]);
     }
 
     public function edit(string $id)

@@ -9,6 +9,10 @@ import LoadingSpinner from "@/Components/Common/LoadingSpinner.vue";
 import toastService from "@/Services/toastService";
 import ReferenceFilter from "@/Components/Admin/ReferenceFilter.vue";
 
+const props = defineProps({
+    disciplines: [Array, Object]
+})
+
 const tableColumns = [
     {
         code: "text",
@@ -48,10 +52,9 @@ const tableColumns = [
     },
 ];
 const tableData = ref(null);
-const disciplineIds = ref([]);
 const totalPage = ref(null);
-const disciplines = ref(null);
-const activeDiscipline = ref(null);
+const disciplines = ref(props?.disciplines || null);
+const activeDiscipline = ref(props?.disciplines[0] || null);
 
 onMounted(async () => {
     await fetchData();
@@ -63,7 +66,6 @@ const fetchData = async () => {
         tableData.value = response.data.data;
         processTableData(tableData.value);
         totalPage.value = response.data.meta.total;
-        await fetchDisciplines();
     } catch (error) {
         toastService.showInfoToast("Заголовок", "Текст");
     }
@@ -74,7 +76,6 @@ const fetchPageData = async (page, limit) => {
         const response = await axios.get(`/api/questions/?include=answers,theme&page=${page + 1}&limit=${limit}`);
         tableData.value = response.data.data;
         processTableData(tableData.value);
-        await fetchDisciplines();
     } catch (error) {
         toastService.showInfoToast("Заголовок", "Текст");
     }
@@ -82,8 +83,6 @@ const fetchPageData = async (page, limit) => {
 
 const processTableData = (data) => {
     data.forEach((element, index) => {
-        const theme = element.theme || {};
-
         let namesString = element.answers
             .map((a) =>
                 a.status
@@ -98,25 +97,7 @@ const processTableData = (data) => {
                 : namesString;
 
         data[index].theme = element?.theme?.name || "Не указано";
-
-        if (theme.discipline_id && !disciplineIds.value.includes(theme.discipline_id)) {
-            disciplineIds.value.push(theme.discipline_id);
-        }
     });
-};
-
-const fetchDisciplines = async () => {
-    try {
-        const response = await axios.post("/api/disciplines/search", {
-            filters: [
-                { field: "id", operator: "in", value: disciplineIds.value },
-            ],
-            sort: [{ field: "name", direction: "asc" }],
-        });
-        disciplines.value = response.data.data;
-    } catch (error) {
-        console.error("Error fetching disciplines:", error);
-    }
 };
 
 const toggleDiscipline = (id) => {

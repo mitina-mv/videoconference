@@ -17,4 +17,9 @@ class Theme extends Model
     protected $table = 'themes';
     protected $primaryKey = 'id';
     public $timestamps = false;
+
+    public function discipline()
+    {
+        return $this->belongsTo(Discipline::class);
+    }
 }
