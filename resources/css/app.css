@@ -55,6 +55,10 @@
     grid-template-columns: repeat(6, 1fr);
 }
 
+.grif-self-col-1 {
+    grid-column: 1/-1;
+}
+
 .form-control{
     display: grid;
     gap: .25em;
@@ -71,11 +75,24 @@
     align-items: center;
 }
 
+.user-table .p-datatable-footer {
+    padding: 0;
+    border-top: none;
+}
+
 .table__empty-block{
     color: var(--gray-400);
     text-align: center;
     padding: 1em;
     font-weight: 500;
+}
+
+.table-value__green{
+    color: var(--green-600);
+}
+
+.table-value__red{
+    color: var(--red-600);
 }
 
 .mb-1 {

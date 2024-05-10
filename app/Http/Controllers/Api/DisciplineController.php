@@ -3,11 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\DisciplineRequest;
-use App\Http\Requests\StudgroupRequest;
 use App\Models\Discipline;
-use App\Models\Studgroup;
 use App\Policies\AdminPolicy;
-use Illuminate\Support\Facades\Auth;
 use Orion\Http\Controllers\Controller;
 
 class DisciplineController extends Controller
@@ -20,12 +17,21 @@ class DisciplineController extends Controller
 
     public function limit() : int
     {
-        return 50;
+        return Discipline::all(['id'])->count();
     }
 
     public function maxLimit() : int
     {
-        return 100;
+        return Discipline::all(['id'])->count();
     }
 
+    public function filterableBy() : array
+    {
+        return ['id', ];
+    }
+
+    public function sortableBy() : array
+    {
+         return ['id', 'name', ];
+    }
 }

@@ -3,7 +3,6 @@ import { ref, onMounted } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage } from "@inertiajs/vue3";
 import axios from "axios";
-import { addToast } from '@/modules/toast';
 import UserForm from '@/Components/Forms/User.vue'
 import labels from '@/locales/ru.js';
 

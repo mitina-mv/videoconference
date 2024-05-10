@@ -15,6 +15,23 @@
                     >{{ errors[code][0] }}</small
                 >
             </div>
+
+            <div class="form-control" v-for="field in addColumns"
+            :key="field.code">
+                <label :for="field.code">{{ field.title }}</label>
+                <Dropdown :id="field.code" v-if="field.type && field.type == 'dropdown'" v-model="data[field.code]" :options="field.options" optionLabel="name" optionValue="id" filter  />
+                <InputText
+                    v-else
+                    :id="field.code"
+                    v-model.trim="data[field.code]"
+                    required="true"
+                    autofocus
+                    :class="{ 'p-invalid': errors && errors[code] }"
+                />
+                <small class="p-error" v-if="errors && errors[code]"
+                    >{{ errors[code][0] }}</small
+                >
+            </div>
         </form>
         <template #footer>
             <Button
@@ -37,23 +54,39 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import Dialog from "primevue/dialog";
 import labels from '@/locales/ru.js';
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
+import Dropdown from "primevue/dropdown";
 
 const props = defineProps({
     entity: String,
     visible: Boolean,
+    addColumns: {
+        type: Array,
+        req: false,
+        default: null
+    },
 });
 
 const emit = defineEmits(['close', 'saveItem'])
-const data = ref({
+let dataNull = {
     name: null,
     code: null
-})
+}
+const data = ref(JSON.parse(JSON.stringify(dataNull)))
 const errors = ref(null)
+
+onMounted(() => {
+    if(props.addColumns) {
+        props.addColumns.forEach(field => {
+            
+            dataNull[field.code] = null 
+        })
+    }
+})
 
 const updateVisible = (value) => {
     emit('close', value)
@@ -61,10 +94,10 @@ const updateVisible = (value) => {
 
 const sendData = () => {
     emit('saveItem', data.value);
-    data.value = {
-        name: null,
-        code: null
-    };
+    data.value = JSON.parse(JSON.stringify(dataNull));
+    console.log(data.value);
+    console.log(dataNull);
+    
     updateVisible(false);
 };
 </script>

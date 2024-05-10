@@ -5,16 +5,40 @@
     </div>
 
     <DataTable v-model:selection="selectedItems" :value="data" dataKey="id" editMode="row" @row-edit-save="onRowEditSave" v-model:editingRows="editingRows">
-        <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+        <Column selectionMode="multiple" headerStyle="width: 3rem" :style="{
+                width: '3%',
+            }"></Column>
         <Column
             v-for="(field, code) in labels.reference_fields"
             :key="code"
             :field="code"
             sortable
             :header="field.title"
+            :style="{
+                width: '25%',
+            }"
         >
             <template #editor="{ data, field }">
                 <InputText v-model="data[field]" />
+            </template>
+        </Column>
+
+        <Column
+            v-for="addField in addColumns"
+            :key="addField.code"
+            :field="addField.code"
+            sortable
+            :header="addField.title"
+            :style="{
+                width: '25%',
+            }"
+        >
+            <template #body="{ data }">
+                {{ getColumnValue(data, addField) }}
+            </template>
+            <template #editor="{ data, field }">
+                <Dropdown v-if="addField.type && addField.type == 'dropdown'" v-model="data[field]" :options="addField.options" optionLabel="name" optionValue="id" filter  />
+                <InputText v-else v-model="data[field]" />
             </template>
         </Column>
 
@@ -25,7 +49,7 @@
         ></Column>
 
     </DataTable>
-    <AddItemDialog :visible="addDialogVisible" @close="closeAddDialog" @saveItem="sendData" />
+    <AddItemDialog :visible="addDialogVisible" @close="closeAddDialog" @saveItem="sendData" :addColumns="addColumns" />
 </template>
 
 <script setup>
@@ -36,12 +60,18 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import labels from '@/locales/ru.js';
 import AddItemDialog from "@/Components/Dialogs/AddItemDialog.vue";
+import Dropdown from "primevue/dropdown";
 
 const props = defineProps({
     data: {
         type: Array
     },
-    entity: String
+    entity: String,
+    addColumns: {
+        type: Array,
+        req: false,
+        default: null
+    },
 });
 
 const selectedItems = ref(null)
@@ -102,4 +132,13 @@ const onRowEditSave = (event) => {
         .catch((error) => {
         });
 };
+
+const getColumnValue = (data, field) => {
+    if(field.type && field.type == 'dropdown') {
+        let index = field.options.findIndex(el => el.id === data[field.code])
+        return field.options[index].name
+    } else {
+        data[field.code]
+    }
+}
 </script>

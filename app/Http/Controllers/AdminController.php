@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Discipline;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -43,6 +44,22 @@ class AdminController extends Controller
     {
         return Inertia::render('Admin/Reference', [
             'entity' => 'disciplines'
+        ]);
+    }
+
+    public function themes()
+    {
+        return Inertia::render('Admin/Reference', [
+            'entity' => 'themes',
+            'addColumns' => [
+                [
+                    'entity' => 'disciplines',
+                    'type' => 'dropdown',
+                    'code' => 'discipline_id',
+                    'title' => 'Дисциплина',
+                    'options' => Discipline::all(),
+                ]
+            ]
         ]);
     }
 }
