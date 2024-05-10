@@ -8,7 +8,7 @@
             :severity="activeId && activeId === item.id ? '' : 'secondary'"
             @click="toggleItem(item.id)"
         />
-        <a v-if="addRoute" :href="addRoute">
+        <a v-if="addRoute" :href="route(addRoute)">
             <Button label="Добавить" severity="success" icon="pi pi-plus" />
         </a>
     </div>

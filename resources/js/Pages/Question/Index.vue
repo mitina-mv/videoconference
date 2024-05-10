@@ -98,7 +98,6 @@ const fetchPageData = async (page, limit) => {
 
     try {
         const response = await axios.post(`/api/questions/search`, params);
-        // const response = await axios.get(`/api/questions/?include=answers,theme&page=${page + 1}&limit=${limit}`);
         tableData.value = response.data.data;
         processTableData(tableData.value);
     } catch (error) {
