@@ -17,7 +17,7 @@ const tableColumns = [
     {
         code: "name",
         style: {
-            width: "35%",
+            width: "25%",
         },
         sort: true,
         title: labels.test_fields.name.title,
@@ -36,7 +36,7 @@ const tableColumns = [
         sort: true,
         title: labels.test_fields.theme.title,
         style: {
-            width: "20%",
+            width: "15%",
         },
     },
     {
@@ -44,6 +44,9 @@ const tableColumns = [
         code: "settings",
         title: labels.test_fields.settings.title,
         type: "html",
+        style: {
+            width: "20%",
+        },
     },
 ];
 const tableData = ref(null);
@@ -161,17 +164,19 @@ const toggleDiscipline = (id) => {
                             :active="activeDiscipline"
                             @toggleItem="toggleDiscipline"
                             addRoute="admin.reference.disciplines"
+                            labelgroup="disciplines"
                         ></reference-filter>
                         <user-table
                             :tableData="tableData"
-                            :routeName="'api.questions'"
+                            :routeName="'api.tests'"
                             :columns="tableColumns"
                             :labelgroup="'tests'"
+                            :includeParamFrom="false"
                             @fetchData="fetchData"
                             @getPage="fetchPageData"
                             :total="totalPage"
-                            routeNameForm="questions.new"
-                            routeNameEdit="questions.edit"
+                            routeNameForm="tests.new"
+                            routeNameEdit="tests.edit"
                         ></user-table>
                     </template>
                 </div>

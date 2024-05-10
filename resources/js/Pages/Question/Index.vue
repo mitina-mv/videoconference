@@ -154,6 +154,7 @@ const toggleDiscipline = (id) => {
                             :tableData="tableData"
                             :routeName="'api.questions'"
                             :columns="tableColumns"
+                            :includeParamFrom="false"
                             :labelgroup="'questions'"
                             @fetchData="fetchData"
                             @getPage="fetchPageData"
