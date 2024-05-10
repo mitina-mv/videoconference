@@ -97,6 +97,10 @@ const sendData = () => {
         data: data,
     })
         .then((response) => {
+            toastService.showSuccessToast(
+                `Сохранение данных`,
+                "Успешно сохранили!"
+            );
             id.value = response.data.data.id
             errors.value = []
         })
@@ -160,6 +164,11 @@ const sendAnswer = (index) => {
     })
         .then((response) => {
             answersData.value[index].id = response.data.data.id
+            
+            toastService.showSuccessToast(
+                `Сохранение ответа`,
+                "Успешно сохранили!"
+            );
         })
         .catch((error) => {
             toastService.showErrorToast(
