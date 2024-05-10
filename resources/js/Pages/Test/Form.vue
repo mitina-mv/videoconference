@@ -11,7 +11,7 @@ const props = defineProps({
         type: String,
         req: false
     },
-    themes: Array
+    disciplines: Array
 })
 
 const id = props?.id || null
@@ -19,7 +19,7 @@ const data = ref(null)
 
 onMounted(() => {
     if(id) {
-        axios.get('/api/tests/' + id)
+        axios.get('/api/tests/' + id + '?include=theme')
             .then((response) => {
                 data.value = response.data.data
             })
@@ -45,7 +45,7 @@ onMounted(() => {
         <div class="d-grid gap-4 content">
             <div class="content__container">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <Tests v-if="(id && data && themes) || (!id && themes)" :data="data" :themes="themes"></Tests>
+                    <Tests v-if="(id && data && disciplines) || (!id && disciplines)" :data="data" :disciplines="disciplines"></Tests>
                     <loading-spinner v-else></loading-spinner>
                 </div>
             </div>

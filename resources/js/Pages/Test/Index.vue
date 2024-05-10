@@ -25,7 +25,6 @@ const tableColumns = [
     {
         code: "description",
         title: labels.test_fields.description.title,
-        type: "html",
         sort: false,
         style: {
             width: "25%",

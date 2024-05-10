@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Discipline;
 use App\Models\Test;
 use App\Models\Theme;
 use Inertia\Inertia;
@@ -25,14 +26,15 @@ class TestController extends Controller
     {
         return Inertia::render('Test/Form', [
             'id' => $id,
-            'themes' => Theme::all(),
+            'disciplines' => Discipline::all(),
         ]);
     }
 
     public function create()
     {
         return Inertia::render('Test/Form', [
-            'themes' => Theme::all(),
+            'disciplines' => Discipline::all(),
+            
         ]);
     }
 }

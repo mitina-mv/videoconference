@@ -202,7 +202,7 @@ const showErrorMessage = computed(() => {
             class="form-control"
             v-for="(field, code) in fieldData"
             :key="code"
-            :class="field.type == 'text' ? 'grif-self-col-1' : ''"
+            :class="field.type == 'text' ? 'grid-self-col-1' : ''"
         >
             <label :for="code + '_input'">{{
                 labels.questions_fields[code].title

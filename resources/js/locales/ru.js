@@ -134,6 +134,12 @@ export default {
         theme: {
             title: "Тема",
         },
+        theme_id: {
+            title: "Тема",
+        },
+        disciplines_id: {
+            title: "Дисциплина",
+        },
         settings: {
             title: "Настройки",
             values: [
