@@ -17,7 +17,7 @@ const tableColumns = [
     {
         code: "name",
         style: {
-            width: "25%",
+            width: "20%",
         },
         sort: true,
         title: labels.test_fields.name.title,
@@ -27,7 +27,7 @@ const tableColumns = [
         title: labels.test_fields.description.title,
         sort: false,
         style: {
-            width: "25%",
+            width: "20%",
         },
     },
     {
@@ -35,7 +35,7 @@ const tableColumns = [
         sort: true,
         title: labels.test_fields.theme.title,
         style: {
-            width: "15%",
+            width: "20%",
         },
     },
     {
@@ -44,7 +44,7 @@ const tableColumns = [
         title: labels.test_fields.settings.title,
         type: "html",
         style: {
-            width: "20%",
+            width: "25%",
         },
     },
 ];
@@ -112,25 +112,21 @@ const processTableData = (data) => {
     data.forEach((element, index) => {
         data[index].theme = element?.theme?.name || "Не указано";
 
-        let settings = element.settings;
-        if (settings.lenght > 0) {
+        let settings = JSON.parse(element.settings);
+
+        if (Object.keys(settings).length > 0) {
             let settingsString = labels.test_fields.settings.values
+                .filter((a) => settings.hasOwnProperty(a.id))
                 .map((a) => {
-                    if (element.settings[a.id]) {
-                        let val =
-                            a.type == "boolean"
-                                ? (
-                                    element.settings[a.id]
-                                        ? "да"
-                                        : "нет"
-                                )
-                                : element.settings[a.id];
-                        return `${a.name}: ${val}`;
-                    } else {
-                        return "";
-                    }
+                    let val =
+                        a.type === "bool"
+                            ? settings[a.id]
+                                ? "да"
+                                : "нет"
+                            : settings[a.id];
+                    return `${a.name}: ${val}`;
                 })
-                .join(", ");
+                .join(",<br />");
             data[index].settings = settingsString
         }
 

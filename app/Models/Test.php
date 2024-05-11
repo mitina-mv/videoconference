@@ -31,9 +31,9 @@ class Test extends Model
         return $this->hasOne(User::class);
     }
 
-    public function discipline()
+    public function theme()
     {
-        return $this->hasOne(Discipline::class);
+        return $this->belongsTo(Theme::class);
     }
 
     public function questionCount()
