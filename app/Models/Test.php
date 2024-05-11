@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property array $settings
+ */
 class Test extends Model
 {
     use HasFactory;
@@ -25,6 +28,11 @@ class Test extends Model
     protected $casts = [
         'settings' => 'array'
     ];
+
+    public function getSettingsAttribute($value)
+    {
+        return json_decode($value, true);
+    }
 
     public function user()
     {

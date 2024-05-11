@@ -145,7 +145,7 @@ export default {
         theme_id: {
             title: "Тема",
         },
-        disciplines_id: {
+        discipline_id: {
             title: "Дисциплина",
         },
         settings: {

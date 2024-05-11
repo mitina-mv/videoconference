@@ -16,6 +16,7 @@ const props = defineProps({
 
 const id = props?.id || null
 const data = ref(null)
+const userId = usePage().props.auth.user.id;
 
 onMounted(() => {
     if(id) {
@@ -45,7 +46,7 @@ onMounted(() => {
         <div class="d-grid gap-4 content">
             <div class="content__container">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <Tests v-if="(id && data && disciplines) || (!id && disciplines)" :data="data" :disciplines="disciplines"></Tests>
+                    <Tests v-if="(id && data && disciplines) || (!id && disciplines)" :data="data" :disciplines="disciplines" :userId="userId"></Tests>
                     <loading-spinner v-else></loading-spinner>
                 </div>
             </div>

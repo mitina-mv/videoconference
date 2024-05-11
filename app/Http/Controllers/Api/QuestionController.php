@@ -27,22 +27,6 @@ class QuestionController extends Controller
         return 100;
     }
 
-    /**
-     * Builds Eloquent query for fetching entities in index method.
-     *
-     * @param Request $request
-     * @param array $requestedRelations
-     * @return Builder
-     */
-    protected function buildIndexFetchQuery(Request $request, array $requestedRelations): Builder
-    {
-        $query = parent::buildIndexFetchQuery($request, $requestedRelations);
-
-        $query->where('user_id', '=', request()->user()->id);
-
-        return $query;
-    }
-
     public function includes() : array
     {
         return ['answers', 'theme'];
@@ -50,7 +34,7 @@ class QuestionController extends Controller
 
     public function filterableBy() : array
     {
-        return ['theme.discipline_id', ];
+        return ['theme.discipline_id', 'theme_id', 'user_id', 'is_private'];
     }
 
     // protected function performStore(Request $request, Model $entity, array $attributes): void

@@ -12,7 +12,7 @@ import ReferenceFilter from "@/Components/Admin/ReferenceFilter.vue";
 const props = defineProps({
     disciplines: [Array, Object]
 })
-
+const userId = usePage().props.auth.user.id;
 const tableColumns = [
     {
         code: "text",
@@ -66,10 +66,17 @@ const fetchData = async () => {
             {"relation" : "answers"}, 
             {"relation" : "theme"}
         ],
+        filters: [
+            {
+                field: "user_id",
+                operator: "=",
+                value: usePage().props.auth.user.id,
+            },
+        ]
     }
 
     if (activeDiscipline.value) {
-        params.filters = [{ field: "theme.discipline_id", operator: "=", value: activeDiscipline.value }]
+        params.filters.push({ field: "theme.discipline_id", operator: "=", value: activeDiscipline.value })
     }
 
     try {
@@ -90,10 +97,17 @@ const fetchPageData = async (page, limit) => {
             {"relation" : "answers"}, 
             {"relation" : "theme"}
         ],
+        filters: [
+            {
+                field: "user_id",
+                operator: "=",
+                value: usePage().props.auth.user.id,
+            },
+        ],
     }
 
     if (activeDiscipline.value) {
-        params.filters = [{ field: "theme.discipline_id", operator: "=", value: activeDiscipline.value }]
+        params.filters.push({ field: "theme.discipline_id", operator: "=", value: activeDiscipline.value })
     }
 
     try {

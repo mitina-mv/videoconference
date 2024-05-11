@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, watch, onBeforeMount } from "vue";
 import InputText from "primevue/inputtext";
 import InputNumber from "primevue/inputnumber";
 import MultiSelect from "primevue/multiselect";
@@ -11,6 +11,7 @@ import InputSwitch from "primevue/inputswitch";
 import Textarea from "primevue/textarea";
 import Toolbar from "primevue/toolbar";
 import Message from "primevue/message";
+import Checkbox from "primevue/checkbox";
 
 const props = defineProps({
     data: {
@@ -18,22 +19,24 @@ const props = defineProps({
         req: false,
     },
     disciplines: Array,
+    userId: Number,
 });
 
 const id = ref(props?.data?.id || null);
 const errors = ref({});
+const questions = ref([]);
 const fieldData = ref({
     name: {
         value: props?.data?.name || null,
-        class: 'grid-self-col-1',
+        class: "grid-self-col-1",
     },
     description: {
         value: props?.data?.description || null,
-        class: 'grid-self-col-1',
+        class: "grid-self-col-1",
         type: "text",
     },
-    disciplines_id: {
-        value: props?.data?.theme.disciplines_id || null,
+    discipline_id: {
+        value: props?.data?.theme.discipline_id || null,
         type: "dropdown",
         options: props.disciplines,
     },
@@ -44,20 +47,28 @@ const fieldData = ref({
     },
 });
 
-const settingsData = ref({});
+const settingsData = ref({
+    count_questions: {},
+    is_random: {},
+    fixed_questions: {},
+});
 
-onMounted(() => {
+onBeforeMount(() => {
+    let settings = JSON.parse(props.data?.settings) || null;
     labels.test_fields.settings.values.forEach((item) => {
         settingsData.value[item.id] = {
-            value: props.data?.settings[item.id] || item.default,
+            value: settings[item.id] || item.default,
             type: item.type,
             title: item.name,
         };
     });
+});
 
-    if (fieldData.value.disciplines_id.value) {
-        fetchThemes()
+onMounted(() => {
+    if (fieldData.value.discipline_id.value) {
+        fetchThemes();
     }
+    console.log(fieldData.value);
 });
 
 const sendData = async () => {
@@ -72,14 +83,17 @@ const sendData = async () => {
     }
 
     const settings = Object.fromEntries(
-        Object.entries(settingsData.value).map(([code, item]) => [code, item.value])
+        Object.entries(settingsData.value).map(([code, item]) => [
+            code,
+            item.value,
+        ])
     );
 
     const data = {
         name: name.value,
         description: description.value,
         theme_id: theme_id.value,
-        settings: JSON.stringify(settings)
+        settings: JSON.stringify(settings),
     };
 
     const url = `/api/tests${id.value ? `/${id.value}` : ""}`;
@@ -109,7 +123,7 @@ const fetchThemes = async () => {
                 {
                     field: "discipline_id",
                     operator: "=",
-                    value: fieldData.value.disciplines_id.value,
+                    value: fieldData.value.discipline_id.value,
                 },
             ],
         });
@@ -120,7 +134,64 @@ const fetchThemes = async () => {
     }
 };
 
-watch(() => fieldData.value.disciplines_id.value, fetchThemes);
+const fetchQuestions = async () => {
+    if (!fieldData.value.theme_id.value) {
+        toastService.showWarnToast(
+            `Сохранение данных`,
+            "Укажите тему теста, чтобы запросить вопросы."
+        );
+        return;
+    }
+    try {
+        const response = await axios.post(`/api/questions/search`, {
+            filters: [
+                {
+                    type: "or",
+                    nested: [
+                        {
+                            field: "user_id",
+                            operator: "=",
+                            value: props.userId,
+                        },
+                        { field: "is_private", operator: "=", value: true },
+                        {
+                            field: "theme_id",
+                            operator: "=",
+                            value: fieldData.value.theme_id.value,
+                        },
+                    ],
+                },
+                {
+                    type: "or",
+                    nested: [
+                        { field: "is_private", operator: "=", value: false },
+                        {
+                            field: "theme_id",
+                            operator: "=",
+                            value: fieldData.value.theme_id.value,
+                        },
+                    ],
+                },
+            ],
+        });
+        questions.value = response.data.data;
+    } catch (error) {
+        console.error("Error fetching questions:", error);
+    }
+};
+
+watch(() => fieldData.value.discipline_id.value, fetchThemes);
+
+watch(
+    () => settingsData.value.fixed_questions.value,
+    (newValue) => {
+        if (newValue) {
+            fetchQuestions();
+        } else {
+            questions.value = [];
+        }
+    }
+);
 </script>
 
 <template>
@@ -164,7 +235,9 @@ watch(() => fieldData.value.disciplines_id.value, fetchThemes);
             </div>
         </div>
         <div class="second-block-form d-grid gap-3 grid-col-3">
-            <h4 class="grid-self-col-1">{{ labels.test_fields.settings.title }}</h4>
+            <h4 class="grid-self-col-1">
+                {{ labels.test_fields.settings.title }}
+            </h4>
             <div
                 class="form-control"
                 v-for="(field, code) in settingsData"
@@ -191,6 +264,26 @@ watch(() => fieldData.value.disciplines_id.value, fetchThemes);
                     v-model="field.value"
                     type="text"
                 />
+            </div>
+
+            <div
+                class="form-control grid-self-col-1"
+                v-if="settingsData.fixed_questions.value"
+            >
+                <h3>Выберите вопросы:</h3>
+                <div class="flex align-items-center" 
+                        v-for="question in questions"
+                        :key="question.id">
+                    <Checkbox
+                        v-model="question.selected"
+                        :inputId="`question_${question.id}`"
+                        :value="question.id"
+                    />
+                    <label
+                        :for="`question_${question.id}`"
+                        >{{ question.text }}</label
+                    >
+                </div>
             </div>
         </div>
         <div class="form-footer mt-2">
