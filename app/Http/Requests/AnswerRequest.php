@@ -6,7 +6,7 @@ use Illuminate\Support\Str;
 use Orion\Http\Requests\Request;
 use Illuminate\Validation\Rule;
 
-class QuestionRequest extends Request
+class AnswerRequest extends Request
 {
     public function updateRules() : array
     {

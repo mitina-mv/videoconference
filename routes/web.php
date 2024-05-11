@@ -75,4 +75,4 @@ Route::post('/tokens/create', function (Request $request) {
     return ['token' => $token->plainTextToken];
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
