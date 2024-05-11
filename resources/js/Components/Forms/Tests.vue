@@ -25,6 +25,7 @@ const props = defineProps({
 const id = ref(props?.data?.id || null);
 const errors = ref({});
 const questions = ref([]);
+const questionSelected = ref([]);
 const fieldData = ref({
     name: {
         value: props?.data?.name || null,
@@ -62,6 +63,7 @@ onBeforeMount(() => {
             title: item.name,
         };
     });
+    questionSelected.value = settings?.question_ids || null
 });
 
 onMounted(() => {
@@ -88,6 +90,18 @@ const sendData = async () => {
             item.value,
         ])
     );
+
+    if (settingsData.value.fixed_questions.value) {
+        if (questionSelected.value.length == 0) {
+            toastService.showWarnToast(
+                `Сохранение данных`,
+                "Не выбрано ни одного вопроса"
+            );
+            return;
+        }
+
+        settings.question_ids = questionSelected.value;
+    }
 
     const data = {
         name: name.value,
@@ -271,11 +285,16 @@ watch(
                 v-if="settingsData.fixed_questions.value"
             >
                 <h3>Выберите вопросы:</h3>
-                <div class="flex align-items-center" 
+
+                <Message severity="warn">
+                    {{ labels.info_messages.test_fixed_question_warn }}
+                </Message>
+
+                <div class="flex align-items-center gap-2" 
                         v-for="question in questions"
                         :key="question.id">
                     <Checkbox
-                        v-model="question.selected"
+                        v-model="questionSelected"
                         :inputId="`question_${question.id}`"
                         :value="question.id"
                     />

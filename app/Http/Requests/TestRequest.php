@@ -17,6 +17,7 @@ class TestRequest extends Request
             'settings.count_questions' => ['nullable', 'integer', 'between:1,100'],
             'settings.is_random' => ['nullable', 'boolean'],
             'settings.fixed_questions' => ['nullable', 'boolean'],
+            'settings.question_ids' => ['nullable', 'array'],
             
         ];
     }
@@ -30,6 +31,7 @@ class TestRequest extends Request
             'settings' => ['sometimes', 'json'],
             'settings.count_questions' => ['nullable', 'integer', 'between:1,100'],
             'settings.is_random' => ['nullable', 'boolean'],
+            'settings.question_ids' => ['nullable', 'array'],
             'settings.fixed_questions' => ['nullable', 'boolean'],
         ];
     }

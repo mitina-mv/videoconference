@@ -37,6 +37,14 @@ class QuestionController extends Controller
         return ['theme.discipline_id', 'theme_id', 'user_id', 'is_private'];
     }
 
+    /* protected function buildIndexFetchQuery(Request $request, array $requestedRelations): Builder
+    {
+        dd($request);
+        $query = parent::buildIndexFetchQuery($request, $requestedRelations);
+        $query->where('user_id', '=', request()->user()->id);
+        return $query;
+    }
+ */
     // protected function performStore(Request $request, Model $entity, array $attributes): void
     // {
     //     if ($this->resolveUser()->hasRole('admin')) {
