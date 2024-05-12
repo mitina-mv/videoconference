@@ -87,11 +87,13 @@
     font-weight: 500;
 }
 
-.table-value__green{
+.table-value__green,
+.text-success {
     color: var(--green-600);
 }
 
-.table-value__red{
+.table-value__red,
+.text-danger {
     color: var(--red-600);
 }
 

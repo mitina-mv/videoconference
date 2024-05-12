@@ -31,4 +31,8 @@ class ThemeController extends Controller
         return ['discipline_id', ];
     }
 
+    public function aggregates() : array
+    {
+        return ['questions', ];
+    }
 }

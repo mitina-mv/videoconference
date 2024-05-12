@@ -26,6 +26,7 @@ const id = ref(props?.data?.id || null);
 const errors = ref({});
 const questions = ref([]);
 const questionSelected = ref([]);
+const initQuestionSelected = ref([]);
 const fieldData = ref({
     name: {
         value: props?.data?.name || null,
@@ -63,14 +64,14 @@ onBeforeMount(() => {
             title: item.name,
         };
     });
-    questionSelected.value = settings?.question_ids || null
+    questionSelected.value = settings?.question_ids || null;
+    initQuestionSelected.value = settings?.question_ids || null;
 });
 
 onMounted(() => {
     if (fieldData.value.discipline_id.value) {
         fetchThemes();
     }
-    console.log(fieldData.value);
 });
 
 const sendData = async () => {
@@ -91,6 +92,23 @@ const sendData = async () => {
         ])
     );
 
+    let themeIndex = fieldData.value.theme_id.options.findIndex(
+        (t) => t.id == theme_id.value
+    );
+    let theme = fieldData.value.theme_id.options[themeIndex];
+
+    if (
+        (theme.questions_count < settings.count_questions &&
+            !settingsData.value.fixed_questions.value) ||
+        theme.questions_count == 0
+    ) {
+        toastService.showWarnToast(
+            `Сохранение данных`,
+            "Вопросов по данной теме недостаточно!"
+        );
+        return;
+    }
+
     if (settingsData.value.fixed_questions.value) {
         if (questionSelected.value.length == 0) {
             toastService.showWarnToast(
@@ -101,6 +119,7 @@ const sendData = async () => {
         }
 
         settings.question_ids = questionSelected.value;
+        settings.count_questions = questionSelected.value.length;
     }
 
     const data = {
@@ -140,6 +159,7 @@ const fetchThemes = async () => {
                     value: fieldData.value.discipline_id.value,
                 },
             ],
+            aggregates: [{ type: "count", relation: "questions" }],
         });
         fieldData.value.theme_id.options = response.data.data;
         fieldData.value.theme_id.value = response.data.data[0]?.id || null;
@@ -156,6 +176,7 @@ const fetchQuestions = async () => {
         );
         return;
     }
+    if (!settingsData.value.fixed_questions.value) return;
     try {
         const response = await axios.post(`/api/questions/search`, {
             filters: [
@@ -189,23 +210,29 @@ const fetchQuestions = async () => {
             ],
         });
         questions.value = response.data.data;
+        if(props.data && fieldData.value.theme_id.value == props.data.theme_id)
+            questionSelected.value = initQuestionSelected.value;
+        else 
+            questionSelected.value = [];
     } catch (error) {
         console.error("Error fetching questions:", error);
+        questions.value = [];
+        questionSelected.value = [];
+    }
+};
+
+const watchFixQuestions = (newValue) => {
+    if (newValue) {
+        fetchQuestions();
+    } else {
+        questions.value = [];
+        questionSelected.value = [];
     }
 };
 
 watch(() => fieldData.value.discipline_id.value, fetchThemes);
-
-watch(
-    () => settingsData.value.fixed_questions.value,
-    (newValue) => {
-        if (newValue) {
-            fetchQuestions();
-        } else {
-            questions.value = [];
-        }
-    }
-);
+watch(() => settingsData.value.fixed_questions.value, watchFixQuestions);
+watch(() => fieldData.value.theme_id.value, watchFixQuestions);
 </script>
 
 <template>
@@ -284,22 +311,30 @@ watch(
                 class="form-control grid-self-col-1"
                 v-if="settingsData.fixed_questions.value"
             >
-                <h3>Выберите вопросы:</h3>
+                <h5>Выбор вопросов</h5>
 
                 <Message severity="warn">
                     {{ labels.info_messages.test_fixed_question_warn }}
                 </Message>
 
-                <div class="flex align-items-center gap-2" 
-                        v-for="question in questions"
-                        :key="question.id">
+                <div
+                    class="flex align-items-center gap-2"
+                    v-for="question in questions"
+                    :key="question.id"
+                >
                     <Checkbox
                         v-model="questionSelected"
                         :inputId="`question_${question.id}`"
                         :value="question.id"
+                        :disabled="question.correct_answers.length == 0"
                     />
                     <label
                         :for="`question_${question.id}`"
+                        :class="
+                            question.correct_answers.length == 0
+                                ? 'text-danger'
+                                : ''
+                        "
                         >{{ question.text }}</label
                     >
                 </div>
