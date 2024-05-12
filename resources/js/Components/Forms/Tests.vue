@@ -41,11 +41,17 @@ const fieldData = ref({
         value: props?.data?.theme.discipline_id || null,
         type: "dropdown",
         options: props.disciplines,
+        header: {
+            addRoute: 'admin.reference.disciplines'
+        },
     },
     theme_id: {
         value: props?.data?.theme_id || null,
         type: "dropdown",
         options: [],
+        header: {
+            addRoute: 'admin.reference.themes'
+        },
     },
 });
 
@@ -56,7 +62,8 @@ const settingsData = ref({
 });
 
 onBeforeMount(() => {
-    let settings = JSON.parse(props.data?.settings) || null;
+    let settings = props.data ? JSON.parse(props.data.settings) : {};
+
     labels.test_fields.settings.values.forEach((item) => {
         settingsData.value[item.id] = {
             value: settings[item.id] || item.default,
@@ -244,9 +251,15 @@ watch(() => fieldData.value.theme_id.value, watchFixQuestions);
                 :key="code"
                 :class="field.class || ''"
             >
-                <label :for="code + '_input'">{{
-                    labels.test_fields[code].title
-                }}</label>
+                <div class="d-flex flex-between">
+                    <label :for="code + '_input'">{{
+                        labels.test_fields[code].title
+                    }}</label>
+                    <a v-if="field.header" :href="route(field.header.addRoute)" class="text-gray">
+                        Добавить
+                    </a>
+                </div>
+                
 
                 <Textarea
                     v-if="field.type == 'text'"
@@ -317,7 +330,16 @@ watch(() => fieldData.value.theme_id.value, watchFixQuestions);
                     {{ labels.info_messages.test_fixed_question_warn }}
                 </Message>
 
+                <div v-if="questions.length == 0">
+                    <b class="text-danger">
+                        {{ labels.info_messages.test_fixed_question_error }}
+                    </b><br />
+                    <a :href="route('questions.new')">
+                        <Button label="Добавить вопрос" severity="secondary" text />
+                    </a>
+                </div>
                 <div
+                    v-else
                     class="flex align-items-center gap-2"
                     v-for="question in questions"
                     :key="question.id"
