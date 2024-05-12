@@ -9,7 +9,7 @@
             @click="toggleItem(item.id)"
         />
         <a v-if="addRoute" :href="route(addRoute)">
-            <Button label="Добавить" severity="success" icon="pi pi-plus" />
+            <Button :label="'Добавить ' + labels[labelgroup].case[3]" severity="success" icon="pi pi-plus" />
         </a>
     </div>
 </template>
@@ -17,6 +17,7 @@
 <script setup>
 import { ref } from "vue";
 import Button from "primevue/button";
+import labels from "@/locales/ru.js";
 
 const props = defineProps({
     items: {
@@ -30,6 +31,10 @@ const props = defineProps({
     addRoute: {
         type: String,
         default: null,
+    },
+    labelgroup: {
+        type: String,
+        default: 'studgroups',
     },
 });
 

@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ConferenceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\TestController;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -55,6 +56,12 @@ Route::group(['prefix' => 'questions'], function () {
     Route::get('/new', [QuestionController::class, 'create'])->name('questions.new');
 })->middleware(['auth']);
 
+Route::group(['prefix' => 'tests'], function () {
+    Route::get('/', [TestController::class, 'index'])->name('tests.index');
+    Route::get('/edit/{id}', [TestController::class, 'edit'])->name('tests.edit');
+    Route::get('/new', [TestController::class, 'create'])->name('tests.new');
+})->middleware(['auth']);
+
 Route::middleware('auth')->group(function () {
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -68,4 +75,4 @@ Route::post('/tokens/create', function (Request $request) {
     return ['token' => $token->plainTextToken];
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

@@ -16,7 +16,7 @@ class Answerlog extends Model
     protected $fillable = [
         'question_id',
         'testlog_id',
-        'mark'
+        'mark',
     ];
     
     public function question()

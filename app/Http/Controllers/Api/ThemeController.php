@@ -26,4 +26,13 @@ class ThemeController extends Controller
         return Theme::all(['id'])->count();
     }
 
+    public function filterableBy() : array
+    {
+        return ['discipline_id', ];
+    }
+
+    public function aggregates() : array
+    {
+        return ['questions', ];
+    }
 }

@@ -24,6 +24,10 @@ const props = defineProps({
     labelgroup: {
         type: String,
     },
+    includeParamFrom: {
+        type: Boolean,
+        default: true,
+    },
     includeCrudActions: {
         type: Boolean,
         default: true,
@@ -137,7 +141,7 @@ watch(
             <h4 class="m-0">{{ labels[labelgroup].title }}</h4>
         </template>
         <template #end>
-            <a :href="route(routeNameForm, labelgroup)">
+            <a :href="includeParamFrom ? route(routeNameForm, labelgroup) : route(routeNameForm)">
                 <Button
                     :label="'Добавить ' + labels[labelgroup].case[3]"
                     icon="pi pi-plus"

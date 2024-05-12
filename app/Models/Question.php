@@ -23,6 +23,13 @@ class Question extends Model
     public $timestamps = false;
     protected $table = 'questions';
     protected $primaryKey = 'id';
+
+    protected $appends = ['correct_answers'];
+
+    public function getCorrectAnswersAttribute()
+    {
+        return $this->answers()->where('status', true)->get();
+    }
         
     public function user()
     {

@@ -10,45 +10,42 @@ import toastService from "@/Services/toastService";
 import ReferenceFilter from "@/Components/Admin/ReferenceFilter.vue";
 
 const props = defineProps({
-    disciplines: [Array, Object]
-})
-const userId = usePage().props.auth.user.id;
+    disciplines: [Array, Object],
+});
+
 const tableColumns = [
     {
-        code: "text",
+        code: "name",
         style: {
-            width: "35%",
+            width: "20%",
         },
         sort: true,
-        title: labels.questions_fields.text.title,
+        title: labels.test_fields.name.title,
     },
     {
-        code: "answers",
-        title: labels.questions_fields.answers.title,
-        type: "html",
+        code: "description",
+        title: labels.test_fields.description.title,
         sort: false,
-        style: {
-            width: "25%",
-        },
-    },
-    {
-        code: "theme",
-        sort: true,
-        title: labels.questions_fields.theme.title,
         style: {
             width: "20%",
         },
     },
     {
-        code: "mark",
-        sort: false,
-        title: labels.questions_fields.mark.title,
+        code: "theme",
+        sort: true,
+        title: labels.test_fields.theme.title,
+        style: {
+            width: "20%",
+        },
     },
     {
-        sort: true,
-        code: "is_private",
-        title: labels.questions_fields.is_private.title,
-        type: "bool",
+        sort: false,
+        code: "settings",
+        title: labels.test_fields.settings.title,
+        type: "html",
+        style: {
+            width: "25%",
+        },
     },
 ];
 const tableData = ref(null);
@@ -62,25 +59,21 @@ onMounted(async () => {
 
 const fetchData = async () => {
     let params = {
-        includes: [
-            {"relation" : "answers"}, 
-            {"relation" : "theme"}
-        ],
-        filters: [
-            {
-                field: "user_id",
-                operator: "=",
-                value: usePage().props.auth.user.id,
-            },
-        ]
-    }
+        includes: [{ relation: "theme" }],
+    };
 
     if (activeDiscipline.value) {
-        params.filters.push({ field: "theme.discipline_id", operator: "=", value: activeDiscipline.value })
+        params.filters = [
+            {
+                field: "theme.discipline_id",
+                operator: "=",
+                value: activeDiscipline.value,
+            },
+        ];
     }
 
     try {
-        const response = await axios.post(`/api/questions/search`, params);
+        const response = await axios.post(`/api/tests/search`, params);
         tableData.value = response.data.data;
         processTableData(tableData.value);
         totalPage.value = response.data.meta.total;
@@ -93,25 +86,21 @@ const fetchPageData = async (page, limit) => {
     let params = {
         page: page + 1,
         limit: limit,
-        includes: [
-            {"relation" : "answers"}, 
-            {"relation" : "theme"}
-        ],
-        filters: [
-            {
-                field: "user_id",
-                operator: "=",
-                value: usePage().props.auth.user.id,
-            },
-        ],
-    }
+        includes: [{ relation: "theme" }],
+    };
 
     if (activeDiscipline.value) {
-        params.filters.push({ field: "theme.discipline_id", operator: "=", value: activeDiscipline.value })
+        params.filters = [
+            {
+                field: "theme.discipline_id",
+                operator: "=",
+                value: activeDiscipline.value,
+            },
+        ];
     }
 
     try {
-        const response = await axios.post(`/api/questions/search`, params);
+        const response = await axios.post(`/api/tests/search`, params);
         tableData.value = response.data.data;
         processTableData(tableData.value);
     } catch (error) {
@@ -121,37 +110,42 @@ const fetchPageData = async (page, limit) => {
 
 const processTableData = (data) => {
     data.forEach((element, index) => {
-        let namesString = element.answers
-            .map((a) =>
-                a.status
-                    ? `<i class='table-value__green'>${a.name}</i>`
-                    : a.name
-            )
-            .join(", ");
-
-        data[index].answers =
-            namesString == ""
-                ? "<b class='table-value__red'>Нет ответов!</b>"
-                : namesString;
-
         data[index].theme = element?.theme?.name || "Не указано";
+
+        let settings = JSON.parse(element.settings);
+
+        if (Object.keys(settings).length > 0) {
+            let settingsString = labels.test_fields.settings.values
+                .filter((a) => settings.hasOwnProperty(a.id))
+                .map((a) => {
+                    let val =
+                        a.type === "bool"
+                            ? settings[a.id]
+                                ? "да"
+                                : "нет"
+                            : settings[a.id];
+                    return `${a.name}: ${val}`;
+                })
+                .join(",<br />");
+            data[index].settings = settingsString
+        }
+
     });
 };
 
 const toggleDiscipline = (id) => {
     activeDiscipline.value = id;
-    fetchData()
+    fetchData();
 };
-
 </script>
 
 <template>
-    <Head :title="labels.page_titles.questions" />
+    <Head :title="labels.page_titles.tests" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ labels.page_titles.questions }}
+                {{ labels.page_titles.tests }}
             </h2>
         </template>
 
@@ -160,24 +154,26 @@ const toggleDiscipline = (id) => {
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <loading-spinner v-if="tableData == null"></loading-spinner>
                     <template v-else>
-                        <reference-filter :items="disciplines"
+                        <reference-filter
+                            :items="disciplines"
                             :active="activeDiscipline"
                             @toggleItem="toggleDiscipline"
-                            addRoute="admin.reference.disciplines"></reference-filter>
+                            addRoute="admin.reference.disciplines"
+                            labelgroup="disciplines"
+                        ></reference-filter>
                         <user-table
                             :tableData="tableData"
-                            :routeName="'api.questions'"
+                            :routeName="'api.tests'"
                             :columns="tableColumns"
+                            :labelgroup="'tests'"
                             :includeParamFrom="false"
-                            :labelgroup="'questions'"
                             @fetchData="fetchData"
                             @getPage="fetchPageData"
                             :total="totalPage"
-                            routeNameForm="questions.new"
-                            routeNameEdit="questions.edit"
+                            routeNameForm="tests.new"
+                            routeNameEdit="tests.edit"
                         ></user-table>
                     </template>
-                    
                 </div>
             </div>
         </div>

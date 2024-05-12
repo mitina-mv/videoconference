@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property array $settings
+ */
 class Test extends Model
 {
     use HasFactory;
@@ -16,20 +19,29 @@ class Test extends Model
         'settings',
         'name',
         'user_id',
-        'discipline_id'
+        'theme_id'
     ];
     public $timestamps = true;
     protected $table = 'tests';
     protected $primaryKey = 'id';
+
+    protected $casts = [
+        'settings' => 'array'
+    ];
+
+    public function getSettingsAttribute($value)
+    {
+        return json_decode($value, true);
+    }
 
     public function user()
     {
         return $this->hasOne(User::class);
     }
 
-    public function discipline()
+    public function theme()
     {
-        return $this->hasOne(Discipline::class);
+        return $this->belongsTo(Theme::class);
     }
 
     public function questionCount()

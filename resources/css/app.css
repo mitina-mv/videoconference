@@ -55,7 +55,7 @@
     grid-template-columns: repeat(6, 1fr);
 }
 
-.grif-self-col-1 {
+.grid-self-col-1 {
     grid-column: 1/-1;
 }
 
@@ -87,12 +87,19 @@
     font-weight: 500;
 }
 
-.table-value__green{
+.table-value__green,
+.text-success {
     color: var(--green-600);
 }
 
-.table-value__red{
+.table-value__red,
+.text-danger {
     color: var(--red-600);
+}
+
+.table-value__gray,
+.text-gray {
+    color: var(--gray-600);
 }
 
 .mb-1 {
@@ -125,4 +132,12 @@
 
 .mt-4 {
     margin-bottom: 1em;
+}
+
+.d-flex {
+    display: flex;
+}
+
+.flex-between {
+    justify-content: space-between;
 }

@@ -22,4 +22,9 @@ class Theme extends Model
     {
         return $this->belongsTo(Discipline::class);
     }
+
+    public function questions()
+    {
+        return $this->hasMany(Question::class);
+    }
 }
