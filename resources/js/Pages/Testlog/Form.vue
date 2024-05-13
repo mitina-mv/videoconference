@@ -11,7 +11,8 @@ const props = defineProps({
         type: String,
         req: false
     },
-    disciplines: Array
+    tests: Array,
+    studgroups: Array,
 })
 
 const id = props?.id || null
@@ -20,7 +21,7 @@ const userId = usePage().props.auth.user.id;
 
 onMounted(() => {
     if(id) {
-        axios.get('/api/tests/' + id + '?include=theme')
+        axios.get('/api/testlogs/' + id + '?include=theme')
             .then((response) => {
                 data.value = response.data.data
             })

@@ -10,7 +10,7 @@ import toastService from "@/Services/toastService";
 import ReferenceFilter from "@/Components/Admin/ReferenceFilter.vue";
 
 const props = defineProps({
-    disciplines: [Array, Object],
+    years: [Array, Object],
 });
 
 const tableColumns = [

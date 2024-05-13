@@ -34,7 +34,7 @@ class TestlogController extends Controller
 
     public function filterableBy() : array
     {
-        return ['test.theme.discipline_id', ];
+        return ['test.theme_id', ];
     }
 
     protected function buildIndexFetchQuery(Request $request, array $requestedRelations): Builder
@@ -47,5 +47,22 @@ class TestlogController extends Controller
             $query->where('user_id', '=', request()->user()->id);
         }
         return $query;
+    }
+
+    public function teacherList(Request $request)
+    {
+        $year = $request->input('year');
+
+        $query = TestLog::where('teacher_id', request()->user()->id);
+
+        if ($year) {
+            $query->whereYear('date', $year);
+        }
+
+        $query->select('test_id', 'date')
+            ->with(['test:id,name', 'test.theme'])
+            ->orderBy('date')
+            ->groupBy('id', 'date')
+            ->get();
     }
 }
