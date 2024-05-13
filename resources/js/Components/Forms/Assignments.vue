@@ -24,23 +24,33 @@ const fieldData = ref({
     date: {
         value: props?.data?.date || null,
         type: "datetime",
+        label: labels.assignments_fields.date.title,
     },
     test_id: {
         value: props?.data?.test_id || null,
         type: "dropdown",
         options: props.tests,
+        label: labels.assignments_fields.test_id.title,
         header: {
             addRoute: 'tests.new'
         },
     },
 });
+
+const sendData = () => {
+    console.log(fieldData.value);
+}
 </script>
 
 <template>
     <div>
       <FormField v-for="(field, code) in fieldData"
-                 :key="code"
-                 :field="field"
-                 :errors="errors" />
+            :key="code"
+            :field="field"
+            :errors="errors" />
+
+        <div class="form-footer mt-2">
+            <Button @click="sendData" label="Сохранить"> </Button>
+        </div>
     </div>
 </template>

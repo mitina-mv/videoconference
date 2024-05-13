@@ -1,3 +1,5 @@
+import Assignments from "@/Components/Forms/Assignments.vue";
+
 export default {
     students: {
         title: "Студенты",
@@ -174,4 +176,12 @@ export default {
             ],
         },
     },
+    assignments_fields: {
+        date: {
+            title: "Дата проведения",
+        },
+        test_id: {
+            title: "Шаблон теста",
+        }
+    }
 };

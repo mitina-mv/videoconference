@@ -10,23 +10,22 @@
             >
         </div>
 
-        <Textarea v-if="field.type === 'text'" v-model="value" :id="field.id"  @update:modelValue="handleUpdateModelValue" />
+        <Textarea v-if="field.type === 'text'" v-model="field.value" :id="field.id"  @update:modelValue="handleUpdateModelValue" />
 
         <Calendar v-else-if="field.type === 'date' || field.type === 'datetime'"
               dateFormat="dd.mm.yy"
               :minDate="new Date()"
-              :numberOfMonths="2"
               showIcon
               :showOnFocus="false"
               :showTime="field.type === 'datetime'"
               hourFormat="24"
-              v-model="value"
+              v-model="field.value"
               @update:modelValue="handleUpdateModelValue" />
 
         <Dropdown
             v-else-if="field.type === 'dropdown'"
             :id="field.id"
-            v-model="value"
+            v-model="field.value"
             :options="field.options"
             optionLabel="name"
             optionValue="id"
@@ -34,10 +33,19 @@
             @update:modelValue="handleUpdateModelValue"
         />
 
+        <InputNumber
+            v-else-if="field.type == 'number'"
+            v-model="field.value"
+            @update:modelValue="handleUpdateModelValue"
+            inputId="minmax"
+            :min="field.min || 1"
+            :max="field.max || 100"
+        />
+
         <InputText
             v-else
             :id="field.id"
-            v-model="value"
+            v-model="field.value"
             type="text"
             :class="{ 'p-invalid': hasError }"
             @update:modelValue="handleUpdateModelValue"
@@ -53,6 +61,7 @@ import InputText from "primevue/inputtext";
 import Textarea from "primevue/textarea";
 import Calendar from 'primevue/calendar';
 import Dropdown from "primevue/dropdown";
+import InputNumber from "primevue/inputnumber";
 
 const props = defineProps({
     field: {
