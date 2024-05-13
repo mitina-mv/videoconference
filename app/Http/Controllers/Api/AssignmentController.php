@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Assignment;
+use App\Models\Role;
+use App\Models\Test;
 use App\Models\Testlog;
 use App\Policies\TruePolicy;
 use Orion\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Orion\Http\Requests\Request as Request;
 
-class TestlogController extends Controller
+class AssignmentController extends Controller
 {
     // use DisableAuthorization;
 
-    protected $model = Testlog::class;
+    protected $model = Assignment::class;
     protected $policy = TruePolicy::class;
 
     public function limit() : int
@@ -27,12 +30,12 @@ class TestlogController extends Controller
 
     public function includes() : array
     {
-        return ['assignment', ];
+        return ['test', ];
     }
 
     public function filterableBy() : array
     {
-        return ['assignment.test_id', ];
+        return ['test.theme_id', ];
     }
 
     protected function buildIndexFetchQuery(Request $request, array $requestedRelations): Builder

@@ -23,6 +23,6 @@ class Studgroup extends Model
 
     public function students()
     {
-        return $this->hasMany(User::class, 'studgroup_id', 'id')->orderBy('user_lastname');
+        return $this->hasMany(User::class, 'studgroup_id', 'id')->orderBy('lastname');
     }
 }

@@ -9,12 +9,10 @@ class TestlogService
 {
     public function getStudgroups()
     {
-        $user = auth();
+        $user = auth()->user();
 
-        $studgroups = Studgroup::whereHas('users_studgroups', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->with('students')->get();
-
+        $studgroups = $user->studgroups->load('students');
+        
         return $studgroups;
     }
 

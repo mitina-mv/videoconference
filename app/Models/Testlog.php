@@ -18,6 +18,7 @@ class Testlog extends Model
         'mark',
         'time',
         'user_id',
+        'assignment_id',
         'uncorrect_answers',
     ];
 
@@ -34,6 +35,11 @@ class Testlog extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+    
+    public function assignment()
+    {
+        return $this->belongsTo(Assignment::class);
     }
 
     public function answerlogs()
