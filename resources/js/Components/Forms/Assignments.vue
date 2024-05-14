@@ -5,7 +5,8 @@ import Button from "primevue/button";
 import toastService from "@/Services/toastService";
 import Toolbar from "primevue/toolbar";
 import Message from "primevue/message";
-import FormField from "@/Components/Common/FormField.vue"
+import FormField from "@/Components/Common/FormField.vue";
+import SelectedStudents from "@/Components/Common/SelectedStudents.vue";
 
 const props = defineProps({
     data: {
@@ -19,6 +20,7 @@ const props = defineProps({
 
 const id = ref(props?.data?.id || null);
 const errors = ref({});
+const selectedStudents = ref([]);
 
 const fieldData = ref({
     date: {
@@ -39,18 +41,23 @@ const fieldData = ref({
 
 const sendData = () => {
     console.log(fieldData.value);
+    console.log(selectedStudents.value);
 }
 </script>
 
 <template>
-    <div>
-      <FormField v-for="(field, code) in fieldData"
-            :key="code"
-            :field="field"
-            :errors="errors" />
-
-        <div class="form-footer mt-2">
-            <Button @click="sendData" label="Сохранить"> </Button>
+    <form @submit.prevent="sendData" class="form d-grid gap-3">
+        <div class="d-grid grid-col-2 gap-3">
+            <div class="studgroups">
+                <SelectedStudents :groups="studgroups" v-model="selectedStudents" />
+            </div>
+            <div>
+                <FormField v-for="(field, code) in fieldData"
+                    :key="code"
+                    :field="field"
+                    :errors="errors" />
+                <Button @click="sendData" label="Сохранить" class="mt-3" />
+            </div>
         </div>
-    </div>
+    </form>
 </template>

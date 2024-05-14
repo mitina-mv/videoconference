@@ -30,7 +30,7 @@ class AssignmentController extends Controller
 
     public function includes() : array
     {
-        return ['test', ];
+        return ['test', 'testlogs', ];
     }
 
     public function filterableBy() : array
