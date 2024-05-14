@@ -7,13 +7,26 @@ use App\Models\Test;
 
 class TestlogService 
 {
-    public function getStudgroups()
+    public function getAllStudgroups()
     {
         $user = auth()->user();
 
         $studgroups = $user->studgroups->load('students');
         
         return $studgroups;
+    }
+
+    public function getStudgroupsWistStudents()
+    {
+        $user = auth()->user();
+
+        $studgroups = $user->studgroups->load('students');
+        
+        $studgroupsWithStudents = $studgroups->filter(function ($studgroup) {
+            return $studgroup->students->isNotEmpty();
+        });
+    
+        return $studgroupsWithStudents;
     }
 
     public function getTests()

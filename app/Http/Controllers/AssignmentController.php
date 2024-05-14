@@ -43,7 +43,7 @@ class AssignmentController extends Controller
         return Inertia::render('Assignment/Form', [
             'id' => $id,
             'tests' => $this->testlogService->getTests(),
-            'studgroups' => $this->testlogService->getStudgroups(),
+            'studgroups' => $this->testlogService->getStudgroupsWistStudents(),
         ]);
     }
 
@@ -51,7 +51,7 @@ class AssignmentController extends Controller
     {
         return Inertia::render('Assignment/Form', [
             'tests' => $this->testlogService->getTests(),
-            'studgroups' => $this->testlogService->getStudgroups(),            
+            'studgroups' => $this->testlogService->getStudgroupsWistStudents(),            
         ]);
     }
 }

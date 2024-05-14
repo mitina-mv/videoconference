@@ -1,10 +1,8 @@
 <script setup>
-import { ref, onMounted, computed, watch, onBeforeMount } from "vue";
+import { ref, onMounted, } from "vue";
 import labels from "@/locales/ru.js";
 import Button from "primevue/button";
 import toastService from "@/Services/toastService";
-import Toolbar from "primevue/toolbar";
-import Message from "primevue/message";
 import FormField from "@/Components/Common/FormField.vue";
 import SelectedStudents from "@/Components/Common/SelectedStudents.vue";
 
@@ -77,10 +75,9 @@ const sendData = async () => {
             "Данные успешно сохранены!"
         );
     } catch (error) {
-        console.error("Ошибка при сохранении данных:", error);
         toastService.showErrorToast(
             `Сохранение данных`,
-            "Ошибка при сохранении данных. Пожалуйста, попробуйте еще раз."
+            error.response.data.message || "Ошибка при сохранении данных. Пожалуйста, попробуйте еще раз."
         );
     }
 }
@@ -105,13 +102,29 @@ const prepareData = () => {
 
 const syncStudgroups = async () => {
     try {
-        const requestData = selectedStudents.value.map(user_id => ({ user_id }));
-        await axios.post(`/api/assignments/${id.value}/testlogs/batch`, {resources: requestData});
+        let testlogs = props.data?.testlogs || [];
+
+        let testlogIds = testlogs.map(testlog => testlog.user_id);
+        let selectedStudentIds = selectedStudents.value;
+
+        let idsToDelete = testlogIds.filter(id => !selectedStudentIds.includes(id));
+        let idsToAdd = selectedStudentIds.filter(id => !testlogIds.includes(id));
+
+        let testlogsToDelete = testlogs.filter(testlog => idsToDelete.includes(testlog.user_id));
+        let testlogIdsDelete = testlogsToDelete.map(testlog => testlog.id);
+
+        testlogIdsDelete.forEach(async (id) => {
+            await axios.delete(`/api/testlogs/${id}`);
+        })
+
+        let requestData = idsToAdd.map(user_id => ({ user_id }));
+        if(requestData.length > 0)
+            await axios.post(`/api/assignments/${id.value}/testlogs/batch`, { resources: requestData });
+
     } catch (error) {
-        console.error("Ошибка при синхронизации студгрупп:", error);
         toastService.showErrorToast(
             `Сохранение данных`,
-            "Ошибка при синхронизации студгрупп. Пожалуйста, попробуйте еще раз."
+            "Ошибка при синхронизации участников. Пожалуйста, попробуйте еще раз."
         );
     }
 }
@@ -122,12 +135,14 @@ const syncStudgroups = async () => {
     <form @submit.prevent="sendData" class="form d-grid gap-3">
         <div class="d-grid grid-col-2 gap-3">
             <div class="studgroups">
+                <h3>Участники</h3>
                 <SelectedStudents :groups="studgroups" v-model="selectedStudents" />
             </div>
             <div>
                 <FormField v-for="(field, code) in fieldData"
                     :key="code"
                     :field="field"
+                    class="mt-2"
                     :errors="errors" />
                 <Button @click="sendData" label="Сохранить" class="mt-3" />
             </div>

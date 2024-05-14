@@ -48,7 +48,7 @@ Route::group(['as' => 'api.'], function() {
 
     Orion::resource('tests', TestController::class)->withSoftDeletes();
 
-    Orion::resource('testlogs', TestlogController::class)->withSoftDeletes();
+    Orion::resource('testlogs', TestlogController::class);
     Orion::resource('assignments', AssignmentController::class)->withSoftDeletes();
     Orion::hasManyResource('assignments', 'testlogs', AssignmentTestlogController::class);
 

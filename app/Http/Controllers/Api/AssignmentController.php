@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\Test;
 use App\Models\Testlog;
 use App\Policies\TruePolicy;
+use Carbon\Carbon;
 use Orion\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Orion\Http\Requests\Request as Request;
@@ -43,5 +44,24 @@ class AssignmentController extends Controller
         $query = parent::buildIndexFetchQuery($request, $requestedRelations);
         $query->where('user_id', '=', request()->user()->id);
         return $query;
+    }
+
+    public function beforeUpdate(Request $request, $assignment)
+    {
+        if ($request->has('date')) {
+            $newDate = new Carbon($request->input('date'));
+            $nowDate = new Carbon();
+
+            if ($newDate < $nowDate) {
+                abort(422, 'Дата мероприятия не может быть позже текущей даты');
+            }
+
+            $curDate = new Carbon($assignment->date);
+
+            // Проверяем, была ли существующая дата мероприятия изменена на прошлую
+            if ($curDate < $nowDate) {
+                abort(422, 'Нельзя редактировать уже прошедшее назначение.');
+            }
+        }
     }
 }
