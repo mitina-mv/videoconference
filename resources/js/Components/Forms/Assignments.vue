@@ -27,11 +27,13 @@ const fieldData = ref({
         value: props?.data?.date || null,
         type: "datetime",
         label: labels.assignments_fields.date.title,
+        req: true,
     },
     test_id: {
         value: props?.data?.test_id || null,
         type: "dropdown",
         options: props.tests,
+        req: true,
         label: labels.assignments_fields.test_id.title,
         header: {
             addRoute: 'tests.new'
@@ -39,10 +41,78 @@ const fieldData = ref({
     },
 });
 
-const sendData = () => {
-    console.log(fieldData.value);
-    console.log(selectedStudents.value);
+const sendData = async () => {
+    if (!validateFields()) {
+        return;
+    }
+
+    const url = "/api/assignments" + (id.value ? `/${id.value}` : "");
+
+    try {
+        let response;
+
+        if (id.value) {
+            response = await axios.patch(url, prepareData());
+        } else {
+            response = await axios.post(url, prepareData());
+        }
+
+        if (response.data.data.id) {
+            console.log(response.data.data.id);
+            id.value = response.data.data.id;
+            await syncStudgroups();
+        }
+
+        toastService.showSuccessToast(
+            `Сохранение данных`,
+            "Данные успешно сохранены!"
+        );
+    } catch (error) {
+        console.error("Ошибка при сохранении данных:", error);
+        toastService.showErrorToast(
+            `Сохранение данных`,
+            "Ошибка при сохранении данных. Пожалуйста, попробуйте еще раз."
+        );
+    }
 }
+
+// Метод для проверки заполненности полей
+const validateFields = () => {
+    for (const field of Object.values(fieldData.value)) {
+        if (field.req && !field.value) {
+            errors.value[field.label] = "Поле обязательно для заполнения";
+            return false;
+        }
+    }
+    return true;
+}
+
+// Метод для подготовки данных перед отправкой на сервер
+const prepareData = () => {
+    const data = {};
+    for (const [code, field] of Object.entries(fieldData.value)) {
+        data[code] = field.value;
+    }
+    // Добавляем выбранных студентов
+    // data.selectedStudents = selectedStudents.value;
+    return data;
+}
+
+// Метод для отправки запроса для текущего отношения
+const syncStudgroups = async () => {
+    try {
+        selectedStudents.value.forEach(async (user_id) => {
+            await axios.post(`/api/assignments/${id.value}/testlogs/associate`, { "related_key": user_id });
+        })
+    } catch (error) {
+        console.error("Ошибка при синхронизации студгрупп:", error);
+        toastService.showErrorToast(
+            `Сохранение данных`,
+            "Ошибка при синхронизации студгрупп. Пожалуйста, попробуйте еще раз."
+        );
+    }
+}
+
 </script>
 
 <template>

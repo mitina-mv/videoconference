@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AnswerController;
 use App\Http\Controllers\Api\AssignmentController;
+use App\Http\Controllers\Api\AssignmentTestlogController;
 use App\Http\Controllers\Api\DisciplineController;
 use App\Http\Controllers\Api\QuestionController;
 use App\Http\Controllers\Api\StudgroupController;
@@ -46,6 +47,9 @@ Route::group(['as' => 'api.'], function() {
     Orion::resource('answers', AnswerController::class)->withSoftDeletes();
 
     Orion::resource('tests', TestController::class)->withSoftDeletes();
+
     Orion::resource('testlogs', TestlogController::class)->withSoftDeletes();
     Orion::resource('assignments', AssignmentController::class)->withSoftDeletes();
+    Orion::hasManyResource('assignments', 'testlogs', AssignmentTestlogController::class);
+
 });
