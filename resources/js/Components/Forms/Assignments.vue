@@ -41,6 +41,15 @@ const fieldData = ref({
     },
 });
 
+onMounted(() => {
+    let testlogs = props.data?.testlogs || null;
+    if(testlogs) {
+        testlogs.forEach(element => {
+            selectedStudents.value.push(element.user_id)
+        });
+    }
+})
+
 const sendData = async () => {
     if (!validateFields()) {
         return;
@@ -76,7 +85,6 @@ const sendData = async () => {
     }
 }
 
-// Метод для проверки заполненности полей
 const validateFields = () => {
     for (const field of Object.values(fieldData.value)) {
         if (field.req && !field.value) {
@@ -87,23 +95,18 @@ const validateFields = () => {
     return true;
 }
 
-// Метод для подготовки данных перед отправкой на сервер
 const prepareData = () => {
     const data = {};
     for (const [code, field] of Object.entries(fieldData.value)) {
         data[code] = field.value;
     }
-    // Добавляем выбранных студентов
-    // data.selectedStudents = selectedStudents.value;
     return data;
 }
 
-// Метод для отправки запроса для текущего отношения
 const syncStudgroups = async () => {
     try {
-        selectedStudents.value.forEach(async (user_id) => {
-            await axios.post(`/api/assignments/${id.value}/testlogs/associate`, { "related_key": user_id });
-        })
+        const requestData = selectedStudents.value.map(user_id => ({ user_id }));
+        await axios.post(`/api/assignments/${id.value}/testlogs/batch`, {resources: requestData});
     } catch (error) {
         console.error("Ошибка при синхронизации студгрупп:", error);
         toastService.showErrorToast(

@@ -29,7 +29,7 @@ class Assignment extends Model
     
     public function getDateAttribute($value)
     {
-        return Carbon::parse($value)->format('d.m.Y H:i');
+        return Carbon::parse($value)->timezone('Europe/Moscow')->format('d.m.Y H:i');
     }
 
     public function test()
