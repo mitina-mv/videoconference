@@ -52,4 +52,7 @@ Route::group(['as' => 'api.'], function() {
     Orion::resource('assignments', AssignmentController::class)->withSoftDeletes();
     Orion::hasManyResource('assignments', 'testlogs', AssignmentTestlogController::class);
 
+    Route::post('/assignments/studgroups', [AssignmentController::class, 'getStudgroups'])->name('api.assignments.studgroups');
+    Route::post('/assignments/themes', [AssignmentController::class, 'themes'])->name('api.assignments.disciplines');
+
 });

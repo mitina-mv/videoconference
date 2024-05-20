@@ -2,73 +2,94 @@
 import { ref, onMounted } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage } from "@inertiajs/vue3";
-import UserTable from "@/Components/Tables/UserTable.vue";
 import axios from "axios";
 import labels from "@/locales/ru.js";
 import LoadingSpinner from "@/Components/Common/LoadingSpinner.vue";
 import toastService from "@/Services/toastService";
 import ReferenceFilter from "@/Components/Admin/ReferenceFilter.vue";
+import FilterTable from "@/Components/Tables/FilterTable.vue";
 
 const props = defineProps({
     years: [Array, Object],
 });
 
-const tableColumns = [
-    {
-        code: "name",
-        style: {
-            width: "20%",
-        },
-        sort: true,
-        title: labels.test_fields.name.title,
-    },
-    {
-        code: "description",
-        title: labels.test_fields.description.title,
+const tableColumns = ref({
+    // {
+    //     code: "name",
+    //     style: {
+    //         width: "20%",
+    //     },
+    //     sort: true,
+    //     title: labels.test_fields.name.title,
+    // },
+    // {
+    //     code: "description",
+    //     title: labels.test_fields.description.title,
+    //     sort: false,
+    //     style: {
+    //         width: "20%",
+    //     },
+    // },
+    // {
+    //     code: "theme",
+    //     sort: true,
+    //     title: labels.test_fields.theme.title,
+    //     style: {
+    //         width: "20%",
+    //     },
+    // },
+    studgroups: {
+        code: "studgroups",
         sort: false,
-        style: {
-            width: "20%",
+        filter: {
+            options: null
         },
-    },
-    {
-        code: "theme",
-        sort: true,
         title: labels.test_fields.theme.title,
         style: {
             width: "20%",
         },
     },
-    {
+    disciplines: {
+        code: "disciplines",
         sort: false,
-        code: "settings",
-        title: labels.test_fields.settings.title,
-        type: "html",
+        filter: {
+            options: null
+        },
+        title: labels.test_fields.theme.title,
         style: {
-            width: "25%",
+            width: "20%",
         },
     },
-];
+});
 const tableData = ref(null);
 const totalPage = ref(null);
-const disciplines = ref(props?.disciplines || null);
-const activeDiscipline = ref(null);
+const years = ref(props?.years || null);
+const activeYear = ref(null);
 
 onMounted(async () => {
-    console.log(props.years);
+    if (years.value != null) {
+        years.value.map((item) => {
+            item.label = item.year + ` (${item.count_test})`;
+        });
+        activeYear.value = years.value[0].year;
+    }
     await fetchData();
 });
 
 const fetchData = async () => {
     let params = {
-        includes: [{ relation: "test" }],
+        includes: [
+            { relation: "test" },
+            // { relation: "test.theme" },
+        ],
     };
 
-    // if (activeDiscipline.value) {
+    // if (activeYear.value) {
     //     params.filters = [
     //         {
     //             field: "test.theme.discipline_id",
     //             operator: "=",
-    //             value: activeDiscipline.value,
+    //             value: activeYear.value,
     //         },
     //     ];
     // }
@@ -76,10 +97,19 @@ const fetchData = async () => {
     try {
         const response = await axios.post(`/api/assignments/search`, params);
         tableData.value = response.data.data;
-        // processTableData(tableData.value);
+        processTableData(tableData.value);
         totalPage.value = response.data.meta.total;
+
+        const studresponse = await axios.post('/api/assignments/studgroups', {
+            ids: response.data.data.map(item => item.id)
+        })
+        tableColumns.value.studgroups.filter.options = studresponse.data.data;
+
+        const discresponse = await axios.post('/api/assignments/themes')
+        tableColumns.value.disciplines.filter.options = discresponse.data.data;
     } catch (error) {
-        toastService.showInfoToast("Заголовок", "Текст");
+        console.error(error);
+        toastService.showErrorToast("Заголовок", "Текст");
     }
 };
 
@@ -90,12 +120,12 @@ const fetchPageData = async (page, limit) => {
         includes: [{ relation: "theme" }],
     };
 
-    if (activeDiscipline.value) {
+    if (activeYear.value) {
         params.filters = [
             {
                 field: "theme.discipline_id",
                 operator: "=",
-                value: activeDiscipline.value,
+                value: activeYear.value,
             },
         ];
     }
@@ -111,42 +141,38 @@ const fetchPageData = async (page, limit) => {
 
 const processTableData = (data) => {
     data.forEach((element, index) => {
-        data[index].theme = element?.theme?.name || "Не указано";
 
-        let settings = JSON.parse(element.settings);
-
-        if (Object.keys(settings).length > 0) {
-            let settingsString = labels.test_fields.settings.values
-                .filter((a) => settings.hasOwnProperty(a.id))
-                .map((a) => {
-                    let val =
-                        a.type === "bool"
-                            ? settings[a.id]
-                                ? "да"
-                                : "нет"
-                            : settings[a.id];
-                    return `${a.name}: ${val}`;
-                })
-                .join(",<br />");
-            data[index].settings = settingsString
-        }
-
+        // if (Object.keys(settings).length > 0) {
+        //     let settingsString = labels.test_fields.settings.values
+        //         .filter((a) => settings.hasOwnProperty(a.id))
+        //         .map((a) => {
+        //             let val =
+        //                 a.type === "bool"
+        //                     ? settings[a.id]
+        //                         ? "да"
+        //                         : "нет"
+        //                     : settings[a.id];
+        //             return `${a.name}: ${val}`;
+        //         })
+        //         .join(",<br />");
+        //     data[index].settings = settingsString;
+        // }
     });
 };
 
-const toggleDiscipline = (id) => {
-    activeDiscipline.value = id;
+const toggleYear = (id) => {
+    activeYear.value = id;
     fetchData();
 };
 </script>
 
 <template>
-    <Head :title="labels.page_titles.tests" />
+    <Head :title="labels.page_titles.assignments" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ labels.page_titles.tests }}
+                {{ labels.page_titles.assignments }}
             </h2>
         </template>
 
@@ -156,13 +182,13 @@ const toggleDiscipline = (id) => {
                     <loading-spinner v-if="tableData == null"></loading-spinner>
                     <template v-else>
                         <reference-filter
-                            :items="disciplines"
-                            :active="activeDiscipline"
-                            @toggleItem="toggleDiscipline"
-                            addRoute="admin.reference.disciplines"
-                            labelgroup="disciplines"
+                            :items="years"
+                            :active="activeYear"
+                            @toggleItem="toggleYear"
+                            idField="year"
+                            label="label"
                         ></reference-filter>
-                        <user-table
+                        <filter-table
                             :tableData="tableData"
                             :routeName="'api.tests'"
                             :columns="tableColumns"
@@ -173,7 +199,7 @@ const toggleDiscipline = (id) => {
                             :total="totalPage"
                             routeNameForm="tests.new"
                             routeNameEdit="tests.edit"
-                        ></user-table>
+                        ></filter-table>
                     </template>
                 </div>
             </div>

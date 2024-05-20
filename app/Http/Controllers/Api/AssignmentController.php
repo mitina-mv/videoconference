@@ -19,24 +19,24 @@ class AssignmentController extends Controller
     protected $model = Assignment::class;
     protected $policy = TruePolicy::class;
 
-    public function limit() : int
+    public function limit(): int
     {
         return 25;
     }
 
-    public function maxLimit() : int
+    public function maxLimit(): int
     {
         return 100;
     }
 
-    public function includes() : array
+    public function includes(): array
     {
-        return ['test', 'testlogs', ];
+        return ['test', 'test.theme', 'testlogs', 'testlogs.user', 'testlogs.user.studgroup',];
     }
 
-    public function filterableBy() : array
+    public function filterableBy(): array
     {
-        return ['test.theme_id', ];
+        return ['test.theme_id',];
     }
 
     protected function buildIndexFetchQuery(Request $request, array $requestedRelations): Builder
@@ -63,5 +63,41 @@ class AssignmentController extends Controller
                 abort(422, 'Нельзя редактировать уже прошедшее назначение.');
             }
         }
+    }
+
+    public function getStudgroups(Request $request) 
+    {
+        $studgroups = Testlog::whereIn('assignment_id', $request->ids)
+        ->with('user.studgroup')
+        ->get()
+        ->pluck('user.studgroup')
+        ->unique();
+
+        return $studgroups;
+    }
+
+    // public function getDisciplines() 
+    // {
+    //     dd(auth()->id());
+        // $disciplines = Test::where("user_id", auth()->id())
+        //     ->with('theme.discipline')
+        //     ->get()
+        //     ->pluck('theme.discipline')
+        //     ->unique();
+
+        // dd($disciplines);
+        
+        // return $disciplines;
+    // }
+
+    public function themes(Request $request)
+    {
+        $themes = Test::where("user_id", auth()->id())
+            ->with('theme')
+            ->get()
+            ->pluck('theme')
+            ->unique();
+
+        return $themes;
     }
 }

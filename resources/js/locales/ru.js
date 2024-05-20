@@ -1,5 +1,3 @@
-import Assignments from "@/Components/Forms/Assignments.vue";
-
 export default {
     students: {
         title: "Студенты",
@@ -93,6 +91,7 @@ export default {
         questions: "Банк заданий",
         answers: "Варианты ответов",
         tests: "Шаблоны тестов",
+        assignments: "Назначение тестирования",
     },
     questions_fields: {
         text: {
