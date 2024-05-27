@@ -14,48 +14,56 @@ const props = defineProps({
 });
 
 const tableColumns = ref({
-    // {
-    //     code: "name",
-    //     style: {
-    //         width: "20%",
-    //     },
-    //     sort: true,
-    //     title: labels.test_fields.name.title,
-    // },
-    // {
-    //     code: "description",
-    //     title: labels.test_fields.description.title,
-    //     sort: false,
-    //     style: {
-    //         width: "20%",
-    //     },
-    // },
-    // {
-    //     code: "theme",
-    //     sort: true,
-    //     title: labels.test_fields.theme.title,
-    //     style: {
-    //         width: "20%",
-    //     },
-    // },
-    studgroups: {
-        code: "studgroups",
+    test_id: {
+        code: "test_id",
         sort: false,
         filter: {
-            options: null
+            type: 'select',
+            options: null,
+            label: 'id',
+            value: 'name',
         },
-        title: labels.test_fields.theme.title,
+        title: labels.assignments_fields.test_id.title,
         style: {
             width: "20%",
         },
     },
-    disciplines: {
-        code: "disciplines",
+    studgroups: {
+        code: "studgroups",
         sort: false,
         filter: {
-            options: null
+            type: 'select',
+            options: null,
+            value: 'id',
+            label: 'name',
         },
-        title: labels.test_fields.theme.title,
+        title: labels.assignments_fields.studgroups.title,
+        style: {
+            width: "20%",
+        },
+    },
+    date: {
+        code: "date",
+        sort: false,
+        filter: {
+            type: 'calendar',
+            options: null,
+        },
+        title: labels.assignments_fields.date.title,
+        style: {
+            width: "20%",
+        },
+    },
+    themes: {
+        code: "themes",
+        sort: false,
+        filter: {
+            type: 'select',
+            options: null,
+            value: 'id',
+            label: 'name',
+        },
+        title: labels.assignments_fields.themes.title,
         style: {
             width: "20%",
         },
@@ -105,8 +113,8 @@ const fetchData = async () => {
         })
         tableColumns.value.studgroups.filter.options = studresponse.data.data;
 
-        const discresponse = await axios.post('/api/assignments/themes')
-        tableColumns.value.disciplines.filter.options = discresponse.data.data;
+        const themeresponse = await axios.post('/api/assignments/themes')
+        tableColumns.value.themes.filter.options = themeresponse.data.data;
     } catch (error) {
         console.error(error);
         toastService.showErrorToast("Заголовок", "Текст");
@@ -141,6 +149,7 @@ const fetchPageData = async (page, limit) => {
 
 const processTableData = (data) => {
     data.forEach((element, index) => {
+        data[index].test_id = element.test.name
 
         // if (Object.keys(settings).length > 0) {
         //     let settingsString = labels.test_fields.settings.values

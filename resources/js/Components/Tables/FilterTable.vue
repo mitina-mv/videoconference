@@ -10,6 +10,8 @@ import DeleteDialog from "@/Components/Dialogs/DeleteDialog.vue";
 import Dialog from "primevue/dialog";
 import Toolbar from "primevue/toolbar";
 import Paginator from "primevue/paginator";
+import MultiSelect from "primevue/multiselect";
+import Calendar from "primevue/calendar";
 
 const props = defineProps({
     tableData: {
@@ -22,6 +24,10 @@ const props = defineProps({
         type: String,
     },
     total: Number,
+    includeCrudActions: {
+        type: Boolean,
+        default: true,
+    },
 });
 const emit = defineEmits(["fetchData", "getPage"]);
 
@@ -34,12 +40,29 @@ const currentPageRow = ref(25);
 const currentPageRowOld = ref(null);
 const deleteDialog = ref(false);
 const dataNotFound = ref(tableData.value.length == 0);
-const filters = ref({})
-const loading = ref(true)
+const filters = ref({});
+const loading = ref(true);
 
 onMounted(() => {
-    // перебираем columns для установки filters
-})
+    Object.keys(columns.value).forEach((key) => {
+        const column = columns.value[key];
+
+        if (column.filter) {
+            switch (column.filter.type) {
+                case "select":
+                    filters.value[column.code] = null;
+                    break;
+                case "calendar":
+                    filters.value[column.code] = null;
+                    break;
+                default:
+                    filters.value[column.code] = null;
+            }
+        }
+    });
+
+    loading.value = false;
+});
 
 const confirmDelete = (row) => {
     deleteRow.value = row;
@@ -103,6 +126,17 @@ watch(
         }
     }
 );
+
+const getFilterComponent = (type) => {
+    switch (type) {
+        case "select":
+            return "MultiSelect";
+        case "calendar":
+            return "Calendar";
+        default:
+            return null;
+    }
+};
 </script>
 
 <template>
@@ -111,10 +145,61 @@ watch(
         :value="tableData"
         dataKey="id"
         filterDisplay="row"
-        :loading="loading"
         showGridlines
     >
-        <template #empty> <div class="table__empty-block">Данные не найдены</div> </template>
-        <template #loading> <div class="table__empty-block">Загрузка данных...</div> </template>
+        <Column
+            v-for="(column, key) in columns"
+            :key="key"
+            :field="column.code"
+            :header="column.title"
+            :style="column.style"
+        >
+            <template #filter>
+                <MultiSelect
+                    v-if="column.filter.type == 'select'"
+                    v-model="filters[`${column.code}`]"
+                    :options="column.filter.options"
+                    :optionLabel="column.filter.label"
+                    :optionValue="column.filter.value"
+                    :placeholder="column.filter.placeholder"
+                />
+                <Calendar
+                    v-if="column.filter.type == 'calendar'"
+                    v-model="filters.date"
+                    :dateFormat="column.filter.format || 'dd.mm.yy'"
+                    :placeholder="column.filter.placeholder || 'Выберите дату'"
+                />
+            </template>
+        </Column>
+
+        <!-- <Column
+            :exportable="false"
+            v-if="includeCrudActions"
+            header="Управление"
+            :style="{ width: '5%' }"
+        >
+            <template #body="row">
+                <a :href="route(routeNameEdit, row.data.id)">
+                    <Button
+                        icon="pi pi-pencil"
+                        severity="secondary"
+                        text
+                    ></Button>
+                </a>
+                <Button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    text
+                    @click="confirmDelete(row.data)"
+                ></Button>
+            </template>
+        </Column> -->
+
+        <template #empty>
+            <div class="table__empty-block">Данные не найдены</div>
+        </template>
+        <template #loading>
+            <div class="table__empty-block">Загрузка данных...</div>
+        </template>
     </DataTable>
 </template>

@@ -181,6 +181,16 @@ export default {
         },
         test_id: {
             title: "Шаблон теста",
-        }
+        },
+        date: {
+            title: "Дата проведения",
+        },
+        themes: {
+            title: "Тема",
+        },
+        studgroups: {
+            title: 'Группы студентов',
+        },
+
     }
 };

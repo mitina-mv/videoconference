@@ -65,7 +65,7 @@ class AssignmentController extends Controller
         }
     }
 
-    public function getStudgroups(Request $request) 
+    public function studgroups(Request $request) 
     {
         $studgroups = Testlog::whereIn('assignment_id', $request->ids)
         ->with('user.studgroup')
