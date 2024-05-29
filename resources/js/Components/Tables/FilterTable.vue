@@ -142,7 +142,6 @@ const getFilterComponent = (type) => {
 
 <template>
     <DataTable
-        v-model:filters="filters"
         :value="tableData"
         dataKey="id"
         filterDisplay="row"
@@ -163,13 +162,13 @@ const getFilterComponent = (type) => {
                     :optionLabel="columns[key].filter.label"
                     :optionValue="columns[key].filter.value"
                 />
-                <!-- <Calendar
+                <Calendar
                     v-if="column.filter.type == 'calendar'"
                     v-model="filters[key]"
                     showIcon
                     :dateFormat="column.filter.format || 'dd.mm.yy'"
                     :placeholder="column.filter.placeholder || 'Выберите дату'"
-                /> -->
+                />
             </template>
         </Column>
 
@@ -204,10 +203,4 @@ const getFilterComponent = (type) => {
         </template>
     </DataTable>
 
-    <MultiSelect
-        v-model="filters.studgroups"
-        :options="columns.studgroups.filter.options"
-        :optionLabel="columns.studgroups.filter.label"
-        :optionValue="columns.studgroups.filter.value"
-    />
 </template>
