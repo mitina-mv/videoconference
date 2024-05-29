@@ -73,6 +73,7 @@ const tableData = ref(null);
 const totalPage = ref(null);
 const years = ref(props?.years || null);
 const activeYear = ref(null);
+const loadData = ref(false)
 
 onMounted(async () => {
     if (years.value != null) {
@@ -111,10 +112,12 @@ const fetchData = async () => {
         const studresponse = await axios.post('/api/assignments/studgroups', {
             ids: response.data.data.map(item => item.id)
         })
-        tableColumns.value.studgroups.filter.options = studresponse.data.data;
+        tableColumns.value.studgroups.filter.options = studresponse.data;
 
         const themeresponse = await axios.post('/api/assignments/themes')
-        tableColumns.value.themes.filter.options = themeresponse.data.data;
+        tableColumns.value.themes.filter.options = themeresponse.data;
+        
+        loadData.value = true
     } catch (error) {
         console.error(error);
         toastService.showErrorToast("Заголовок", "Текст");
@@ -188,7 +191,7 @@ const toggleYear = (id) => {
         <div class="d-grid gap-4 content">
             <div class="content__container">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <loading-spinner v-if="tableData == null"></loading-spinner>
+                    <loading-spinner v-if="!loadData"></loading-spinner>
                     <template v-else>
                         <reference-filter
                             :items="years"

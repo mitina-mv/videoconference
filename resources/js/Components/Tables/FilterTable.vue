@@ -59,6 +59,7 @@ onMounted(() => {
                     filters.value[column.code] = null;
             }
         }
+
     });
 
     loading.value = false;
@@ -154,21 +155,21 @@ const getFilterComponent = (type) => {
             :header="column.title"
             :style="column.style"
         >
-            <template #filter>
+            <template #filter v-if="column.filter">
                 <MultiSelect
                     v-if="column.filter.type == 'select'"
-                    v-model="filters[`${column.code}`]"
-                    :options="column.filter.options"
-                    :optionLabel="column.filter.label"
-                    :optionValue="column.filter.value"
-                    :placeholder="column.filter.placeholder"
+                    v-model="filters[key]"
+                    :options="columns[key].filter.options"
+                    :optionLabel="columns[key].filter.label"
+                    :optionValue="columns[key].filter.value"
                 />
-                <Calendar
+                <!-- <Calendar
                     v-if="column.filter.type == 'calendar'"
-                    v-model="filters.date"
+                    v-model="filters[key]"
+                    showIcon
                     :dateFormat="column.filter.format || 'dd.mm.yy'"
                     :placeholder="column.filter.placeholder || 'Выберите дату'"
-                />
+                /> -->
             </template>
         </Column>
 
@@ -202,4 +203,11 @@ const getFilterComponent = (type) => {
             <div class="table__empty-block">Загрузка данных...</div>
         </template>
     </DataTable>
+
+    <MultiSelect
+        v-model="filters.studgroups"
+        :options="columns.studgroups.filter.options"
+        :optionLabel="columns.studgroups.filter.label"
+        :optionValue="columns.studgroups.filter.value"
+    />
 </template>
