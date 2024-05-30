@@ -26,6 +26,7 @@ class Assignment extends Model
         'date' => 'datetime',
     ];
 
+    protected $appends = ['studgroups'];
     
     public function getDateAttribute($value)
     {
@@ -46,4 +47,15 @@ class Assignment extends Model
     {
         return $this->hasMany(Testlog::class);
     }
+
+    public function getStudgroupsAttribute()
+    {
+        return $this->testlogs()
+            ->with('user.studgroup')
+            ->get()
+            ->pluck('user.studgroup')
+            ->unique()
+            ->values();
+    }
+
 }

@@ -11,6 +11,9 @@ import FilterTable from "@/Components/Tables/FilterTable.vue";
 
 const props = defineProps({
     years: [Array, Object],
+    studgroups: Array,
+    tests: Array,
+    themes: Array,
 });
 
 const tableColumns = ref({
@@ -19,22 +22,24 @@ const tableColumns = ref({
         sort: false,
         filter: {
             type: 'select',
-            options: null,
-            label: 'id',
-            value: 'name',
+            options: props.tests,
+            field: 'test_id',
+            label: 'name',
+            value: 'id',
         },
         title: labels.assignments_fields.test_id.title,
         style: {
             width: "20%",
         },
     },
-    studgroups: {
-        code: "studgroups",
+    studgroup_id: {
+        code: "studgroup_id",
         sort: false,
         filter: {
             type: 'select',
-            options: null,
+            options: props.studgroups,
             value: 'id',
+            field: 'testlogs.user.studgroup_id',
             label: 'name',
         },
         title: labels.assignments_fields.studgroups.title,
@@ -47,6 +52,7 @@ const tableColumns = ref({
         sort: false,
         filter: {
             type: 'calendar',
+            field: 'date',
             options: null,
         },
         title: labels.assignments_fields.date.title,
@@ -54,14 +60,15 @@ const tableColumns = ref({
             width: "20%",
         },
     },
-    themes: {
-        code: "themes",
+    theme_id: {
+        code: "theme_id",
         sort: false,
         filter: {
             type: 'select',
-            options: null,
+            options: props.themes,
             value: 'id',
             label: 'name',
+            field: 'test.theme_id',
         },
         title: labels.assignments_fields.themes.title,
         style: {
@@ -85,13 +92,19 @@ onMounted(async () => {
     await fetchData();
 });
 
-const fetchData = async () => {
+const fetchData = async (filters = null) => {
     let params = {
         includes: [
             { relation: "test" },
-            // { relation: "test.theme" },
+            { relation: "test.theme" },
         ],
     };
+
+    console.log(filters);
+
+    if (filters) {
+        params.filters = filters
+    }
 
     // if (activeYear.value) {
     //     params.filters = [
@@ -108,14 +121,6 @@ const fetchData = async () => {
         tableData.value = response.data.data;
         processTableData(tableData.value);
         totalPage.value = response.data.meta.total;
-
-        const studresponse = await axios.post('/api/assignments/studgroups', {
-            ids: response.data.data.map(item => item.id)
-        })
-        tableColumns.value.studgroups.filter.options = studresponse.data;
-
-        const themeresponse = await axios.post('/api/assignments/themes')
-        tableColumns.value.themes.filter.options = themeresponse.data;
         
         loadData.value = true
     } catch (error) {
@@ -153,22 +158,11 @@ const fetchPageData = async (page, limit) => {
 const processTableData = (data) => {
     data.forEach((element, index) => {
         data[index].test_id = element.test.name
+        data[index].theme_id = element.test.theme.name
 
-        // if (Object.keys(settings).length > 0) {
-        //     let settingsString = labels.test_fields.settings.values
-        //         .filter((a) => settings.hasOwnProperty(a.id))
-        //         .map((a) => {
-        //             let val =
-        //                 a.type === "bool"
-        //                     ? settings[a.id]
-        //                         ? "да"
-        //                         : "нет"
-        //                     : settings[a.id];
-        //             return `${a.name}: ${val}`;
-        //         })
-        //         .join(",<br />");
-        //     data[index].settings = settingsString;
-        // }
+        if(element.studgroups.length > 0) {
+            data[index].studgroup_id = element.studgroups.map(a => a.name).join(', ')
+        }
     });
 };
 

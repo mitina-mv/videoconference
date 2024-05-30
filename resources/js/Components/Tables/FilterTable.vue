@@ -18,7 +18,7 @@ const props = defineProps({
         type: Object,
     },
     columns: {
-        type: Array,
+        type: Object,
     },
     labelgroup: {
         type: String,
@@ -48,22 +48,32 @@ onMounted(() => {
         const column = columns.value[key];
 
         if (column.filter) {
-            switch (column.filter.type) {
-                case "select":
-                    filters.value[column.code] = null;
-                    break;
-                case "calendar":
-                    filters.value[column.code] = null;
-                    break;
-                default:
-                    filters.value[column.code] = null;
-            }
+            filters.value[key] = null;
         }
-
     });
 
     loading.value = false;
 });
+
+const transformFilters = () => {
+    const transformed = [];
+    for (const [key, value] of Object.entries(filters.value)) {
+        if(!value) continue;
+
+        let field = columns.value[key].filter.field || key
+
+        if(columns.value[key].filter.type == 'select') {
+            transformed.push({
+                "field": field, "operator" : "in", "value" : value
+            })
+        } else {
+            transformed.push({
+                "field": field, "operator" : "=", "value" : value
+            })
+        }
+    }
+    return transformed;
+};
 
 const confirmDelete = (row) => {
     deleteRow.value = row;
@@ -100,8 +110,8 @@ const deleteItem = () => {
         });
 };
 
-const fetchData = (id) => {
-    emit("fetchData");
+const fetchData = (filters) => {
+    emit("fetchData", filters);
 };
 
 const onPage = ({ page }) => {
@@ -127,17 +137,13 @@ watch(
         }
     }
 );
-
-const getFilterComponent = (type) => {
-    switch (type) {
-        case "select":
-            return "MultiSelect";
-        case "calendar":
-            return "Calendar";
-        default:
-            return null;
-    }
-};
+watch(
+    filters,
+    () => {
+        fetchData(transformFilters());
+    },
+    { deep: true }
+)
 </script>
 
 <template>
@@ -146,6 +152,7 @@ const getFilterComponent = (type) => {
         dataKey="id"
         filterDisplay="row"
         showGridlines
+        :globalFilterFields="['date']"
     >
         <Column
             v-for="(column, key) in columns"
@@ -159,8 +166,9 @@ const getFilterComponent = (type) => {
                     v-if="column.filter.type == 'select'"
                     v-model="filters[key]"
                     :options="columns[key].filter.options"
-                    :optionLabel="columns[key].filter.label"
-                    :optionValue="columns[key].filter.value"
+                    :optionLabel="columns[key].filter.label || 'name'"
+                    :optionValue="columns[key].filter.value || 'id'"
+                    :placeholder="column.filter.placeholder || 'Выберите...'"
                 />
                 <Calendar
                     v-if="column.filter.type == 'calendar'"

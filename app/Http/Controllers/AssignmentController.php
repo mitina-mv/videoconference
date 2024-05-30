@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\AssignmentController as ApiAssignmentController;
 use App\Http\Service\TestlogService;
 use App\Models\Assignment;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,9 @@ class AssignmentController extends Controller
 
         return Inertia::render('Assignment/Index', [
             'years' => $yearsTestlog,
+            'studgroups' => $this->testlogService->studgroupsAssignment(),
+            'tests' => $this->testlogService->getTests(),
+            'themes' => $this->testlogService->themesAssignment(),
         ]);
     }
 
@@ -43,7 +47,7 @@ class AssignmentController extends Controller
         return Inertia::render('Assignment/Form', [
             'id' => $id,
             'tests' => $this->testlogService->getTests(),
-            'studgroups' => $this->testlogService->getStudgroupsWistStudents(),
+            'studgroups' => $this->testlogService->getStudgroupsWithStudents(),
         ]);
     }
 
@@ -51,7 +55,7 @@ class AssignmentController extends Controller
     {
         return Inertia::render('Assignment/Form', [
             'tests' => $this->testlogService->getTests(),
-            'studgroups' => $this->testlogService->getStudgroupsWistStudents(),            
+            'studgroups' => $this->testlogService->getStudgroupsWithStudents(),            
         ]);
     }
 }

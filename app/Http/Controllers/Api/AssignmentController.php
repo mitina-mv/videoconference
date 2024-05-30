@@ -36,7 +36,7 @@ class AssignmentController extends Controller
 
     public function filterableBy(): array
     {
-        return ['test.theme_id',];
+        return ['test.theme_id', 'test_id', 'testlogs.user.studgroup_id'];
     }
 
     protected function buildIndexFetchQuery(Request $request, array $requestedRelations): Builder
@@ -68,29 +68,15 @@ class AssignmentController extends Controller
     public function studgroups(Request $request) 
     {
         $studgroups = Testlog::whereIn('assignment_id', $request->ids)
-        ->with('user.studgroup')
-        ->get()
-        ->pluck('user.studgroup')
-        ->unique();
+            ->with('user.studgroup')
+            ->get()
+            ->pluck('user.studgroup')
+            ->unique();
 
         return $studgroups;
     }
 
-    // public function getDisciplines() 
-    // {
-    //     dd(auth()->id());
-        // $disciplines = Test::where("user_id", auth()->id())
-        //     ->with('theme.discipline')
-        //     ->get()
-        //     ->pluck('theme.discipline')
-        //     ->unique();
-
-        // dd($disciplines);
-        
-        // return $disciplines;
-    // }
-
-    public function themes(Request $request)
+    public function themes()
     {
         $themes = Test::where("user_id", auth()->id())
             ->with('theme')
