@@ -28,6 +28,10 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
+    routeName: {
+        type: String,
+        default: 'admin.new',
+    },
 });
 const emit = defineEmits(["fetchData"]);
 
@@ -88,7 +92,7 @@ const deleteItem = () => {
     if (deleteRow.value == null) return;
 
     axios
-        .delete(route(props.routeName + ".destroy", { id: deleteRow.value.id }))
+        .delete(route('api.' + props.routeName + ".destroy", { id: deleteRow.value.id }))
         .then((response) => {
             toastService.showInfoToast(
                 `Удаление ${labels[props.labelgroup].case[1]}`,
@@ -156,8 +160,8 @@ watch(
         dataKey="id"
         filterDisplay="row"
         showGridlines
-        :globalFilterFields="['date']"
         :loading="loading"
+        class="p-datatable-small user-table unvisible-clear-filter-btn"
     >
         <Column
             v-for="(column, key) in columns"
@@ -174,6 +178,9 @@ watch(
                     :optionLabel="columns[key].filter.label || 'name'"
                     :optionValue="columns[key].filter.value || 'id'"
                     :placeholder="column.filter.placeholder || 'Выберите...'"
+                    display="chip"
+                    filter
+                    :maxSelectedLabels="2"
                 />
                 <Calendar
                     v-if="column.filter.type == 'calendar'"
@@ -185,14 +192,14 @@ watch(
             </template>
         </Column>
 
-        <!-- <Column
+        <Column
             :exportable="false"
             v-if="includeCrudActions"
             header="Управление"
-            :style="{ width: '5%' }"
+            :style="{ width: '3%' }"
         >
             <template #body="row">
-                <a :href="route(routeNameEdit, row.data.id)">
+                <a :href="route(routeName + '.edit', row.data.id)">
                     <Button
                         icon="pi pi-pencil"
                         severity="secondary"
@@ -206,7 +213,7 @@ watch(
                     @click="confirmDelete(row.data)"
                 ></Button>
             </template>
-        </Column> -->
+        </Column>
 
         <template #empty>
             <div class="table__empty-block">Данные не найдены</div>
@@ -227,4 +234,16 @@ watch(
         </template>
     </DataTable>
 
+    <DeleteDialog :visible="deleteDialog" @close="hideDeleteDialog" @delete="deleteItem" labelgroup="assignments" />
 </template>
+
+<style>
+.unvisible-clear-filter-btn button.p-column-filter-menu-button.p-link {
+    display: none;
+    margin: 0;
+}
+
+.unvisible-clear-filter-btn button.p-column-filter-clear-button.p-link.p-hidden-space {
+    display: none;
+}
+</style>

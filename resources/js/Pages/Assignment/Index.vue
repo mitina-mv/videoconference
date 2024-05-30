@@ -170,17 +170,16 @@ const toggleYear = (id) => {
                             @toggleItem="toggleYear"
                             idField="year"
                             label="label"
+                            addRoute="assignments.new"
+                            labelgroup="assignments"
                         ></reference-filter>
                         <filter-table
                             :tableData="tableData"
-                            :routeName="'api.tests'"
                             :columns="tableColumns"
                             :labelgroup="'tests'"
-                            :includeParamFrom="false"
                             @fetchData="fetchData"
                             :total="totalPage"
-                            routeNameForm="tests.new"
-                            routeNameEdit="tests.edit"
+                            routeName="assignments"
                         ></filter-table>
                     </template>
                 </div>
