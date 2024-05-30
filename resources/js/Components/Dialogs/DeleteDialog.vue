@@ -1,9 +1,9 @@
 <template>
     <Dialog
-        v-model:visible="visible"
-        @update:visible="handleVisibleUpdate"
+        :visible="visible"
+        @update:visible="updateVisible"
         :style="{ width: '450px' }"
-        :header="'Удаление ' + labels.case[1]"
+        :header="'Удаление ' + labels[labelgroup].case[1]"
         :modal="true"
     >
         <div class="confirmation-content">
@@ -11,7 +11,7 @@
                 class="pi pi-exclamation-triangle mr-3"
                 style="font-size: 2rem; color: var(--yellow-500)"
             />
-            <span>Вы уверены, что хотите удалить этого {{ labels.case[1] }}</span>
+            <span>Вы уверены, что хотите удалить этого {{ labels[labelgroup].case[1] }}</span>
         </div>
         <template #footer>
             <Button
@@ -19,13 +19,13 @@
                 icon="pi pi-times"
                 severity="danger"
                 text
-                @click="hideDeleteDialog"
+                @click="updateVisible"
             />
             <Button
                 label="Да"
                 icon="pi pi-check"
                 text
-                @click="confirmDelete"
+                @click.enter="confirmDelete"
             />
         </template>
     </Dialog>
@@ -35,20 +35,22 @@
 import { defineProps, ref } from 'vue';
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
+import labels from "@/locales/ru.js";
 
 const props = defineProps({
     visible: Boolean,
-    labels: Object
+    labels: Object,
+    labelgroup: String
 });
 
-const visible = ref(props.visible);
+const emit = defineEmits(['close', 'delete'])
 
-const hideDeleteDialog = () => {
-    emit('update:visible', false);
+const updateVisible = (value) => {
+    emit('close', value)
 };
 
 const confirmDelete = () => {
-    emit('delete-item');
+    emit('delete');
     hideDeleteDialog();
 };
 

@@ -68,4 +68,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Studgroup::class, 'users_studgroups');
     }
+
+    public function studgroup()
+    {
+        return $this->belongsTo(Studgroup::class);
+    }
 }

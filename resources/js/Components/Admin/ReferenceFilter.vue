@@ -2,11 +2,11 @@
     <div class="buttons-group mb-2">
         <Button
             v-for="item in items"
-            :key="item.id"
-            :label="item.name"
+            :key="item[idField]"
+            :label="item[label]"
             outlined
-            :severity="activeId && activeId === item.id ? '' : 'secondary'"
-            @click="toggleItem(item.id)"
+            :severity="activeId && activeId === item[idField] ? '' : 'secondary'"
+            @click="toggleItem(item[idField])"
         />
         <a v-if="addRoute" :href="route(addRoute)">
             <Button :label="'Добавить ' + labels[labelgroup].case[3]" severity="success" icon="pi pi-plus" />
@@ -36,6 +36,14 @@ const props = defineProps({
         type: String,
         default: 'studgroups',
     },
+    idField: {
+        type: String,
+        default: 'id'
+    },
+    label: {
+        type: String,
+        default: 'name'
+    }
 });
 
 const emit = defineEmits(["toggleItem"]);

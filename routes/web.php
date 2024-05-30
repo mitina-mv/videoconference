@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\ConferenceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionController;
@@ -42,12 +43,13 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin.index');
     Route::get('/edit/{id}', [AdminController::class, 'edit'])->name('admin.edit');
     Route::get('/new/{role}', [AdminController::class, 'create'])->name('admin.new');
+})->middleware(['auth']);
 
-    Route::group(['prefix' => 'reference'], function () {
-        Route::get('/studgroups', [AdminController::class, 'studgroups'])->name('admin.reference.studgroups');
-        Route::get('/disciplines', [AdminController::class, 'disciplines'])->name('admin.reference.disciplines');
-        Route::get('/themes', [AdminController::class, 'themes'])->name('admin.reference.themes');
-    });
+
+Route::group(['prefix' => 'reference'], function () {
+    Route::get('/studgroups', [AdminController::class, 'studgroups'])->name('admin.reference.studgroups');
+    Route::get('/disciplines', [AdminController::class, 'disciplines'])->name('admin.reference.disciplines');
+    Route::get('/themes', [AdminController::class, 'themes'])->name('admin.reference.themes');
 })->middleware(['auth']);
 
 Route::group(['prefix' => 'questions'], function () {
@@ -60,6 +62,12 @@ Route::group(['prefix' => 'tests'], function () {
     Route::get('/', [TestController::class, 'index'])->name('tests.index');
     Route::get('/edit/{id}', [TestController::class, 'edit'])->name('tests.edit');
     Route::get('/new', [TestController::class, 'create'])->name('tests.new');
+})->middleware(['auth']);
+
+Route::group(['prefix' => 'assignments'], function () {
+    Route::get('/', [AssignmentController::class, 'index'])->name('assignments.index');
+    Route::get('/edit/{id}', [AssignmentController::class, 'edit'])->name('assignments.edit');
+    Route::get('/new', [AssignmentController::class, 'create'])->name('assignments.new');
 })->middleware(['auth']);
 
 Route::middleware('auth')->group(function () {

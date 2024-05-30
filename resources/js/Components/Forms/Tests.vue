@@ -2,8 +2,6 @@
 import { ref, onMounted, computed, watch, onBeforeMount } from "vue";
 import InputText from "primevue/inputtext";
 import InputNumber from "primevue/inputnumber";
-import MultiSelect from "primevue/multiselect";
-import Dropdown from "primevue/dropdown";
 import labels from "@/locales/ru.js";
 import Button from "primevue/button";
 import toastService from "@/Services/toastService";
@@ -12,6 +10,7 @@ import Textarea from "primevue/textarea";
 import Toolbar from "primevue/toolbar";
 import Message from "primevue/message";
 import Checkbox from "primevue/checkbox";
+import FormField from "@/Components/Common/FormField.vue"
 
 const props = defineProps({
     data: {
@@ -31,15 +30,18 @@ const fieldData = ref({
     name: {
         value: props?.data?.name || null,
         class: "grid-self-col-1",
+        label: labels.test_fields.name.title,
     },
     description: {
         value: props?.data?.description || null,
         class: "grid-self-col-1",
         type: "text",
+        label: labels.test_fields.description.title,
     },
     discipline_id: {
         value: props?.data?.theme.discipline_id || null,
         type: "dropdown",
+        label: labels.test_fields.discipline_id.title,
         options: props.disciplines,
         header: {
             addRoute: 'admin.reference.disciplines'
@@ -48,6 +50,7 @@ const fieldData = ref({
     theme_id: {
         value: props?.data?.theme_id || null,
         type: "dropdown",
+        label: labels.test_fields.theme_id.title,
         options: [],
         header: {
             addRoute: 'admin.reference.themes'
@@ -245,48 +248,10 @@ watch(() => fieldData.value.theme_id.value, watchFixQuestions);
 <template>
     <form @submit.prevent="sendData" class="form d-grid gap-3">
         <div class="main-block-form d-grid gap-3 grid-col-2">
-            <div
-                class="form-control"
-                v-for="(field, code) in fieldData"
+            <FormField v-for="(field, code) in fieldData"
                 :key="code"
-                :class="field.class || ''"
-            >
-                <div class="d-flex flex-between">
-                    <label :for="code + '_input'">{{
-                        labels.test_fields[code].title
-                    }}</label>
-                    <a v-if="field.header" :href="route(field.header.addRoute)" class="text-gray">
-                        Добавить
-                    </a>
-                </div>
-                
-
-                <Textarea
-                    v-if="field.type == 'text'"
-                    v-model="fieldData[code].value"
-                />
-
-                <Dropdown
-                    :id="field.code"
-                    v-else-if="field.type && field.type == 'dropdown'"
-                    v-model="fieldData[code].value"
-                    :options="field.options"
-                    optionLabel="name"
-                    optionValue="id"
-                    filter
-                />
-
-                <InputText
-                    v-else
-                    :id="code + '_input'"
-                    v-model="fieldData[code].value"
-                    type="text"
-                    :class="{ 'p-invalid': errors[`${code}`] }"
-                />
-                <small class="p-error" v-if="errors[code]">{{
-                    errors[code] ? errors[code][0] : "&nbsp;"
-                }}</small>
-            </div>
+                :field="field"
+                :errors="errors" />
         </div>
         <div class="second-block-form d-grid gap-3 grid-col-3">
             <h4 class="grid-self-col-1">

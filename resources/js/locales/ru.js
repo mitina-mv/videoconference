@@ -44,6 +44,10 @@ export default {
         title: "Шаблоны тестов",
         case: ["шаблон", "шаблона", "шаблону", "шаблон", "шаблоном", "шаблоне"],
     },
+    assignments: {
+        title: "Назначение тестов",
+        case: ["назначение", "назначения", "назначению", "назначение", "назначением", "назначении"],
+    },
     user_fields: {
         name: {
             title: "Имя",
@@ -91,6 +95,7 @@ export default {
         questions: "Банк заданий",
         answers: "Варианты ответов",
         tests: "Шаблоны тестов",
+        assignments: "Назначение тестирования",
     },
     questions_fields: {
         text: {
@@ -174,4 +179,22 @@ export default {
             ],
         },
     },
+    assignments_fields: {
+        date: {
+            title: "Дата проведения",
+        },
+        test_id: {
+            title: "Шаблон теста",
+        },
+        date: {
+            title: "Дата проведения",
+        },
+        themes: {
+            title: "Тема",
+        },
+        studgroups: {
+            title: 'Группы студентов',
+        },
+
+    }
 };

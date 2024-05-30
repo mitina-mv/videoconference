@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\Api\AnswerController;
+use App\Http\Controllers\Api\AssignmentController;
+use App\Http\Controllers\Api\AssignmentTestlogController;
 use App\Http\Controllers\Api\DisciplineController;
 use App\Http\Controllers\Api\QuestionController;
 use App\Http\Controllers\Api\StudgroupController;
 use App\Http\Controllers\Api\TestController;
+use App\Http\Controllers\Api\TestlogController;
 use App\Http\Controllers\Api\ThemeController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserStudgroupsController;
@@ -44,4 +47,12 @@ Route::group(['as' => 'api.'], function() {
     Orion::resource('answers', AnswerController::class)->withSoftDeletes();
 
     Orion::resource('tests', TestController::class)->withSoftDeletes();
+
+    Orion::resource('testlogs', TestlogController::class);
+    Orion::resource('assignments', AssignmentController::class)->withSoftDeletes();
+    Orion::hasManyResource('assignments', 'testlogs', AssignmentTestlogController::class);
+
+    Route::post('/assignments/studgroups', [AssignmentController::class, 'studgroups'])->name('api.assignments.studgroups');
+    Route::post('/assignments/themes', [AssignmentController::class, 'themes'])->name('api.assignments.disciplines');
+
 });
