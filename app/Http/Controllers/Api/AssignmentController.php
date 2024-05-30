@@ -36,13 +36,19 @@ class AssignmentController extends Controller
 
     public function filterableBy(): array
     {
-        return ['test.theme_id', 'test_id', 'testlogs.user.studgroup_id'];
+        return ['test.theme_id', 'test_id', 'testlogs.user.studgroup_id', 'date'];
     }
 
     protected function buildIndexFetchQuery(Request $request, array $requestedRelations): Builder
     {
         $query = parent::buildIndexFetchQuery($request, $requestedRelations);
         $query->where('user_id', '=', request()->user()->id);
+
+        if ($request->has('year')) {
+            $year = $request->input('year');
+            $query->whereYear('date', $year);
+        }
+        
         return $query;
     }
 

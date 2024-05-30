@@ -29,7 +29,7 @@ const props = defineProps({
         default: true,
     },
 });
-const emit = defineEmits(["fetchData", "getPage"]);
+const emit = defineEmits(["fetchData"]);
 
 const currentPage = ref(0);
 const total = ref(props.total);
@@ -58,7 +58,7 @@ onMounted(() => {
 const transformFilters = () => {
     const transformed = [];
     for (const [key, value] of Object.entries(filters.value)) {
-        if(!value) continue;
+        if(!value || value.length == 0) continue;
 
         let field = columns.value[key].filter.field || key
 
@@ -110,8 +110,10 @@ const deleteItem = () => {
         });
 };
 
-const fetchData = (filters) => {
-    emit("fetchData", filters);
+const fetchData = (page = null) => {
+    loading.value = true;
+    emit("fetchData", transformFilters(), page, currentPageRow.value);
+    loading.value = false;
 };
 
 const onPage = ({ page }) => {
@@ -120,7 +122,9 @@ const onPage = ({ page }) => {
         currentPageRowOld.value == currentPageRow.value
     )
         return;
-    emit("getPage", page, currentPageRow.value);
+
+    fetchData(page)
+    
     currentPage.value = page;
     currentPageRowOld.value = currentPageRow.value;
 };
@@ -140,7 +144,7 @@ watch(
 watch(
     filters,
     () => {
-        fetchData(transformFilters());
+        fetchData(currentPage.value);
     },
     { deep: true }
 )
@@ -153,6 +157,7 @@ watch(
         filterDisplay="row"
         showGridlines
         :globalFilterFields="['date']"
+        :loading="loading"
     >
         <Column
             v-for="(column, key) in columns"
@@ -206,8 +211,19 @@ watch(
         <template #empty>
             <div class="table__empty-block">Данные не найдены</div>
         </template>
+
         <template #loading>
             <div class="table__empty-block">Загрузка данных...</div>
+        </template>
+
+        <template #footer>
+            <Paginator
+                :rows="currentPageRow"
+                :totalRecords="total"
+                :rowsPerPageOptions="[5, 25, 50, 100]"
+                v-model:rows="currentPageRow"
+                @page="onPage"
+            ></Paginator>
         </template>
     </DataTable>
 

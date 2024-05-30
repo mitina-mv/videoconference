@@ -13,8 +13,7 @@ class AssignmentController extends Controller
     public function __construct(
         public TestlogService $testlogService
     )
-    {
-        
+    {  
     }
     
     public function index()
@@ -27,7 +26,7 @@ class AssignmentController extends Controller
                 DB::raw("to_char(date, 'YYYY') as year"),
                 DB::raw("count(id) as count_test"),
             )
-            ->orderBy('year')
+            ->orderBy('year', 'desc')
             ->groupBy(
                 'year'
             )

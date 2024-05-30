@@ -92,7 +92,11 @@ onMounted(async () => {
     await fetchData();
 });
 
-const fetchData = async (filters = null) => {
+const fetchData = async (
+    filters = null,
+    page = null,
+    limit = null
+) => {
     let params = {
         includes: [
             { relation: "test" },
@@ -100,24 +104,23 @@ const fetchData = async (filters = null) => {
         ],
     };
 
-    console.log(filters);
-
     if (filters) {
         params.filters = filters
     }
 
-    // if (activeYear.value) {
-    //     params.filters = [
-    //         {
-    //             field: "test.theme.discipline_id",
-    //             operator: "=",
-    //             value: activeYear.value,
-    //         },
-    //     ];
-    // }
+    if (page !== null && limit !== null) {
+        params.page = page + 1;
+        params.limit = limit;
+    }
+    
+    let url = '/api/assignments/search'
+
+    if (activeYear.value) {
+        url = url + `?year=${activeYear.value}`
+    }
 
     try {
-        const response = await axios.post(`/api/assignments/search`, params);
+        const response = await axios.post(url, params);
         tableData.value = response.data.data;
         processTableData(tableData.value);
         totalPage.value = response.data.meta.total;
@@ -126,32 +129,6 @@ const fetchData = async (filters = null) => {
     } catch (error) {
         console.error(error);
         toastService.showErrorToast("Заголовок", "Текст");
-    }
-};
-
-const fetchPageData = async (page, limit) => {
-    let params = {
-        page: page + 1,
-        limit: limit,
-        includes: [{ relation: "theme" }],
-    };
-
-    if (activeYear.value) {
-        params.filters = [
-            {
-                field: "theme.discipline_id",
-                operator: "=",
-                value: activeYear.value,
-            },
-        ];
-    }
-
-    try {
-        const response = await axios.post(`/api/tests/search`, params);
-        tableData.value = response.data.data;
-        processTableData(tableData.value);
-    } catch (error) {
-        toastService.showInfoToast("Заголовок", "Текст");
     }
 };
 
@@ -201,7 +178,6 @@ const toggleYear = (id) => {
                             :labelgroup="'tests'"
                             :includeParamFrom="false"
                             @fetchData="fetchData"
-                            @getPage="fetchPageData"
                             :total="totalPage"
                             routeNameForm="tests.new"
                             routeNameEdit="tests.edit"
