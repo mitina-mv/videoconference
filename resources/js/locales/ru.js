@@ -40,6 +40,10 @@ export default {
             "дисциплине",
         ],
     },
+    videoconferences: {
+        title: "Конференции",
+        case: ["конференция",  "конференции",  "конференции",  "конференцию",  "конференцией",  "конференции"],
+    },
     tests: {
         title: "Шаблоны тестов",
         case: ["шаблон", "шаблона", "шаблону", "шаблон", "шаблоном", "шаблоне"],
@@ -194,6 +198,46 @@ export default {
         },
         studgroups: {
             title: 'Группы студентов',
+        },
+    },
+    videoconferences_fields:  {
+        session: {
+            title: "Сессия",
+        },
+        name: {
+            title: "Название",
+        },
+        studgroups: {
+            title: 'Группы студентов',
+        },
+        date: {
+            title: "Дата",
+        },
+        test:  {
+            title: "Шаблон теста",
+        },
+        settings:  {
+            title: "Настройки",
+            values: [
+                {
+                    id: "permission_video",
+                    name: "Использование камеры",
+                    type: "bool",
+                    default: false,
+                },
+                {
+                    id: "permission_audio",
+                    name: "Использование аудио",
+                    type: "bool",
+                    default: false,
+                },
+                {
+                    id: "permission_mute",
+                    name: "Функция 'заглушить всех'",
+                    type: "bool",
+                    default: true,
+                },
+            ],
         },
 
     }

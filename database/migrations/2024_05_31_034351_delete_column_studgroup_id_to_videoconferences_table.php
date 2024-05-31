@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('videoconferences', function (Blueprint $table) {
             $table->dropColumn('studgroup_id');
+            $table->string('name');
         });
     }
 
@@ -24,6 +25,7 @@ return new class extends Migration
         Schema::table('videoconferences', function (Blueprint $table) {
             $table->foreignId('studgroup_id')->nullable()
                 ->constrained('studgroups');
+            $table->dropColumn('name');
         });
     }
 };

@@ -4,7 +4,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage } from "@inertiajs/vue3";
 import toastService from "@/Services/toastService";
 import LoadingSpinner from "@/Components/Common/LoadingSpinner.vue";
-import Assignments from "@/Components/Forms/Assignments.vue";
+import Videoconference from "@/Components/Forms/Videoconference.vue";
 
 const props = defineProps({
     id: {
@@ -47,7 +47,7 @@ onMounted(() => {
         <div class="d-grid gap-4 content">
             <div class="content__container">
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <Assignments v-if="(id && data && studgroups) || (!id && studgroups)" :data="data" :tests="tests" :studgroups="studgroups" :userId="userId"></Assignments>
+                    <Videoconference v-if="(id && data && studgroups) || (!id && studgroups)" :data="data" :tests="tests" :studgroups="studgroups" :userId="userId"></Videoconference>
                     <loading-spinner v-else></loading-spinner>
                 </div>
             </div>

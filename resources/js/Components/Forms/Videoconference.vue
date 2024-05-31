@@ -3,6 +3,7 @@ import { ref, onMounted, } from "vue";
 import labels from "@/locales/ru.js";
 import Button from "primevue/button";
 import toastService from "@/Services/toastService";
+import FormField from "@/Components/Common/FormField.vue";
 
 const props = defineProps({
     data: {
@@ -16,42 +17,86 @@ const props = defineProps({
 
 const id = ref(props?.data?.id || null);
 const errors = ref({});
+const labelgroup = 'videoconferences_fields'
+const settings = ref([])
 
 const fieldData = ref({
+    name: {
+        value: props?.data?.name || null,
+        type: "string",
+        label: labels[labelgroup].name.title,
+        req: true,
+    },
     date: {
         value: props?.data?.date || null,
         type: "datetime",
-        label: labels.assignments_fields.date.title,
+        label: labels[labelgroup].date.title,
         req: true,
     },
     test_id: {
         value: props?.data?.test_id || null,
         type: "dropdown",
         options: props.tests,
-        req: true,
-        label: labels.assignments_fields.test_id.title,
+        req: false,
+        label: labels[labelgroup].test.title,
         header: {
             addRoute: 'tests.new'
         },
     },
+    studgroups: {
+        value: props?.data?.studgroups || null,
+        type: "multiselect",
+        options: props.studgroups,
+        req: true,
+        label: labels[labelgroup].studgroups.title,
+        header: {
+            addRoute: 'admin.reference.studgroups'
+        },
+        max: 4,
+    },
 });
 
+onMounted(() => {
+    let st = props.data ? JSON.parse(props.data.settings) : {};
+
+    labels[labelgroup].settings.values.forEach((item) => {
+        settings.value[item.id] = {
+            value: st[item.id] || item.default,
+            type: item.type,
+            label: item.name,
+        };
+    });
+
+    console.log(settings.value);
+});
+
+const sendData = () => {
+
+}
 </script>
 
 <template>
     <form @submit.prevent="sendData" class="form d-grid gap-3">
         <div class="d-grid grid-col-2 gap-3">
-            <div class="studgroups">
-                <h3>Участники</h3>
-            </div>
             <div>
                 <FormField v-for="(field, code) in fieldData"
                     :key="code"
                     :field="field"
                     class="mt-2"
-                    :errors="errors" />
-                <Button @click="sendData" label="Сохранить" class="mt-3" />
+                    :errors="errors" />    
+            </div>
+            <div>
+                <h3>
+                    {{ labels[labelgroup].settings.title }}
+                </h3>
+
+                <FormField v-for="(field, code) in settings"
+                    :key="code"
+                    :field="field"
+                    class="mt-2"
+                    :errors="[]" />  
             </div>
         </div>
+        <Button @click="sendData" label="Сохранить" class="mt-3" />
     </form>
 </template>
