@@ -17,6 +17,7 @@ class Videoconference extends Model
         'user_id',
         'date',
         'settings',
+        'session' // uuid
     ];
 
     // relationships
@@ -28,5 +29,10 @@ class Videoconference extends Model
     public function assignment()
     {
         return $this->hasOne(Assignment::class);
+    }
+
+    public function files()
+    {
+        return $this->belongsToMany(File::class);
     }
 }

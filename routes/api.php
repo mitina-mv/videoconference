@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\ThemeController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserStudgroupsController;
 use App\Http\Controllers\Api\VideoconferenceController;
+use App\Http\Controllers\Api\VideoconferenceStudgroupController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Orion\Facades\Orion;
@@ -58,5 +59,6 @@ Route::group(['as' => 'api.'], function() {
     Route::post('/assignments/themes', [AssignmentController::class, 'themes'])->name('api.assignments.disciplines');
 
     Orion::resource('videoconferences', VideoconferenceController::class)->withSoftDeletes();
-
+    Orion::belongsToManyResource('videoconferences', 'studgroups', VideoconferenceStudgroupController::class);
+    
 });

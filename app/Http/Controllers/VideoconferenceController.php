@@ -37,4 +37,24 @@ class VideoconferenceController extends Controller
         ]);
     }
 
+    public function edit($id)
+    {
+        $user = auth()->user();
+
+        return Inertia::render('Videoconference/Form', [
+            'id' => $id,
+            'tests' => $user->tests,
+            'studgroups' => $user->studgroups,
+        ]);
+    }
+
+    public function create()
+    {
+        $user = auth()->user();
+        
+        return Inertia::render('Videoconference/Form', [
+            'tests' => $user->tests,
+            'studgroups' => $user->studgroups,            
+        ]);
+    }
 }
