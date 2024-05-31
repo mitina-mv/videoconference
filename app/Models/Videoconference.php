@@ -27,6 +27,15 @@ class Videoconference extends Model
         'date' => 'datetime',
     ];
 
+    protected $appends = ['is_completed'];
+
+    public function getIsCompletedAttribute()
+    {
+        $now = Carbon::now()->timezone('Europe/Moscow');
+        $date = Carbon::parse($this->date)->timezone('Europe/Moscow');
+        return $date && $date->lt($now);
+    }
+
     public function getDateAttribute($value)
     {
         return Carbon::parse($value)->timezone('Europe/Moscow')->format('d.m.Y H:i');

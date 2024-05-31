@@ -228,19 +228,22 @@ watch(
             :style="{ width: '2%' }"
         >
             <template #body="row">
-                <a :href="route(routeName + '.edit', row.data.id)">
+                <div v-if="(typeof row.data.is_completed !== 'undefined' && !row.data.is_completed) || (typeof row.data.is_completed == 'undefined')">
+                    <a :href="route(routeName + '.edit', row.data.id)">
+                        <Button
+                            icon="pi pi-pencil"
+                            severity="secondary"
+                            text
+                        ></Button>
+                    </a>
                     <Button
-                        icon="pi pi-pencil"
-                        severity="secondary"
+                        icon="pi pi-trash"
+                        severity="danger"
                         text
+                        @click="confirmDelete(row.data)"
                     ></Button>
-                </a>
-                <Button
-                    icon="pi pi-trash"
-                    severity="danger"
-                    text
-                    @click="confirmDelete(row.data)"
-                ></Button>
+                </div>
+
             </template>
         </Column>
 
