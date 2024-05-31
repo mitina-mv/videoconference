@@ -16,6 +16,7 @@ class Assignment extends Model
         'user_id',
         'test_id',
         'date',
+        'vc_id'
     ];
     protected $table = 'assignments';
     protected $primaryKey = 'id';
@@ -41,6 +42,11 @@ class Assignment extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function videoconference()
+    {
+        return $this->belongsTo(Videoconference::class);
     }
 
     public function testlogs()

@@ -15,9 +15,18 @@ class Videoconference extends Model
 
     protected $fillable = [
         'user_id',
-        'studgroup_id',
-        'test_id',
         'date',
         'settings',
     ];
+
+    // relationships
+    public function studgroups()
+    {
+        return $this->belongsToMany(Studgroup::class, 'videoconference_studgroup');
+    }
+
+    public function assignment()
+    {
+        return $this->hasOne(Assignment::class);
+    }
 }

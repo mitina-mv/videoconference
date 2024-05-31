@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\TestlogController;
 use App\Http\Controllers\Api\ThemeController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserStudgroupsController;
+use App\Http\Controllers\Api\VideoconferenceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Orion\Facades\Orion;
@@ -50,9 +51,12 @@ Route::group(['as' => 'api.'], function() {
 
     Orion::resource('testlogs', TestlogController::class);
     Orion::resource('assignments', AssignmentController::class)->withSoftDeletes();
+    // TODO вомзможно не используется
     Orion::hasManyResource('assignments', 'testlogs', AssignmentTestlogController::class);
 
     Route::post('/assignments/studgroups', [AssignmentController::class, 'studgroups'])->name('api.assignments.studgroups');
     Route::post('/assignments/themes', [AssignmentController::class, 'themes'])->name('api.assignments.disciplines');
+
+    Orion::resource('videoconferences', VideoconferenceController::class)->withSoftDeletes();
 
 });
