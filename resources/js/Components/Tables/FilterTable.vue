@@ -244,6 +244,9 @@ watch(
                     ></Button>
                 </div>
 
+                <div v-else>
+                    отчет
+                </div>
             </template>
         </Column>
 
