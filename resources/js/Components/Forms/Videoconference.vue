@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, } from "vue";
+import { ref, onMounted } from "vue";
 import labels from "@/locales/ru.js";
 import Button from "primevue/button";
 import toastService from "@/Services/toastService";
@@ -18,8 +18,8 @@ const props = defineProps({
 
 const id = ref(props?.data?.id || null);
 const errors = ref({});
-const labelgroup = 'videoconferences_fields'
-const settingsData = ref({})
+const labelgroup = "videoconferences_fields";
+const settingsData = ref({});
 const assignment_id = ref(props?.data?.assignment?.id || null);
 
 const fieldData = ref({
@@ -42,7 +42,7 @@ const fieldData = ref({
         req: false,
         label: labels[labelgroup].test.title,
         header: {
-            addRoute: 'tests.new'
+            addRoute: "tests.new",
         },
     },
     studgroups: {
@@ -52,7 +52,7 @@ const fieldData = ref({
         req: true,
         label: labels[labelgroup].studgroups.title,
         header: {
-            addRoute: 'admin.reference.studgroups'
+            addRoute: "admin.reference.studgroups",
         },
         max: 4,
     },
@@ -69,12 +69,14 @@ onMounted(() => {
         };
     });
 
-    if(props.data && props.data.studgroups) {
-        fieldData.value.studgroups.value = props.data.studgroups.map(a => a.id)
+    if (props.data && props.data.studgroups) {
+        fieldData.value.studgroups.value = props.data.studgroups.map(
+            (a) => a.id
+        );
     }
 
-    if(assignment_id.value) {
-        fieldData.value.test_id.value = props.data.assignment.test_id
+    if (assignment_id.value) {
+        fieldData.value.test_id.value = props.data.assignment.test_id;
     }
 
     console.log(fieldData.value);
@@ -115,14 +117,15 @@ const sendData = async () => {
 
         toastService.showErrorToast(
             `Сохранение данных`,
-            message || "Ошибка при сохранении данных. Пожалуйста, попробуйте еще раз."
+            message ||
+                "Ошибка при сохранении данных. Пожалуйста, попробуйте еще раз."
         );
     }
-}
+};
 
 const validateFields = () => {
     for (const field of Object.values(fieldData.value)) {
-        if (field.req && !field.value) {
+        if (field.req && (!field.value || field.value.length == 0)) {
             toastService.showErrorToast(
                 `Сохранение данных`,
                 "Необходимо заполнить все обязательные поля!"
@@ -131,39 +134,44 @@ const validateFields = () => {
         }
     }
     return true;
-}
+};
 
 const prepareData = (initial = fieldData.value) => {
     const data = {};
     for (const [code, field] of Object.entries(initial)) {
-        if(code != 'test_id' || code != 'studgroups')
-        data[code] = field.value;
+        if (code != "test_id" || code != "studgroups") data[code] = field.value;
     }
     return data;
-}
+};
 
 const syncStudgroups = async () => {
     try {
-        await axios.patch(`/api/videoconferences/${id.value}/studgroups/sync`, {resources: fieldData.value.studgroups.value})
+        await axios.patch(`/api/videoconferences/${id.value}/studgroups/sync`, {
+            resources: fieldData.value.studgroups.value,
+        });
     } catch (error) {
-        if(props.data && props.data.studgroups) {
-            fieldData.value.studgroups.value = props.data.studgroups.map(a => a.id)
+        if (props.data && props.data.studgroups) {
+            fieldData.value.studgroups.value = props.data.studgroups.map(
+                (a) => a.id
+            );
         } else {
-            fieldData.value.studgroups.value = null
+            fieldData.value.studgroups.value = null;
         }
 
-        throw new Error('Не удалось сохранить список участвующих групп.');
+        throw new Error("Не удалось сохранить список участвующих групп.");
     }
-}
+};
 
 const syncAssignmentTest = async () => {
-    if(!fieldData.value.test_id.value) {
+    if (!fieldData.value.test_id.value) {
         // запрос на удаление
         if (assignment_id.value) {
             try {
-                await axios.delete(`/api/assignments/${assignment_id.value}?force=true`);
+                await axios.delete(
+                    `/api/assignments/${assignment_id.value}?force=true`
+                );
             } catch (error) {
-                throw new Error('Не удалось удалить назначение.');
+                throw new Error("Не удалось удалить назначение.");
             }
             return;
         } else {
@@ -171,7 +179,9 @@ const syncAssignmentTest = async () => {
         }
     }
 
-    const url = "/api/assignments" + (assignment_id.value ? `/${assignment_id.value}` : "");
+    const url =
+        "/api/assignments" +
+        (assignment_id.value ? `/${assignment_id.value}` : "");
     let response;
     const test_data = {
         test_id: fieldData.value.test_id.value,
@@ -181,40 +191,44 @@ const syncAssignmentTest = async () => {
 
     try {
         // если есть значение и есть старое значение
-        if(assignment_id.value) {
+        if (assignment_id.value) {
             response = await axios.patch(url, test_data);
-        } else { // если создаем новое назначение
+        } else {
+            // если создаем новое назначение
             response = await axios.post(url, test_data);
-            assignment_id.value = response.data.data.id
+            assignment_id.value = response.data.data.id;
         }
     } catch (error) {
-        throw new Error('Не удалось сохранить тест для видеоконференции.');
+        throw new Error("Не удалось сохранить тест для видеоконференции.");
     }
-
-}
+};
 </script>
 
 <template>
     <form @submit.prevent="sendData" class="form d-grid gap-3">
         <div class="d-grid grid-col-2 gap-4">
             <div>
-                <FormField v-for="(field, code) in fieldData"
+                <FormField
+                    v-for="(field, code) in fieldData"
                     :key="code"
                     :field="field"
                     class="mt-2"
-                    :errors="errors" />    
+                    :errors="errors"
+                />
+                <Button @click="sendData" label="Сохранить" class="mt-3" />
             </div>
             <div>
                 <h3>
                     {{ labels[labelgroup].settings.title }}
                 </h3>
-                <FormField v-for="(field, code) in settingsData"
+                <FormField
+                    v-for="(field, code) in settingsData"
                     :key="code"
                     :field="field"
                     class="mt-2"
-                    :errors="[]" />  
+                    :errors="[]"
+                />
             </div>
         </div>
-        <Button @click="sendData" label="Сохранить" class="mt-3" />
     </form>
 </template>

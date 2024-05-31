@@ -12,24 +12,15 @@ import FilterTable from "@/Components/Tables/FilterTable.vue";
 const props = defineProps({
     years: [Array, Object],
     studgroups: Array,
-    tests: Array,
-    themes: Array,
 });
 
 const tableColumns = ref({
-    test_id: {
-        code: "test_id",
-        sort: false,
-        filter: {
-            type: 'select',
-            options: props.tests,
-            field: 'test_id',
-            label: 'name',
-            value: 'id',
-        },
-        title: labels.assignments_fields.test_id.title,
+    name: {
+        code: "name",
+        sort: true,
+        title: labels.videoconferences_fields.name.title,
         style: {
-            width: "20%",
+            width: "10%",
         },
     },
     studgroup_id: {
@@ -39,12 +30,12 @@ const tableColumns = ref({
             type: 'select',
             options: props.studgroups,
             value: 'id',
-            field: 'testlogs.user.studgroup_id',
+            field: 'studgroups.id',
             label: 'name',
         },
-        title: labels.assignments_fields.studgroups.title,
+        title: labels.videoconferences_fields.studgroups.title,
         style: {
-            width: "20%",
+            width: "10%",
         },
     },
     date: {
@@ -54,25 +45,20 @@ const tableColumns = ref({
             type: 'calendar',
             field: 'date',
             options: null,
+            showTile: true,
         },
-        title: labels.assignments_fields.date.title,
+        title: labels.videoconferences_fields.date.title,
         style: {
-            width: "20%",
+            width: "23%",
         },
     },
-    theme_id: {
-        code: "theme_id",
+    settings: {
         sort: false,
-        filter: {
-            type: 'select',
-            options: props.themes,
-            value: 'id',
-            label: 'name',
-            field: 'test.theme_id',
-        },
-        title: labels.assignments_fields.themes.title,
+        code: "settings",
+        title: labels.videoconferences_fields.settings.title,
+        type: "html",
         style: {
-            width: "20%",
+            width: "55%",
         },
     },
 });
@@ -90,6 +76,8 @@ onMounted(async () => {
         activeYear.value = years.value[0].year;
     }
     await fetchData();
+
+console.log(props.studgroups);
 });
 
 const fetchData = async (
@@ -99,9 +87,14 @@ const fetchData = async (
 ) => {
     let params = {
         includes: [
-            { relation: "test" },
-            { relation: "test.theme" },
+            { relation: "studgroups" },
+            { relation: "assignment" },
+            { relation: "assignment.test" },
         ],
+        sort : [
+            {"field" : "date", "direction" : "asc"},
+            {"field" : "name", "direction" : "asc"},
+        ]
     };
 
     if (filters) {
@@ -113,7 +106,7 @@ const fetchData = async (
         params.limit = limit;
     }
     
-    let url = '/api/assignments/search'
+    let url = '/api/videoconferences/search'
 
     if (activeYear.value) {
         url = url + `?year=${activeYear.value}`
@@ -134,11 +127,34 @@ const fetchData = async (
 
 const processTableData = (data) => {
     data.forEach((element, index) => {
-        data[index].test_id = element.test.name
-        data[index].theme_id = element.test.theme.name
+        data[index].test_id = element.assignment?.test.name || '-'
 
         if(element.studgroups.length > 0) {
             data[index].studgroup_id = element.studgroups.map(a => a.name).join(', ')
+        } else {
+            data[index].studgroup_id = 'не указано'
+        }
+
+        let settings = JSON.parse(element.settings);
+        let sessionString = `,<br />${labels.videoconferences_fields.session.title}: ${element.session}`
+        let testString = `,<br />${labels.videoconferences_fields.test.title}: ${element.assignment?.test.name || 'нет'}`
+
+        if (Object.keys(settings).length > 0) {
+            let settingsString = labels.videoconferences_fields.settings.values
+                .filter((a) => settings.hasOwnProperty(a.id))
+                .map((a) => {
+                    let val =
+                        a.type === "bool"
+                            ? settings[a.id]
+                                ? "да"
+                                : "нет"
+                            : settings[a.id];
+                    return `${a.name}: ${val}`;
+                })
+                .join(",<br />");
+            data[index].settings = settingsString + `${sessionString}${testString}` 
+        } else {
+            data[index].settings = 'Настройки: Не установлены' + `${sessionString}${testString}` 
         }
     });
 };
@@ -150,12 +166,12 @@ const toggleYear = (id) => {
 </script>
 
 <template>
-    <Head :title="labels.page_titles.assignments" />
+    <Head :title="labels.page_titles.videoconferences" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ labels.page_titles.assignments }}
+                {{ labels.page_titles.videoconferences }}
             </h2>
         </template>
 
@@ -170,16 +186,17 @@ const toggleYear = (id) => {
                             @toggleItem="toggleYear"
                             idField="year"
                             label="label"
-                            addRoute="assignments.new"
-                            labelgroup="assignments"
+                            addRoute="videoconferences.new"
+                            labelgroup="videoconferences"
+                            class="mb-4"
                         ></reference-filter>
                         <filter-table
                             :tableData="tableData"
                             :columns="tableColumns"
-                            :labelgroup="'tests'"
+                            labelgroup="videoconferences"
                             @fetchData="fetchData"
                             :total="totalPage"
-                            routeName="assignments"
+                            routeName="videoconferences"
                         ></filter-table>
                     </template>
                 </div>

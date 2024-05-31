@@ -100,6 +100,7 @@ export default {
         answers: "Варианты ответов",
         tests: "Шаблоны тестов",
         assignments: "Назначение тестирования",
+        videoconferences: "Назначение видеоконференции",
     },
     questions_fields: {
         text: {

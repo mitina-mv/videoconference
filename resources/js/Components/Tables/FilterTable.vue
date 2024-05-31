@@ -30,7 +30,7 @@ const props = defineProps({
     },
     routeName: {
         type: String,
-        default: 'admin.new',
+        default: "admin.new",
     },
 });
 const emit = defineEmits(["fetchData"]);
@@ -62,19 +62,26 @@ onMounted(() => {
 const transformFilters = () => {
     const transformed = [];
     for (const [key, value] of Object.entries(filters.value)) {
-        if(!value || value.length == 0) continue;
+        if (!value || value.length == 0) continue;
 
-        let field = columns.value[key].filter.field || key
+        let field = columns.value[key].filter.field || key;
+        let operator = "="
 
-        if(columns.value[key].filter.type == 'select') {
-            transformed.push({
-                "field": field, "operator" : "in", "value" : value
-            })
-        } else {
-            transformed.push({
-                "field": field, "operator" : "=", "value" : value
-            })
+        switch(columns.value[key].filter.type)
+        {
+            case "select":
+                operator = "in"
+                break;
+            case 'calendar':
+                operator = ">="
+                break;
         }
+
+        transformed.push({
+            field: field,
+            operator: operator,
+            value: value,
+        });
     }
     return transformed;
 };
@@ -92,7 +99,11 @@ const deleteItem = () => {
     if (deleteRow.value == null) return;
 
     axios
-        .delete(route('api.' + props.routeName + ".destroy", { id: deleteRow.value.id }))
+        .delete(
+            route("api." + props.routeName + ".destroy", {
+                id: deleteRow.value.id,
+            })
+        )
         .then((response) => {
             toastService.showInfoToast(
                 `Удаление ${labels[props.labelgroup].case[1]}`,
@@ -127,8 +138,8 @@ const onPage = ({ page }) => {
     )
         return;
 
-    fetchData(page)
-    
+    fetchData(page);
+
     currentPage.value = page;
     currentPageRowOld.value = currentPageRow.value;
 };
@@ -151,7 +162,7 @@ watch(
         fetchData(currentPage.value);
     },
     { deep: true }
-)
+);
 </script>
 
 <template>
@@ -185,10 +196,28 @@ watch(
                 <Calendar
                     v-if="column.filter.type == 'calendar'"
                     v-model="filters[key]"
-                    showIcon
+                    showIcon iconDisplay="input"
                     :dateFormat="column.filter.format || 'dd.mm.yy'"
                     :placeholder="column.filter.placeholder || 'Выберите дату'"
                 />
+            </template>
+
+            <template #body="{ data }">
+                <i
+                    class="pi"
+                    :class="{
+                        'pi-check-circle text-green-500': data[column.code],
+                        'pi-times-circle text-red-400': !data[column.code],
+                    }"
+                    v-if="column.type && column.type == 'bool'"
+                ></i>
+                <div
+                    v-html="data[column.code]"
+                    v-else-if="column.type && column.type == 'html'"
+                ></div>
+                <div v-else>
+                    {{ data[column.code] }}
+                </div>
             </template>
         </Column>
 
@@ -196,7 +225,7 @@ watch(
             :exportable="false"
             v-if="includeCrudActions"
             header="Управление"
-            :style="{ width: '3%' }"
+            :style="{ width: '2%' }"
         >
             <template #body="row">
                 <a :href="route(routeName + '.edit', row.data.id)">
@@ -234,7 +263,12 @@ watch(
         </template>
     </DataTable>
 
-    <DeleteDialog :visible="deleteDialog" @close="hideDeleteDialog" @delete="deleteItem" labelgroup="assignments" />
+    <DeleteDialog
+        :visible="deleteDialog"
+        @close="hideDeleteDialog"
+        @delete="deleteItem"
+        labelgroup="assignments"
+    />
 </template>
 
 <style>
@@ -243,7 +277,8 @@ watch(
     margin: 0;
 }
 
-.unvisible-clear-filter-btn button.p-column-filter-clear-button.p-link.p-hidden-space {
+.unvisible-clear-filter-btn
+    button.p-column-filter-clear-button.p-link.p-hidden-space {
     display: none;
 }
 </style>

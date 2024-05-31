@@ -41,14 +41,33 @@ class AssignmentController extends Controller
 
     protected function buildIndexFetchQuery(Request $request, array $requestedRelations): Builder
     {
+        // Удаление фильтра по дате из запроса
+        if ($request->has('filters') && !empty($request->input('filters'))) {
+            $filtersOld = $request->input('filters');
+            $fitlerFields = array_column($filtersOld, 'field');
+
+            $filters = array_filter($filtersOld, function ($filter) {
+                return $filter['field'] !== 'date';
+            });
+
+            $request->merge(['filters' => array_values($filters)]);
+        }
+
         $query = parent::buildIndexFetchQuery($request, $requestedRelations);
         $query->where('user_id', '=', request()->user()->id);
 
-        if ($request->has('year')) {
+        if (!empty($fitlerFields) 
+            && ($key = array_search('date', $fitlerFields)) !== false
+        ) {
+            $date = Carbon::parse($filtersOld[$key]['value'])
+                ->timezone('Europe/Moscow')
+                ->format('d.m.Y');
+            $query->whereDate('date', $date);
+        } else if ($request->has('year')) {
             $year = $request->input('year');
             $query->whereYear('date', $year);
         }
-        
+
         return $query;
     }
 

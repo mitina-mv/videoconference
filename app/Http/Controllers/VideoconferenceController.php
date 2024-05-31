@@ -17,6 +17,7 @@ class VideoconferenceController extends Controller
     
     public function index()
     {
+        $user = auth()->user();
         // забираем года и количество назначенных вк
         $arYears = Videoconference::where([
             'user_id' => auth()->id(),
@@ -34,6 +35,7 @@ class VideoconferenceController extends Controller
 
         return Inertia::render('Videoconference/Index', [
             'years' => $arYears,
+            'studgroups' => $user->studgroups,
         ]);
     }
 
