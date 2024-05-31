@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,6 +21,16 @@ class Videoconference extends Model
         'name',
         'session', // uuid
     ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'date' => 'datetime',
+    ];
+
+    public function getDateAttribute($value)
+    {
+        return Carbon::parse($value)->timezone('Europe/Moscow')->format('d.m.Y H:i');
+    }
 
     // relationships
     public function studgroups()

@@ -4,6 +4,7 @@ import labels from "@/locales/ru.js";
 import Button from "primevue/button";
 import toastService from "@/Services/toastService";
 import FormField from "@/Components/Common/FormField.vue";
+import { data } from "autoprefixer";
 
 const props = defineProps({
     data: {
@@ -19,6 +20,7 @@ const id = ref(props?.data?.id || null);
 const errors = ref({});
 const labelgroup = 'videoconferences_fields'
 const settingsData = ref({})
+const assignment_id = ref(props?.data?.assignment?.id || null);
 
 const fieldData = ref({
     name: {
@@ -71,7 +73,11 @@ onMounted(() => {
         fieldData.value.studgroups.value = props.data.studgroups.map(a => a.id)
     }
 
-    console.log(settingsData.value);
+    if(assignment_id.value) {
+        fieldData.value.test_id.value = props.data.assignment.test_id
+    }
+
+    console.log(fieldData.value);
 });
 
 const sendData = async () => {
@@ -97,6 +103,7 @@ const sendData = async () => {
         if (response.data.data.id) {
             id.value = response.data.data.id;
             await syncStudgroups();
+            await syncAssignmentTest();
         }
 
         toastService.showSuccessToast(
@@ -104,9 +111,11 @@ const sendData = async () => {
             "Данные успешно сохранены!"
         );
     } catch (error) {
+        let message = error?.response.data.message || error;
+
         toastService.showErrorToast(
             `Сохранение данных`,
-            error.response.data.message || "Ошибка при сохранении данных. Пожалуйста, попробуйте еще раз."
+            message || "Ошибка при сохранении данных. Пожалуйста, попробуйте еще раз."
         );
     }
 }
@@ -134,7 +143,54 @@ const prepareData = (initial = fieldData.value) => {
 }
 
 const syncStudgroups = async () => {
-    await axios.patch(`/api/videoconferences/${id.value}/studgroups/sync`, {resources: fieldData.value.studgroups.value})
+    try {
+        await axios.patch(`/api/videoconferences/${id.value}/studgroups/sync`, {resources: fieldData.value.studgroups.value})
+    } catch (error) {
+        if(props.data && props.data.studgroups) {
+            fieldData.value.studgroups.value = props.data.studgroups.map(a => a.id)
+        } else {
+            fieldData.value.studgroups.value = null
+        }
+
+        throw new Error('Не удалось сохранить список участвующих групп.');
+    }
+}
+
+const syncAssignmentTest = async () => {
+    if(!fieldData.value.test_id.value) {
+        // запрос на удаление
+        if (assignment_id.value) {
+            try {
+                await axios.delete(`/api/assignments/${assignment_id.value}?force=true`);
+            } catch (error) {
+                throw new Error('Не удалось удалить назначение.');
+            }
+            return;
+        } else {
+            return;
+        }
+    }
+
+    const url = "/api/assignments" + (assignment_id.value ? `/${assignment_id.value}` : "");
+    let response;
+    const test_data = {
+        test_id: fieldData.value.test_id.value,
+        date: fieldData.value.date.value,
+        vc_id: id.value,
+    };
+
+    try {
+        // если есть значение и есть старое значение
+        if(assignment_id.value) {
+            response = await axios.patch(url, test_data);
+        } else { // если создаем новое назначение
+            response = await axios.post(url, test_data);
+            assignment_id.value = response.data.data.id
+        }
+    } catch (error) {
+        throw new Error('Не удалось сохранить тест для видеоконференции.');
+    }
+
 }
 </script>
 
