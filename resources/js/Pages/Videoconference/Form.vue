@@ -21,7 +21,7 @@ const userId = usePage().props.auth.user.id;
 
 onMounted(() => {
     if(id) {
-        axios.get('/api/assignments/' + id + '?include=test,testlogs')
+        axios.get('/api/videoconferences/' + id + '?include=studgroups,assignment')
             .then((response) => {
                 data.value = response.data.data
             })

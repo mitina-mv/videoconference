@@ -67,6 +67,10 @@ onMounted(() => {
         };
     });
 
+    if(props.data && props.data.studgroups) {
+        fieldData.value.studgroups.value = props.data.studgroups.map(a => a.id)
+    }
+
     console.log(settingsData.value);
 });
 

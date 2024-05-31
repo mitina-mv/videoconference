@@ -29,7 +29,7 @@ class Videoconference extends Model
 
     public function assignment()
     {
-        return $this->hasOne(Assignment::class);
+        return $this->hasOne(Assignment::class, 'vc_id');
     }
 
     public function files()
