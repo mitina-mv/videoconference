@@ -37,6 +37,7 @@
             optionLabel="name"
             optionValue="id"
             filter
+            showClear
             @update:modelValue="handleUpdateModelValue"
         />
 

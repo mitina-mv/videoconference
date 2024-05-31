@@ -17,13 +17,14 @@ class Videoconference extends Model
         'user_id',
         'date',
         'settings',
-        'session' // uuid
+        'name',
+        'session', // uuid
     ];
 
     // relationships
     public function studgroups()
     {
-        return $this->belongsToMany(Studgroup::class, 'videoconference_studgroup');
+        return $this->belongsToMany(Studgroup::class, 'videoconference_studgroup', 'vc_id', 'studgroup_id');
     }
 
     public function assignment()

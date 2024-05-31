@@ -18,7 +18,7 @@ const props = defineProps({
 const id = ref(props?.data?.id || null);
 const errors = ref({});
 const labelgroup = 'videoconferences_fields'
-const settings = ref([])
+const settingsData = ref({})
 
 const fieldData = ref({
     name: {
@@ -60,24 +60,83 @@ onMounted(() => {
     let st = props.data ? JSON.parse(props.data.settings) : {};
 
     labels[labelgroup].settings.values.forEach((item) => {
-        settings.value[item.id] = {
+        settingsData.value[item.id] = {
             value: st[item.id] || item.default,
             type: item.type,
             label: item.name,
         };
     });
 
-    console.log(settings.value);
+    console.log(settingsData.value);
 });
 
-const sendData = () => {
+const sendData = async () => {
+    if (!validateFields()) {
+        return;
+    }
 
+    const url = "/api/videoconferences" + (id.value ? `/${id.value}` : "");
+
+    let data = prepareData();
+    data.settings = JSON.stringify(prepareData(settingsData.value));
+
+    console.log(data);
+    try {
+        let response;
+
+        if (id.value) {
+            response = await axios.patch(url, data);
+        } else {
+            response = await axios.post(url, data);
+        }
+
+        if (response.data.data.id) {
+            id.value = response.data.data.id;
+            await syncStudgroups();
+        }
+
+        toastService.showSuccessToast(
+            `Сохранение данных`,
+            "Данные успешно сохранены!"
+        );
+    } catch (error) {
+        toastService.showErrorToast(
+            `Сохранение данных`,
+            error.response.data.message || "Ошибка при сохранении данных. Пожалуйста, попробуйте еще раз."
+        );
+    }
+}
+
+const validateFields = () => {
+    for (const field of Object.values(fieldData.value)) {
+        if (field.req && !field.value) {
+            toastService.showErrorToast(
+                `Сохранение данных`,
+                "Необходимо заполнить все обязательные поля!"
+            );
+            return false;
+        }
+    }
+    return true;
+}
+
+const prepareData = (initial = fieldData.value) => {
+    const data = {};
+    for (const [code, field] of Object.entries(initial)) {
+        if(code != 'test_id' || code != 'studgroups')
+        data[code] = field.value;
+    }
+    return data;
+}
+
+const syncStudgroups = async () => {
+    await axios.patch(`/api/videoconferences/${id.value}/studgroups/sync`, {resources: fieldData.value.studgroups.value})
 }
 </script>
 
 <template>
     <form @submit.prevent="sendData" class="form d-grid gap-3">
-        <div class="d-grid grid-col-2 gap-3">
+        <div class="d-grid grid-col-2 gap-4">
             <div>
                 <FormField v-for="(field, code) in fieldData"
                     :key="code"
@@ -89,8 +148,7 @@ const sendData = () => {
                 <h3>
                     {{ labels[labelgroup].settings.title }}
                 </h3>
-
-                <FormField v-for="(field, code) in settings"
+                <FormField v-for="(field, code) in settingsData"
                     :key="code"
                     :field="field"
                     class="mt-2"

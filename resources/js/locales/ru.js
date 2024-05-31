@@ -233,7 +233,7 @@ export default {
                 },
                 {
                     id: "permission_mute",
-                    name: "Функция 'заглушить всех'",
+                    name: "Функция «заглушить всех»",
                     type: "bool",
                     default: true,
                 },

@@ -16,4 +16,9 @@ class VideoconferenceStudgroupController extends RelationController
 
     protected $pivotFillable = ['vc_id', 'studgroup_id'];
     protected $pivotJson = ['studgroup_id'];
+
+    protected function parentKeyName(): string
+    {
+        return 'id';
+    }
 }
