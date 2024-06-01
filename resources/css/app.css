@@ -153,7 +153,7 @@
     justify-content: space-between;
 }
 
-.container {
+.body {
     display: flex;
     min-height: 100vh;
     background-color: #f8f9fa;
@@ -165,29 +165,54 @@
     border-right: 1px solid #dee2e6;
     padding: 20px;
     position: sticky;
-    top: 0; /* фиксируем боковое меню при прокрутке */
+    top: 0;
     height: 100vh;
     overflow-y: auto;
+    display: flex;
+    align-content: center;
+    flex-direction: column;
 }
 
 .logo {
     display: flex;
     justify-content: center;
-    margin-bottom: 20px;
+    margin-bottom: 2em;
+    /* border-bottom: 1px solid #dee2e6;
+    padding: 20px; */
 }
-
+.logo img {
+    width: 100px;
+    object-fit: contain;
+}
 .user-info {
-    margin-bottom: 20px;
-    text-align: center;
+    margin-bottom: 2em;
+    /* text-align: center; */
+    display: flex;
+    gap: 0.5em;
+    align-items: flex-start;
+}
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    border: 3px solid var(--primary-color);
+    justify-content: center;
+    padding: 14px;
+    /* background-color: var(--primary-color); */
+    color: var(--text-color);
+    /* color: #fff; */
+    font-weight: bolder;
 }
 
 .user-info .name {
-    font-size: 1.25rem;
-    color: #495057;
+    font-size: 1.1rem;
+    color: var(--text-color);
 }
 
 .user-info .email {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: #6c757d;
 }
 
@@ -204,10 +229,21 @@
     color: #495057;
     text-decoration: none;
     font-size: 1rem;
+    
+    display: flex;
+    gap: .5em;
+    border: 0;
 }
 
 .menu-item a:hover {
-    color: #007bff;
+    text-decoration: none;
+    color: var(--primary-color);
+    border: 0;
+}
+
+.menu-item a.active .pi {
+    color: var(--primary-color);
+    font-weight: bold;
 }
 
 .logout {
@@ -216,11 +252,15 @@
 }
 
 .logout button {
-    color: #dc3545;
+    color: var(--red-600);
     background: none;
     border: none;
     font-size: 1rem;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    /* justify-content: center; */
+    gap: 0.5em;
 }
 
 .main-content {

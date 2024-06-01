@@ -99,8 +99,8 @@ export default {
         questions: "Банк заданий",
         answers: "Варианты ответов",
         tests: "Шаблоны тестов",
-        assignments: "Назначение тестирования",
-        videoconferences: "Назначение видеоконференции",
+        assignments: "Тестирования",
+        videoconferences: "Видеоконференции",
     },
     questions_fields: {
         text: {

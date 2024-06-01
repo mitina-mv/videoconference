@@ -15,41 +15,49 @@ const links = [
     {
         name: labels.page_titles.users,
         route: "admin.index",
+        icon: 'pi-user',
         roles: [1]
     },
     {
         name: labels.page_titles.reference_studgroups,
         route: "admin.reference.studgroups",
+        icon: 'pi-users',
         roles: [1, 2]
     },
     {
         name: labels.page_titles.reference_disciplines,
         route: "admin.reference.disciplines",
+        icon: 'pi-book',
         roles: [1, 2]
     },
     {
         name: labels.page_titles.reference_themes,
         route: "admin.reference.themes",
+        icon: 'pi-bookmark',
         roles: [1, 2]
     },
     {
         name: labels.page_titles.questions,
         route: "questions.index",
+        icon: 'pi-question',
         roles: [2]
     },
     {
         name: labels.page_titles.tests,
         route: "tests.index",
+        icon: 'pi-objects-column',
         roles: [2]
     },
     {
         name: labels.page_titles.assignments,
         route: "assignments.index",
+        icon: 'pi-calculator',
         roles: [2]
     },
     {
         name: labels.page_titles.videoconferences,
         route: "videoconferences.index",
+        icon: 'pi-video',
         roles: [2]
     },
 ];
@@ -62,22 +70,25 @@ const filteredLinks = computed(() => {
 </script>
 
 <template>
-    <div class="container">
+    <div class="body">
         <aside class="sidebar">
             <div class="logo">
-                <Link :href="route('dashboard')">
-                    <ApplicationLogo
-                        class="block h-9 w-auto fill-current text-gray-800"
-                    />
-                </Link>
+                <img src="/logo.png"/>
             </div>
             <div class="user-info">
-                <div class="name">
-                    <a :href="route('profile.edit')">
-                        {{ $page.props.auth.user.full_name }}
-                    </a>
+                <div class="user-avatar">
+                    <!-- {{ $page.props.auth.user.initials }} -->
+                    <i class="pi pi-user" style="font-size: 1.5rem"></i>
                 </div>
-                <div class="email">{{ $page.props.auth.user.email }}</div>
+                <div>
+                    <div class="name">
+                        <a :href="route('profile.edit')">
+                            {{ $page.props.auth.user.full_name }}
+                        </a>
+                    </div>
+                    <!-- <div class="email">{{ $page.props.auth.user.email }}</div> -->
+                </div>
+
             </div>
             <ul class="menu">
                 <li
@@ -89,13 +100,15 @@ const filteredLinks = computed(() => {
                         :href="route(link.route)"
                         :active="route().current(link.route)"
                     >
+                        <i class="pi" :class="link.icon" style="font-size: 1rem"></i>
                         {{ link.name }}
                     </NavLink>
                 </li>
             </ul>
             <div class="logout">
                 <DropdownLink :href="route('logout')" method="post" as="button">
-                    Log Out
+                    <i class="pi pi-sign-out"></i>
+                    Выйти
                 </DropdownLink>
             </div>
         </aside>
