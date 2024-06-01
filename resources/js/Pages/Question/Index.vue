@@ -10,8 +10,8 @@ import toastService from "@/Services/toastService";
 import ReferenceFilter from "@/Components/Admin/ReferenceFilter.vue";
 
 const props = defineProps({
-    disciplines: [Array, Object]
-})
+    disciplines: [Array, Object],
+});
 const userId = usePage().props.auth.user.id;
 const tableColumns = [
     {
@@ -62,21 +62,22 @@ onMounted(async () => {
 
 const fetchData = async () => {
     let params = {
-        includes: [
-            {"relation" : "answers"}, 
-            {"relation" : "theme"}
-        ],
+        includes: [{ relation: "answers" }, { relation: "theme" }],
         filters: [
             {
                 field: "user_id",
                 operator: "=",
                 value: usePage().props.auth.user.id,
             },
-        ]
-    }
+        ],
+    };
 
     if (activeDiscipline.value) {
-        params.filters.push({ field: "theme.discipline_id", operator: "=", value: activeDiscipline.value })
+        params.filters.push({
+            field: "theme.discipline_id",
+            operator: "=",
+            value: activeDiscipline.value,
+        });
     }
 
     try {
@@ -93,10 +94,7 @@ const fetchPageData = async (page, limit) => {
     let params = {
         page: page + 1,
         limit: limit,
-        includes: [
-            {"relation" : "answers"}, 
-            {"relation" : "theme"}
-        ],
+        includes: [{ relation: "answers" }, { relation: "theme" }],
         filters: [
             {
                 field: "user_id",
@@ -104,10 +102,14 @@ const fetchPageData = async (page, limit) => {
                 value: usePage().props.auth.user.id,
             },
         ],
-    }
+    };
 
     if (activeDiscipline.value) {
-        params.filters.push({ field: "theme.discipline_id", operator: "=", value: activeDiscipline.value })
+        params.filters.push({
+            field: "theme.discipline_id",
+            operator: "=",
+            value: activeDiscipline.value,
+        });
     }
 
     try {
@@ -140,9 +142,8 @@ const processTableData = (data) => {
 
 const toggleDiscipline = (id) => {
     activeDiscipline.value = id;
-    fetchData()
+    fetchData();
 };
-
 </script>
 
 <template>
@@ -157,28 +158,27 @@ const toggleDiscipline = (id) => {
 
         <div class="d-grid gap-4 content">
             <div class="content__container">
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <loading-spinner v-if="tableData == null"></loading-spinner>
-                    <template v-else>
-                        <reference-filter :items="disciplines"
-                            :active="activeDiscipline"
-                            @toggleItem="toggleDiscipline"
-                            addRoute="admin.reference.disciplines"></reference-filter>
-                        <user-table
-                            :tableData="tableData"
-                            :routeName="'api.questions'"
-                            :columns="tableColumns"
-                            :includeParamFrom="false"
-                            :labelgroup="'questions'"
-                            @fetchData="fetchData"
-                            @getPage="fetchPageData"
-                            :total="totalPage"
-                            routeNameForm="questions.new"
-                            routeNameEdit="questions.edit"
-                        ></user-table>
-                    </template>
-                    
-                </div>
+                <loading-spinner v-if="tableData == null"></loading-spinner>
+                <template v-else>
+                    <reference-filter
+                        :items="disciplines"
+                        :active="activeDiscipline"
+                        @toggleItem="toggleDiscipline"
+                        addRoute="admin.reference.disciplines"
+                    ></reference-filter>
+                    <user-table
+                        :tableData="tableData"
+                        :routeName="'api.questions'"
+                        :columns="tableColumns"
+                        :includeParamFrom="false"
+                        :labelgroup="'questions'"
+                        @fetchData="fetchData"
+                        @getPage="fetchPageData"
+                        :total="totalPage"
+                        routeNameForm="questions.new"
+                        routeNameEdit="questions.edit"
+                    ></user-table>
+                </template>
             </div>
         </div>
     </AuthenticatedLayout>

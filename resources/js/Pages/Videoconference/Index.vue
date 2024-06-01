@@ -177,7 +177,7 @@ const toggleYear = (id) => {
 
         <div class="d-grid gap-4 content">
             <div class="content__container">
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                <div >
                     <loading-spinner v-if="!loadData"></loading-spinner>
                     <template v-else>
                         <reference-filter

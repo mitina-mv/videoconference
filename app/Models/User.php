@@ -55,12 +55,29 @@ class User extends Authenticatable
     ];
 
     // Виртуальный атрибут для главной фотографии объявления
-    protected $appends = ['full_name'];
+    protected $appends = ['full_name', 'initials'];
 
     public function getFullNameAttribute()
     {
         return $this->lastname . " " . $this->name 
         . ($this->patronymic ? ' ' . $this->patronymic : '');
+    }
+
+    public function getInitialsAttribute()
+    {
+        $lastname = $this->lastname;
+        $name = $this->name;
+
+        // Получаем первые буквы имени и фамилии (если они существуют)
+        $initials = '';
+        if (!empty($lastname)) {
+            $initials .= mb_substr($lastname, 0, 1);
+        }
+        if (!empty($name)) {
+            $initials .= mb_substr($name, 0, 1);
+        }
+
+        return $initials;
     }
 
     // relationships

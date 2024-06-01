@@ -4,7 +4,7 @@
         <Button label="Добавить" @click="showAddDialog" />
     </div>
 
-    <DataTable v-model:selection="selectedItems" :value="data" dataKey="id" editMode="row" @row-edit-save="onRowEditSave" v-model:editingRows="editingRows">
+    <DataTable v-model:selection="selectedItems" :value="data" dataKey="id" editMode="row" @row-edit-save="onRowEditSave" v-model:editingRows="editingRows" showGridlines>
         <Column selectionMode="multiple" headerStyle="width: 3rem" :style="{
                 width: '3%',
             }"></Column>
@@ -44,7 +44,7 @@
 
         <Column
             :rowEditor="true"
-            style="width: 10%; min-width: 8rem"
+            style="width: 3%; min-width: 3rem"
             bodyStyle="text-align:center"
         ></Column>
 

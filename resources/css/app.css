@@ -9,11 +9,6 @@
  @tailwind utilities;
 }
 
-.content {
-    width: 80vw;
-    margin: 5em auto;
-}
-
 .content__container.mx-auto {
     width: 100%;
     box-sizing: border-box;
@@ -156,4 +151,140 @@
 
 .flex-between {
     justify-content: space-between;
+}
+
+.body {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.sidebar {
+    width: 20vw;
+    background-color: #fff;
+    border-right: 1px solid #dee2e6;
+    padding: 20px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    align-content: center;
+    flex-direction: column;
+}
+
+.logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2em;
+    /* border-bottom: 1px solid #dee2e6;
+    padding: 20px; */
+}
+.logo img {
+    width: 100px;
+    object-fit: contain;
+}
+.user-info {
+    margin-bottom: 2em;
+    /* text-align: center; */
+    display: flex;
+    gap: 0.5em;
+    align-items: flex-start;
+}
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    border: 3px solid var(--primary-color);
+    justify-content: center;
+    padding: 14px;
+    /* background-color: var(--primary-color); */
+    color: var(--text-color);
+    /* color: #fff; */
+    font-weight: bolder;
+}
+
+.user-info .name {
+    font-size: 1.1rem;
+    color: var(--text-color);
+}
+
+.user-info .email {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.menu {
+    list-style-type: none;
+    padding: 0;
+}
+
+.menu-item {
+    margin-bottom: 10px;
+}
+
+.menu-item a {
+    color: #495057;
+    text-decoration: none;
+    font-size: 1rem;
+    
+    display: flex;
+    gap: .5em;
+    border: 0;
+}
+
+.menu-item a:hover {
+    text-decoration: none;
+    color: var(--primary-color);
+    border: 0;
+}
+
+.menu-item a.active .pi {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.logout {
+    margin-top: auto;
+    text-align: center;
+}
+
+.logout button {
+    color: var(--red-600);
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    /* justify-content: center; */
+    gap: 0.5em;
+}
+
+.main-content {
+    flex: 1;
+    padding: 0;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-bottom: 1px solid #dee2e6;
+    padding: 1em 1.5em;
+    margin-bottom: 1em;
+    gap: .5em;
+}
+
+.back-button {
+    color: inherit;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+main {
+    padding: 1.5em;
+    width: 78vw;
 }

@@ -5,7 +5,7 @@ import { Head, usePage } from "@inertiajs/vue3";
 import UserTable from "@/Components/Tables/UserTable.vue";
 import axios from "axios";
 import LoadingSpinner from "@/Components/Common/LoadingSpinner.vue";
-import labels from '@/locales/ru.js';
+import labels from "@/locales/ru.js";
 import ReferenceFilter from "@/Components/Admin/ReferenceFilter.vue";
 
 const students = ref(null);
@@ -21,8 +21,8 @@ const studentsColumns = [
         sort: true,
         code: "full_name",
         style: {
-            width: '45%',
-        }
+            width: "45%",
+        },
     },
     {
         title: labels.user_fields.email.title,
@@ -38,10 +38,10 @@ const teacterColumns = [
         sort: false,
         code: "studgroups",
         style: {
-            width: '25%',
-        }
-    }
-]
+            width: "25%",
+        },
+    },
+];
 
 onMounted(async () => {
     await fetchStudgroups();
@@ -51,7 +51,7 @@ onMounted(async () => {
 
 const toggleStudgroup = (id) => {
     activeStudgroup.value = id;
-    fetchStudents()
+    fetchStudents();
 };
 
 const fetchStudgroups = async () => {
@@ -80,11 +80,11 @@ const fetchStudents = (params = {}) => {
                 },
             ],
             sort: [{ field: "lastname", direction: "asc" }],
-            ...params
+            ...params,
         })
         .then((response) => {
             students.value = response.data.data;
-            studentsTotal.value = response.data.meta.total
+            studentsTotal.value = response.data.meta.total;
         })
         .catch((error) => {});
 };
@@ -94,18 +94,20 @@ const fetchTeachers = (params = {}) => {
         .post("/api/users/search", {
             filters: [{ field: "role_id", operator: "=", value: "2" }],
             sort: [{ field: "lastname", direction: "asc" }],
-            includes: [{"relation" : "studgroups"}],
-            ...params
+            includes: [{ relation: "studgroups" }],
+            ...params,
         })
         .then((response) => {
             teachers.value = response.data.data;
 
             teachers.value.forEach((element, index) => {
-                let namesString = element.studgroups.map((sg) => sg.name).join(', ');
+                let namesString = element.studgroups
+                    .map((sg) => sg.name)
+                    .join(", ");
                 teachers.value[index].studgroups = namesString;
             });
 
-            teachersTotal.value = response.data.meta.total
+            teachersTotal.value = response.data.meta.total;
         })
         .catch((error) => {});
 };
@@ -113,16 +115,16 @@ const fetchTeachers = (params = {}) => {
 const fetchTeachersPageData = (page, limit) => {
     fetchTeachers({
         page: page + 1,
-        limit: limit
-    })
-}
+        limit: limit,
+    });
+};
 
 const fetchStudentsPageData = (page, limit) => {
     fetchStudents({
         page: page + 1,
-        limit: limit
-    })
-}
+        limit: limit,
+    });
+};
 </script>
 
 <template>
@@ -137,43 +139,41 @@ const fetchStudentsPageData = (page, limit) => {
 
         <div class="d-grid gap-4 content">
             <div class="content__container">
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <loading-spinner v-if="studgroups == null || students == null"></loading-spinner>
-                    <div v-else>
-                        <reference-filter
-                            :items="studgroups"
-                            :active="activeStudgroup"
-                            @toggleItem="toggleStudgroup"
-                            addRoute="admin.reference.studgroups"
-                        ></reference-filter>
-                        <user-table
-                            v-if="students"
-                            :tableData="students"
-                            :routeName="'api.users'"
-                            :columns="studentsColumns"
-                            :labelgroup="'students'"
-                            @fetchData="fetchStudents"
-                            @getPage="fetchStudentsPageData"
-                            :total="studentsTotal"
-                        ></user-table>
-                    </div>
-                </div>
+                <loading-spinner
+                    v-if="studgroups == null || students == null"
+                ></loading-spinner>
+                <template v-else>
+                    <reference-filter
+                        :items="studgroups"
+                        :active="activeStudgroup"
+                        @toggleItem="toggleStudgroup"
+                        addRoute="admin.reference.studgroups"
+                    ></reference-filter>
+                    <user-table
+                        v-if="students"
+                        :tableData="students"
+                        :routeName="'api.users'"
+                        :columns="studentsColumns"
+                        :labelgroup="'students'"
+                        @fetchData="fetchStudents"
+                        @getPage="fetchStudentsPageData"
+                        :total="studentsTotal"
+                    ></user-table>
+                </template>
             </div>
 
             <div class="content__container">
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <loading-spinner v-if="teachers == null"></loading-spinner>
-                    <user-table
-                        v-else
-                        :tableData="teachers"
-                        :routeName="'api.users'"
-                        :columns="teacterColumns"
-                        :labelgroup="'teachers'"
-                        @fetchData="fetchTeachers"
-                        @getPage="fetchTeachersPageData"
-                        :total="teachersTotal"
-                    ></user-table>
-                </div>
+                <loading-spinner v-if="teachers == null"></loading-spinner>
+                <user-table
+                    v-else
+                    :tableData="teachers"
+                    :routeName="'api.users'"
+                    :columns="teacterColumns"
+                    :labelgroup="'teachers'"
+                    @fetchData="fetchTeachers"
+                    @getPage="fetchTeachersPageData"
+                    :total="teachersTotal"
+                ></user-table>
             </div>
         </div>
     </AuthenticatedLayout>
