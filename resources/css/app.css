@@ -10,8 +10,7 @@
 }
 
 .content {
-    width: 80vw;
-    margin: 5em auto;
+    /* width: 70vw; */
 }
 
 .content__container.mx-auto {
@@ -156,4 +155,101 @@
 
 .flex-between {
     justify-content: space-between;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.sidebar {
+    width: 20vw;
+    background-color: #fff;
+    border-right: 1px solid #dee2e6;
+    padding: 20px;
+    position: sticky;
+    top: 0; /* фиксируем боковое меню при прокрутке */
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.user-info {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.user-info .name {
+    font-size: 1.25rem;
+    color: #495057;
+}
+
+.user-info .email {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.menu {
+    list-style-type: none;
+    padding: 0;
+}
+
+.menu-item {
+    margin-bottom: 10px;
+}
+
+.menu-item a {
+    color: #495057;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.menu-item a:hover {
+    color: #007bff;
+}
+
+.logout {
+    margin-top: auto;
+    text-align: center;
+}
+
+.logout button {
+    color: #dc3545;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff;
+    border-bottom: 1px solid #dee2e6;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+}
+
+.back-button {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+main {
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }

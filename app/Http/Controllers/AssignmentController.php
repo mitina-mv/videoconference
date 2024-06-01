@@ -47,6 +47,7 @@ class AssignmentController extends Controller
             'id' => $id,
             'tests' => $this->testlogService->getTests(),
             'studgroups' => $this->testlogService->getStudgroupsWithStudents(),
+            'backLink' => 'assignments.index',
         ]);
     }
 
@@ -54,6 +55,7 @@ class AssignmentController extends Controller
     {
         return Inertia::render('Assignment/Form', [
             'tests' => $this->testlogService->getTests(),
+            'backLink' => 'assignments.index',
             'studgroups' => $this->testlogService->getStudgroupsWithStudents(),            
         ]);
     }
