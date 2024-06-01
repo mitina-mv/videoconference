@@ -13,6 +13,7 @@ class AssignmentRequest extends Request
             'date' => ['required', 'string', 'max:255'],
             'test_id' => ['required', 'exists:tests,id', 'bail'],
             'user_id' => ['required', 'exists:users,id', 'bail'],
+            'vc_id' => ['nullable', 'exists:videoconferences,id', 'bail'],
         ];
     }
 
@@ -21,6 +22,7 @@ class AssignmentRequest extends Request
         return [
             'date' => ['required', 'string', 'max:255'],
             'test_id' => ['required', 'exists:tests,id', 'bail'],
+            'vc_id' => ['nullable', 'exists:videoconferences,id', 'bail'],
             'user_id' => ['required', 'exists:users,id', 'bail'],
         ];
     }

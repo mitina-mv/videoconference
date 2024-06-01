@@ -16,6 +16,7 @@ class Assignment extends Model
         'user_id',
         'test_id',
         'date',
+        'vc_id'
     ];
     protected $table = 'assignments';
     protected $primaryKey = 'id';
@@ -26,11 +27,18 @@ class Assignment extends Model
         'date' => 'datetime',
     ];
 
-    protected $appends = ['studgroups'];
+    protected $appends = ['studgroups', 'is_completed'];
     
     public function getDateAttribute($value)
     {
         return Carbon::parse($value)->timezone('Europe/Moscow')->format('d.m.Y H:i');
+    }
+
+    public function getIsCompletedAttribute()
+    {
+        $now = Carbon::now()->timezone('Europe/Moscow');
+        $date = Carbon::parse($this->date)->timezone('Europe/Moscow');
+        return $date && $date->lt($now);
     }
 
     public function test()
@@ -41,6 +49,11 @@ class Assignment extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function videoconference()
+    {
+        return $this->belongsTo(Videoconference::class);
     }
 
     public function testlogs()

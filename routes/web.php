@@ -6,6 +6,7 @@ use App\Http\Controllers\ConferenceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\VideoconferenceController;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -70,8 +71,15 @@ Route::group(['prefix' => 'assignments'], function () {
     Route::get('/new', [AssignmentController::class, 'create'])->name('assignments.new');
 })->middleware(['auth']);
 
-Route::middleware('auth')->group(function () {
+Route::group(['prefix' => 'videoconferences'], function () {
+    Route::get('/', [VideoconferenceController::class, 'index'])->name('videoconferences.index');
+    Route::get('/edit/{id}', [VideoconferenceController::class, 'edit'])->name('videoconferences.edit');
+    Route::get('/new', [VideoconferenceController::class, 'create'])->name('videoconferences.new');
+})->middleware(['auth']);
 
+
+
+Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

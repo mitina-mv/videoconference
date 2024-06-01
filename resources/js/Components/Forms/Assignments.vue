@@ -85,7 +85,10 @@ const sendData = async () => {
 const validateFields = () => {
     for (const field of Object.values(fieldData.value)) {
         if (field.req && !field.value) {
-            errors.value[field.label] = "Поле обязательно для заполнения";
+            toastService.showErrorToast(
+                `Сохранение данных`,
+                "Необходимо заполнить все обязательные поля!"
+            );
             return false;
         }
     }
