@@ -9,47 +9,53 @@ import Assignments from "@/Components/Forms/Assignments.vue";
 const props = defineProps({
     id: {
         type: String,
-        req: false
+        req: false,
     },
     tests: Array,
     studgroups: Array,
-})
+});
 
-const id = props?.id || null
-const data = ref(null)
+const id = props?.id || null;
+const data = ref(null);
 const userId = usePage().props.auth.user.id;
 
 onMounted(() => {
-    if(id) {
-        axios.get('/api/assignments/' + id + '?include=test,testlogs')
+    if (id) {
+        axios
+            .get("/api/assignments/" + id + "?include=test,testlogs")
             .then((response) => {
-                data.value = response.data.data
+                data.value = response.data.data;
             })
             .catch((error) => {
-                toastService.showErrorToast(`Редактирование данных`, "Не удалось получить данные.")
-            })
+                toastService.showErrorToast(
+                    `Редактирование данных`,
+                    "Не удалось получить данные."
+                );
+            });
     }
-
-
-})
+});
 </script>
 
 <template>
-    <Head :title="(id == null ? 'Добавление ' : 'Редактирование ')" />
+    <Head :title="id == null ? 'Добавление ' : 'Редактирование '" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ (id == null ? 'Добавление ' : 'Редактирование ') }}
+                {{ id == null ? "Добавление " : "Редактирование " }}
             </h2>
         </template>
 
         <div class="d-grid gap-4 content">
             <div class="content__container">
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <Assignments v-if="(id && data && studgroups) || (!id && studgroups)" :data="data" :tests="tests" :studgroups="studgroups" :userId="userId"></Assignments>
-                    <loading-spinner v-else></loading-spinner>
-                </div>
+                <Assignments
+                    v-if="(id && data && studgroups) || (!id && studgroups)"
+                    :data="data"
+                    :tests="tests"
+                    :studgroups="studgroups"
+                    :userId="userId"
+                ></Assignments>
+                <loading-spinner v-else></loading-spinner>
             </div>
         </div>
     </AuthenticatedLayout>

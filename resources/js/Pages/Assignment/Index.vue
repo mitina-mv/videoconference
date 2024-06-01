@@ -21,11 +21,11 @@ const tableColumns = ref({
         code: "test_id",
         sort: false,
         filter: {
-            type: 'select',
+            type: "select",
             options: props.tests,
-            field: 'test_id',
-            label: 'name',
-            value: 'id',
+            field: "test_id",
+            label: "name",
+            value: "id",
         },
         title: labels.assignments_fields.test_id.title,
         style: {
@@ -36,11 +36,11 @@ const tableColumns = ref({
         code: "studgroup_id",
         sort: false,
         filter: {
-            type: 'select',
+            type: "select",
             options: props.studgroups,
-            value: 'id',
-            field: 'testlogs.user.studgroup_id',
-            label: 'name',
+            value: "id",
+            field: "testlogs.user.studgroup_id",
+            label: "name",
         },
         title: labels.assignments_fields.studgroups.title,
         style: {
@@ -51,8 +51,8 @@ const tableColumns = ref({
         code: "date",
         sort: false,
         filter: {
-            type: 'calendar',
-            field: 'date',
+            type: "calendar",
+            field: "date",
             options: null,
         },
         title: labels.assignments_fields.date.title,
@@ -64,11 +64,11 @@ const tableColumns = ref({
         code: "theme_id",
         sort: false,
         filter: {
-            type: 'select',
+            type: "select",
             options: props.themes,
-            value: 'id',
-            label: 'name',
-            field: 'test.theme_id',
+            value: "id",
+            label: "name",
+            field: "test.theme_id",
         },
         title: labels.assignments_fields.themes.title,
         style: {
@@ -80,7 +80,7 @@ const tableData = ref(null);
 const totalPage = ref(null);
 const years = ref(props?.years || null);
 const activeYear = ref(null);
-const loadData = ref(false)
+const loadData = ref(false);
 
 onMounted(async () => {
     if (years.value != null) {
@@ -92,31 +92,24 @@ onMounted(async () => {
     await fetchData();
 });
 
-const fetchData = async (
-    filters = null,
-    page = null,
-    limit = null
-) => {
+const fetchData = async (filters = null, page = null, limit = null) => {
     let params = {
-        includes: [
-            { relation: "test" },
-            { relation: "test.theme" },
-        ],
+        includes: [{ relation: "test" }, { relation: "test.theme" }],
     };
 
     if (filters) {
-        params.filters = filters
+        params.filters = filters;
     }
 
     if (page !== null && limit !== null) {
         params.page = page + 1;
         params.limit = limit;
     }
-    
-    let url = '/api/assignments/search'
+
+    let url = "/api/assignments/search";
 
     if (activeYear.value) {
-        url = url + `?year=${activeYear.value}`
+        url = url + `?year=${activeYear.value}`;
     }
 
     try {
@@ -124,8 +117,8 @@ const fetchData = async (
         tableData.value = response.data.data;
         processTableData(tableData.value);
         totalPage.value = response.data.meta.total;
-        
-        loadData.value = true
+
+        loadData.value = true;
     } catch (error) {
         console.error(error);
         toastService.showErrorToast("Заголовок", "Текст");
@@ -134,11 +127,13 @@ const fetchData = async (
 
 const processTableData = (data) => {
     data.forEach((element, index) => {
-        data[index].test_id = element.test.name
-        data[index].theme_id = element.test.theme.name
+        data[index].test_id = element.test.name;
+        data[index].theme_id = element.test.theme.name;
 
-        if(element.studgroups.length > 0) {
-            data[index].studgroup_id = element.studgroups.map(a => a.name).join(', ')
+        if (element.studgroups.length > 0) {
+            data[index].studgroup_id = element.studgroups
+                .map((a) => a.name)
+                .join(", ");
         }
     });
 };
@@ -161,28 +156,26 @@ const toggleYear = (id) => {
 
         <div class="d-grid gap-4 content">
             <div class="content__container">
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <loading-spinner v-if="!loadData"></loading-spinner>
-                    <template v-else>
-                        <reference-filter
-                            :items="years"
-                            :active="activeYear"
-                            @toggleItem="toggleYear"
-                            idField="year"
-                            label="label"
-                            addRoute="assignments.new"
-                            labelgroup="assignments"
-                        ></reference-filter>
-                        <filter-table
-                            :tableData="tableData"
-                            :columns="tableColumns"
-                            :labelgroup="'tests'"
-                            @fetchData="fetchData"
-                            :total="totalPage"
-                            routeName="assignments"
-                        ></filter-table>
-                    </template>
-                </div>
+                <loading-spinner v-if="!loadData"></loading-spinner>
+                <template v-else>
+                    <reference-filter
+                        :items="years"
+                        :active="activeYear"
+                        @toggleItem="toggleYear"
+                        idField="year"
+                        label="label"
+                        addRoute="assignments.new"
+                        labelgroup="assignments"
+                    ></reference-filter>
+                    <filter-table
+                        :tableData="tableData"
+                        :columns="tableColumns"
+                        :labelgroup="'tests'"
+                        @fetchData="fetchData"
+                        :total="totalPage"
+                        routeName="assignments"
+                    ></filter-table>
+                </template>
             </div>
         </div>
     </AuthenticatedLayout>

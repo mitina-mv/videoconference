@@ -137,10 +137,6 @@ const syncStudgroups = async () => {
 <template>
     <form @submit.prevent="sendData" class="form d-grid gap-3">
         <div class="d-grid grid-col-2 gap-3">
-            <div class="studgroups">
-                <h3>Участники</h3>
-                <SelectedStudents :groups="studgroups" v-model="selectedStudents" />
-            </div>
             <div>
                 <FormField v-for="(field, code) in fieldData"
                     :key="code"
@@ -148,6 +144,10 @@ const syncStudgroups = async () => {
                     class="mt-2"
                     :errors="errors" />
                 <Button @click="sendData" label="Сохранить" class="mt-3" />
+            </div>
+            <div class="studgroups">
+                <h3>Участники</h3>
+                <SelectedStudents :groups="studgroups" v-model="selectedStudents" />
             </div>
         </div>
     </form>

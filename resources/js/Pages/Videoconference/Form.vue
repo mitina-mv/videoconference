@@ -46,7 +46,7 @@ onMounted(() => {
 
         <div class="d-grid gap-4 content">
             <div class="content__container">
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                <div >
                     <Videoconference v-if="(id && data && studgroups) || (!id && studgroups)" :data="data" :tests="tests" :studgroups="studgroups" :userId="userId"></Videoconference>
                     <loading-spinner v-else></loading-spinner>
                 </div>

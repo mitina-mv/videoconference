@@ -127,9 +127,8 @@ const processTableData = (data) => {
                     return `${a.name}: ${val}`;
                 })
                 .join(",<br />");
-            data[index].settings = settingsString
+            data[index].settings = settingsString;
         }
-
     });
 };
 
@@ -151,30 +150,28 @@ const toggleDiscipline = (id) => {
 
         <div class="d-grid gap-4 content">
             <div class="content__container">
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                    <loading-spinner v-if="tableData == null"></loading-spinner>
-                    <template v-else>
-                        <reference-filter
-                            :items="disciplines"
-                            :active="activeDiscipline"
-                            @toggleItem="toggleDiscipline"
-                            addRoute="admin.reference.disciplines"
-                            labelgroup="disciplines"
-                        ></reference-filter>
-                        <user-table
-                            :tableData="tableData"
-                            :routeName="'api.tests'"
-                            :columns="tableColumns"
-                            :labelgroup="'tests'"
-                            :includeParamFrom="false"
-                            @fetchData="fetchData"
-                            @getPage="fetchPageData"
-                            :total="totalPage"
-                            routeNameForm="tests.new"
-                            routeNameEdit="tests.edit"
-                        ></user-table>
-                    </template>
-                </div>
+                <loading-spinner v-if="tableData == null"></loading-spinner>
+                <template v-else>
+                    <reference-filter
+                        :items="disciplines"
+                        :active="activeDiscipline"
+                        @toggleItem="toggleDiscipline"
+                        addRoute="admin.reference.disciplines"
+                        labelgroup="disciplines"
+                    ></reference-filter>
+                    <user-table
+                        :tableData="tableData"
+                        :routeName="'api.tests'"
+                        :columns="tableColumns"
+                        :labelgroup="'tests'"
+                        :includeParamFrom="false"
+                        @fetchData="fetchData"
+                        @getPage="fetchPageData"
+                        :total="totalPage"
+                        routeNameForm="tests.new"
+                        routeNameEdit="tests.edit"
+                    ></user-table>
+                </template>
             </div>
         </div>
     </AuthenticatedLayout>
