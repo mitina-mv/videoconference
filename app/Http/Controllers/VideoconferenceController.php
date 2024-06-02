@@ -94,8 +94,6 @@ class VideoconferenceController extends Controller
                     'data' => json_encode(['user_id' => $user->id, 'username' => $user->full_name])
                 ]);
             }
-
-            dump($connection['token']); 
     
             return Inertia::render('Videoconference/Conference', [
                 'sessionId' => $vc->session,

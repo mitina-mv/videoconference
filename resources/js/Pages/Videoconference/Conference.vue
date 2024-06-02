@@ -8,6 +8,7 @@ import labels from "@/locales/ru.js";
 const props = defineProps({
     sessionId: String,
     token: String,
+    error: String
 });
 
 </script>
@@ -24,7 +25,9 @@ const props = defineProps({
 
         <div class="d-grid gap-4 content">
             <div class="content__container">
-                <Room :sessionId="sessionId" :token="token"></Room>
+                <div v-if="error">
+                {{ error }}</div>
+                <Room :sessionId="sessionId" :token="token" v-else></Room>
             </div>
         </div>
     </AuthenticatedLayout>
