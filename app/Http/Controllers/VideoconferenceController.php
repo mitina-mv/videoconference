@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Service\OpenViduService;
 use App\Http\Service\TestlogService;
 use App\Models\Videoconference;
 use Illuminate\Support\Facades\DB;
@@ -58,5 +59,52 @@ class VideoconferenceController extends Controller
             'tests' => $user->tests,
             'studgroups' => $user->studgroups,            
         ]);
+    }
+
+    public function room(string $session)
+    {
+        $vc = Videoconference::where('session', $session)->first();
+        $user = auth()->user();
+    
+        if(!$vc) {
+            return Inertia::render('Videoconference/Conference', [
+                'error' => 'Эта видеоконференция не существует' 
+            ]);
+        }
+    
+        $openViduService = new OpenViduService();
+    
+        try {
+            // получаем сессию
+            if(!$openViduService->sessionExists($vc->session)) {
+                // создаем сессию, если она не существует
+                $openViduService->createSession($vc->session);
+            }
+
+            if ($vc->user_id == $user->id) {
+                // Пользователь владелец конференции, подключаем как модератора
+                $connection = $openViduService->connectToSession($vc->session, [
+                    'role' => 'MODERATOR',
+                    'data' => json_encode(['user_id' => $user->id, 'username' => $user->full_name])
+                ]);
+            } else {
+                // Пользователь не владелец конференции, подключаем как слушателя
+                $connection = $openViduService->connectToSession($vc->session, [
+                    'role' => 'SUBSCRIBER',
+                    'data' => json_encode(['user_id' => $user->id, 'username' => $user->full_name])
+                ]);
+            }
+    
+            return Inertia::render('Videoconference/Conference', [
+                'sessionId' => $vc->session,
+                'token' => $connection['token']
+            ]);
+    
+        } catch (\Exception $e) {
+            dump($e); 
+            return Inertia::render('Videoconference/Conference', [
+                'error' => 'Не удалось подключиться к видеоконференции'
+            ]);
+        }
     }
 }

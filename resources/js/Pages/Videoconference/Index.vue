@@ -27,11 +27,11 @@ const tableColumns = ref({
         code: "studgroup_id",
         sort: false,
         filter: {
-            type: 'select',
+            type: "select",
             options: props.studgroups,
-            value: 'id',
-            field: 'studgroups.id',
-            label: 'name',
+            value: "id",
+            field: "studgroups.id",
+            label: "name",
         },
         title: labels.videoconferences_fields.studgroups.title,
         style: {
@@ -42,8 +42,8 @@ const tableColumns = ref({
         code: "date",
         sort: false,
         filter: {
-            type: 'calendar',
-            field: 'date',
+            type: "calendar",
+            field: "date",
             options: null,
             showTile: true,
         },
@@ -66,7 +66,7 @@ const tableData = ref(null);
 const totalPage = ref(null);
 const years = ref(props?.years || null);
 const activeYear = ref(null);
-const loadData = ref(false)
+const loadData = ref(false);
 
 onMounted(async () => {
     if (years.value != null) {
@@ -77,39 +77,35 @@ onMounted(async () => {
     }
     await fetchData();
 
-console.log(props.studgroups);
+    console.log(props.studgroups);
 });
 
-const fetchData = async (
-    filters = null,
-    page = null,
-    limit = null
-) => {
+const fetchData = async (filters = null, page = null, limit = null) => {
     let params = {
         includes: [
             { relation: "studgroups" },
             { relation: "assignment" },
             { relation: "assignment.test" },
         ],
-        sort : [
-            {"field" : "date", "direction" : "asc"},
-            {"field" : "name", "direction" : "asc"},
-        ]
+        sort: [
+            { field: "date", direction: "asc" },
+            { field: "name", direction: "asc" },
+        ],
     };
 
     if (filters) {
-        params.filters = filters
+        params.filters = filters;
     }
 
     if (page !== null && limit !== null) {
         params.page = page + 1;
         params.limit = limit;
     }
-    
-    let url = '/api/videoconferences/search'
+
+    let url = "/api/videoconferences/search";
 
     if (activeYear.value) {
-        url = url + `?year=${activeYear.value}`
+        url = url + `?year=${activeYear.value}`;
     }
 
     try {
@@ -117,8 +113,8 @@ const fetchData = async (
         tableData.value = response.data.data;
         processTableData(tableData.value);
         totalPage.value = response.data.meta.total;
-        
-        loadData.value = true
+
+        loadData.value = true;
     } catch (error) {
         console.error(error);
         toastService.showErrorToast("Заголовок", "Текст");
@@ -127,17 +123,21 @@ const fetchData = async (
 
 const processTableData = (data) => {
     data.forEach((element, index) => {
-        data[index].test_id = element.assignment?.test.name || '-'
+        data[index].test_id = element.assignment?.test.name || "-";
 
-        if(element.studgroups.length > 0) {
-            data[index].studgroup_id = element.studgroups.map(a => a.name).join(', ')
+        if (element.studgroups.length > 0) {
+            data[index].studgroup_id = element.studgroups
+                .map((a) => a.name)
+                .join(", ");
         } else {
-            data[index].studgroup_id = 'не указано'
+            data[index].studgroup_id = "не указано";
         }
 
         let settings = JSON.parse(element.settings);
-        let sessionString = `,<br />${labels.videoconferences_fields.session.title}: ${element.session}`
-        let testString = `,<br />${labels.videoconferences_fields.test.title}: ${element.assignment?.test.name || 'нет'}`
+        let sessionString = `,<br />${labels.videoconferences_fields.session.title}: ${element.session}`;
+        let testString = `,<br />${
+            labels.videoconferences_fields.test.title
+        }: ${element.assignment?.test.name || "нет"}`;
 
         if (Object.keys(settings).length > 0) {
             let settingsString = labels.videoconferences_fields.settings.values
@@ -152,9 +152,11 @@ const processTableData = (data) => {
                     return `${a.name}: ${val}`;
                 })
                 .join(",<br />");
-            data[index].settings = settingsString + `${sessionString}${testString}` 
+            data[index].settings =
+                settingsString + `${sessionString}${testString}`;
         } else {
-            data[index].settings = 'Настройки: Не установлены' + `${sessionString}${testString}` 
+            data[index].settings =
+                "Настройки: Не установлены" + `${sessionString}${testString}`;
         }
     });
 };
@@ -177,29 +179,27 @@ const toggleYear = (id) => {
 
         <div class="d-grid gap-4 content">
             <div class="content__container">
-                <div >
-                    <loading-spinner v-if="!loadData"></loading-spinner>
-                    <template v-else>
-                        <reference-filter
-                            :items="years"
-                            :active="activeYear"
-                            @toggleItem="toggleYear"
-                            idField="year"
-                            label="label"
-                            addRoute="videoconferences.new"
-                            labelgroup="videoconferences"
-                            class="mb-4"
-                        ></reference-filter>
-                        <filter-table
-                            :tableData="tableData"
-                            :columns="tableColumns"
-                            labelgroup="videoconferences"
-                            @fetchData="fetchData"
-                            :total="totalPage"
-                            routeName="videoconferences"
-                        ></filter-table>
-                    </template>
-                </div>
+                <loading-spinner v-if="!loadData"></loading-spinner>
+                <template v-else>
+                    <reference-filter
+                        :items="years"
+                        :active="activeYear"
+                        @toggleItem="toggleYear"
+                        idField="year"
+                        label="label"
+                        addRoute="videoconferences.new"
+                        labelgroup="videoconferences"
+                        class="mb-4"
+                    ></reference-filter>
+                    <filter-table
+                        :tableData="tableData"
+                        :columns="tableColumns"
+                        labelgroup="videoconferences"
+                        @fetchData="fetchData"
+                        :total="totalPage"
+                        routeName="videoconferences"
+                    ></filter-table>
+                </template>
             </div>
         </div>
     </AuthenticatedLayout>

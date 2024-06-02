@@ -75,6 +75,8 @@ Route::group(['prefix' => 'videoconferences'], function () {
     Route::get('/', [VideoconferenceController::class, 'index'])->name('videoconferences.index');
     Route::get('/edit/{id}', [VideoconferenceController::class, 'edit'])->name('videoconferences.edit');
     Route::get('/new', [VideoconferenceController::class, 'create'])->name('videoconferences.new');
+    Route::get('/room/{session}', [VideoconferenceController::class, 'room'])->name('videoconferences.room');
+
 })->middleware(['auth']);
 
 
