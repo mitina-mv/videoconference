@@ -52,6 +52,24 @@ class MyVideoconferenceController extends Controller
         $query->whereHas('studgroups', function (Builder $query) use ($userGroupIds) {
             $query->whereIn('studgroup_id', $userGroupIds);
         });
+
+        if ($request->has('date')) {
+            $date = Carbon::parse($request->date)
+                ->timezone('Europe/Moscow')
+                ->format('d.m.Y');
+            $query->whereDate('date', $date);
+        }
+
+        if ($request->has('discipline')) {
+            $discipline = $request->discipline;
+            if($discipline == '__null') {
+                $query->doesntHave('assignment');
+            } else if (is_numeric($discipline)) {
+                $query->whereHas('assignment.test.theme', function (Builder $query) use ($discipline) {
+                    $query->where('discipline_id', $discipline);
+                });
+            }
+        }
         
         return $query;
     }

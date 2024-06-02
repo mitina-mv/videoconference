@@ -1,14 +1,17 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage } from "@inertiajs/vue3";
 import axios from "axios";
 import labels from "@/locales/ru.js";
 import LoadingSpinner from "@/Components/Common/LoadingSpinner.vue";
 import toastService from "@/Services/toastService";
+import Calendar from "primevue/calendar";
+import Dropdown from "primevue/dropdown";
 import FilterTable from "@/Components/Tables/FilterTable.vue";
 
 const props = defineProps({
+    disciplines: [Array, null]
 });
 
 const tableColumns = ref({
@@ -42,16 +45,12 @@ const tableData = ref(null);
 const totalPage = ref(null);
 const years = ref(props?.years || null);
 const loadData = ref(false);
+const dateFilter = ref(new Date())
+const disciplineFilter = ref(null)
 
 onMounted(async () => {
-    // if (years.value != null) {
-    //     years.value.map((item) => {
-    //         item.label = item.year + ` (${item.count_test})`;
-    //     });
-    //     activeYear.value = years.value[0].year;
-    // }
+    disciplineFilter.value = props.disciplines[0].id
     await fetchData();
-
 });
 
 const fetchData = async (filters = null, page = null, limit = null) => {
@@ -78,6 +77,14 @@ const fetchData = async (filters = null, page = null, limit = null) => {
 
     let url = "/api/my-videoconferences/search";
 
+    if (dateFilter.value) {
+        url += `?date=${dateFilter.value.toISOString()}`
+    }
+
+    if (disciplineFilter.value !== null) {
+        url += `&discipline=${disciplineFilter.value}`
+    }
+
     try {
         const response = await axios.post(url, params);
         tableData.value = response.data.data;
@@ -93,43 +100,21 @@ const fetchData = async (filters = null, page = null, limit = null) => {
 
 const processTableData = (data) => {
     data.forEach((element, index) => {
-        data[index].test_id = element.assignment?.test.name || "-";
-
-        if (element.studgroups.length > 0) {
-            data[index].studgroup_id = element.studgroups
-                .map((a) => a.name)
-                .join(", ");
-        } else {
-            data[index].studgroup_id = "не указано";
-        }
-
-        let settings = JSON.parse(element.settings);
-        let sessionString = `,<br />${labels.videoconferences_fields.session.title}: ${element.session}`;
+        let sessionString = `${labels.videoconferences_fields.session.title}: ${element.session}`;
         let testString = `,<br />${
             labels.videoconferences_fields.test.title
         }: ${element.assignment?.test.name || "нет"}`;
 
-        if (Object.keys(settings).length > 0) {
-            let settingsString = labels.videoconferences_fields.settings.values
-                .filter((a) => settings.hasOwnProperty(a.id))
-                .map((a) => {
-                    let val =
-                        a.type === "bool"
-                            ? settings[a.id]
-                                ? "да"
-                                : "нет"
-                            : settings[a.id];
-                    return `${a.name}: ${val}`;
-                })
-                .join(",<br />");
-            data[index].settings =
-                settingsString + `${sessionString}${testString}`;
-        } else {
-            data[index].settings =
-                "Настройки: Не установлены" + `${sessionString}${testString}`;
-        }
+        data[index].settings = `${sessionString}${testString}`
     });
 };
+
+watch(
+    dateFilter,
+    () => {
+        fetchData();
+    },
+);
 </script>
 
 <template>
@@ -146,6 +131,22 @@ const processTableData = (data) => {
             <div class="content__container">
                 <loading-spinner v-if="!loadData"></loading-spinner>
                 <template v-else>
+                    
+                    <Dropdown
+                        v-model="disciplineFilter"
+                        :options="disciplines"
+                        optionLabel="name"
+                        optionValue="id"
+                        filter
+                        showClear
+                    />
+                    <Calendar
+                        v-model="dateFilter"
+                        showIcon
+                        iconDisplay="input"
+                        dateFormat="dd.mm.yy"
+                        placeholder="Выберите дату"
+                    />
                     <filter-table
                         :tableData="tableData"
                         :columns="tableColumns"
