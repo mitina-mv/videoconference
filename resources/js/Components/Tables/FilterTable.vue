@@ -169,7 +169,7 @@ watch(
     <DataTable
         :value="tableData"
         dataKey="id"
-        filterDisplay="row"
+        :filterDisplay="filters.value ? 'row' : false"
         showGridlines
         :loading="loading"
         class="p-datatable-small user-table unvisible-clear-filter-btn"
