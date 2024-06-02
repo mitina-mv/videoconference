@@ -60,6 +60,18 @@ const links = [
         icon: 'pi-video',
         roles: [2]
     },
+    {
+        name: labels.page_titles.videoconferences,
+        route: "videoconferences.my",
+        icon: 'pi-video',
+        roles: [3]
+    },
+    {
+        name: labels.page_titles.assignments,
+        route: "assignments.index",
+        icon: 'pi-calculator',
+        roles: [3]
+    },
 ];
 
 const userRole = usePage().props.auth.user.role_id;
