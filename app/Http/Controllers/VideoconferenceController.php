@@ -59,4 +59,12 @@ class VideoconferenceController extends Controller
             'studgroups' => $user->studgroups,            
         ]);
     }
+
+    public function room(string $session)
+    {
+        dump($session);
+        
+        return Inertia::render('Videoconference/Room', [
+        ]);
+    }
 }

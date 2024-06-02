@@ -27,13 +27,23 @@ class Videoconference extends Model
         'date' => 'datetime',
     ];
 
-    protected $appends = ['is_completed'];
+    protected $appends = ['is_completed', 'is_active'];
 
     public function getIsCompletedAttribute()
     {
-        $now = Carbon::now()->timezone('Europe/Moscow');
-        $date = Carbon::parse($this->date)->timezone('Europe/Moscow');
+        $now = Carbon::now()->timezone('Europe/Moscow')->addMinutes(6);
+        $date = Carbon::parse($this->date, 3);
         return $date && $date->lt($now);
+    }
+
+    public function getIsActiveAttribute()
+    {
+        $now = Carbon::now()->timezone('Europe/Moscow');
+        $date = Carbon::parse($this->date, 3);
+        $start = $date->copy()->subMinutes(5);
+        $end = $date->copy()->addMinutes(30);
+
+        return $now->between($start, $end);
     }
 
     public function getDateAttribute($value)
