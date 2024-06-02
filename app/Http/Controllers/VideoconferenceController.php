@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Service\OpenViduService;
 use App\Http\Service\TestlogService;
 use App\Models\Videoconference;
 use Illuminate\Support\Facades\DB;
@@ -62,9 +63,41 @@ class VideoconferenceController extends Controller
 
     public function room(string $session)
     {
-        dump($session);
-        
-        return Inertia::render('Videoconference/Room', [
-        ]);
+        $vc = Videoconference::where('session', $session)->first();
+        $user = auth()->user();
+    
+        if(!$vc) {
+            return Inertia::render('Videoconference/Room', [
+                'error' => 'Эта видеоконференция не существует' 
+            ]);
+        }
+    
+        $openViduService = new OpenViduService();
+    
+        try {
+            if ($vc->user_id == $user->id) {
+                // Пользователь владелец конференции, подключаем как модератора
+                $connection = $openViduService->connectToSession($vc->session, [
+                    'role' => 'MODERATOR',
+                    'data' => json_encode(['user_id' => $user->id, 'username' => $user->full_name])
+                ]);
+            } else {
+                // Пользователь не владелец конференции, подключаем как слушателя
+                $connection = $openViduService->connectToSession($vc->session, [
+                    'role' => 'SUBSCRIBER',
+                    'data' => json_encode(['user_id' => $user->id, 'username' => $user->full_name])
+                ]);
+            }
+    
+            return Inertia::render('Videoconference/Room', [
+                'sessionId' => $vc->session,
+                'token' => $connection['token']
+            ]);
+    
+        } catch (\Exception $e) {
+            return Inertia::render('Videoconference/Room', [
+                'error' => 'Не удалось подключиться к видеоконференции'
+            ]);
+        }
     }
 }
