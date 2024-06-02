@@ -288,3 +288,13 @@ main {
     padding: 1.5em;
     width: 78vw;
 }
+
+svg.w-20.h-20.fill-current.text-gray-500.guest-logo {
+    color: #f3f4f6;
+    width: 120px;
+    height: 120px;
+}
+
+.guest-main.border-main {
+    border: 1px solid #dee2e6;
+}

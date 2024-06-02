@@ -73,7 +73,7 @@ const filteredLinks = computed(() => {
     <div class="body">
         <aside class="sidebar">
             <div class="logo">
-                <img src="/logo.png"/>
+                <ApplicationLogo />
             </div>
             <div class="user-info">
                 <div class="user-avatar">
