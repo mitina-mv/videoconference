@@ -67,7 +67,7 @@ class VideoconferenceController extends Controller
         $user = auth()->user();
     
         if(!$vc) {
-            return Inertia::render('Videoconference/Room', [
+            return Inertia::render('Videoconference/Conference', [
                 'error' => 'Эта видеоконференция не существует' 
             ]);
         }
@@ -75,6 +75,12 @@ class VideoconferenceController extends Controller
         $openViduService = new OpenViduService();
     
         try {
+            // получаем сессию
+            if(!$openViduService->sessionExists($vc->session)) {
+                // создаем сессию, если она не существует
+                $openViduService->createSession($vc->session);
+            }
+
             if ($vc->user_id == $user->id) {
                 // Пользователь владелец конференции, подключаем как модератора
                 $connection = $openViduService->connectToSession($vc->session, [
@@ -88,14 +94,17 @@ class VideoconferenceController extends Controller
                     'data' => json_encode(['user_id' => $user->id, 'username' => $user->full_name])
                 ]);
             }
+
+            dump($connection['token']); 
     
-            return Inertia::render('Videoconference/Room', [
+            return Inertia::render('Videoconference/Conference', [
                 'sessionId' => $vc->session,
                 'token' => $connection['token']
             ]);
     
         } catch (\Exception $e) {
-            return Inertia::render('Videoconference/Room', [
+            dump($e); 
+            return Inertia::render('Videoconference/Conference', [
                 'error' => 'Не удалось подключиться к видеоконференции'
             ]);
         }

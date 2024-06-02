@@ -55,6 +55,18 @@ class OpenViduService
         }
     }
 
+    // Метод проверки существования сессии
+    public function sessionExists($sessionId) {
+        $url = "{$this->apiUrl}/{$sessionId}";
+
+        try {
+            $this->client->get($url);
+            return true;
+        } catch (RequestException $e) {
+            return false;
+        }
+    }
+
     // Метод получения сессии по sessionId
     public function getSession($sessionId)
     {

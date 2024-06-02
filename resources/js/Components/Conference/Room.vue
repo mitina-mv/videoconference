@@ -26,6 +26,11 @@ import axios from "axios";
 import { OpenVidu } from "openvidu-browser";
 import Button from 'primevue/button';
 
+const props = defineProps({
+    sessionId: String,
+    token: String,
+});
+
 const OV = new OpenVidu();
 const videoContainer = ref(null);
 const roomConteiner = ref(null);
@@ -35,13 +40,13 @@ const session = ref(null);
 const videoEnabled = ref(true);
 const audioEnabled = ref(true);
 const fullScreen = ref(false);
-const mySessionId = "ses_EtTToJZqM8";
 
 const joinSession = async () => {
+    console.log(props.token);
     try {
-        const response = await axios.get(`/connection/${mySessionId}`);
-        const connectData = response.data;
-        const myToken = connectData.token;
+        // const response = await axios.get(`/connection/${mySessionId}`);
+        // const connectData = response.data;
+        // const myToken = connectData.token;
 
         session.value.on("streamCreated", ({ stream }) => {
             const subscriber = session.value.subscribe(
@@ -52,7 +57,7 @@ const joinSession = async () => {
             subscribers.value.push(subscriber);
         });
 
-        await session.value.connect(myToken);
+        await session.value.connect(props.token);
 
         console.log("Connected to session");
 
