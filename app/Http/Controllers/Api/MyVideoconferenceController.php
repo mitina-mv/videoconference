@@ -28,7 +28,7 @@ class MyVideoconferenceController extends Controller
 
     public function includes(): array
     {
-        return ['user', 'assignment.test', 'studgroups',];
+        return ['user', 'assignment.test.theme', 'studgroups',];
     }
 
     public function filterableBy(): array

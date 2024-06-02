@@ -56,9 +56,8 @@ onMounted(async () => {
 const fetchData = async (filters = null, page = null, limit = null) => {
     let params = {
         includes: [
-            { relation: "studgroups" },
             { relation: "user" },
-            { relation: "assignment.test" },
+            { relation: "assignment.test.theme" },
         ],
         sort: [
             { field: "date", direction: "asc" },
@@ -101,16 +100,23 @@ const fetchData = async (filters = null, page = null, limit = null) => {
 const processTableData = (data) => {
     data.forEach((element, index) => {
         let sessionString = `${labels.videoconferences_fields.session.title}: ${element.session}`;
-        let testString = `,<br />${
-            labels.videoconferences_fields.test.title
-        }: ${element.assignment?.test.name || "нет"}`;
+        let testString = `,<br />Тестирование: ${element.assignment ? 'да' : "нет"}`;
+        let speakerString = `,<br />Проводит: ${element.user.full_name}`;
+        let themeString = `,<br />Тема: ${element.assignment ? element.assignment.test.theme.name : "нет"}`;
 
-        data[index].settings = `${sessionString}${testString}`
+        data[index].settings = `${sessionString}${testString}${speakerString}${themeString}`
     });
 };
 
 watch(
     dateFilter,
+    () => {
+        fetchData();
+    },
+);
+
+watch(
+    disciplineFilter,
     () => {
         fetchData();
     },
@@ -131,22 +137,23 @@ watch(
             <div class="content__container">
                 <loading-spinner v-if="!loadData"></loading-spinner>
                 <template v-else>
-                    
-                    <Dropdown
-                        v-model="disciplineFilter"
-                        :options="disciplines"
-                        optionLabel="name"
-                        optionValue="id"
-                        filter
-                        showClear
-                    />
-                    <Calendar
-                        v-model="dateFilter"
-                        showIcon
-                        iconDisplay="input"
-                        dateFormat="dd.mm.yy"
-                        placeholder="Выберите дату"
-                    />
+                    <div class="d-grid grid-col-4 gap-4 mb-4">
+                        <Dropdown
+                            v-model="disciplineFilter"
+                            :options="disciplines"
+                            optionLabel="name"
+                            optionValue="id"
+                            filter
+                            showClear
+                        />
+                        <Calendar
+                            v-model="dateFilter"
+                            showIcon
+                            iconDisplay="input"
+                            dateFormat="dd.mm.yy"
+                            placeholder="Выберите дату"
+                        />
+                    </div>
                     <filter-table
                         :tableData="tableData"
                         :columns="tableColumns"
