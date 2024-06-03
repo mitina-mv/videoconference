@@ -68,7 +68,7 @@ const links = [
     },
     {
         name: labels.page_titles.assignments,
-        route: "assignments.index",
+        route: "assignments.my",
         icon: 'pi-calculator',
         roles: [3]
     },

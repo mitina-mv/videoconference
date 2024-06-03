@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\ConferenceController;
+use App\Http\Controllers\MyAssignmentController;
 use App\Http\Controllers\MyVideoconferenceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionController;
@@ -70,6 +71,8 @@ Route::group(['prefix' => 'assignments'], function () {
     Route::get('/', [AssignmentController::class, 'index'])->name('assignments.index');
     Route::get('/edit/{id}', [AssignmentController::class, 'edit'])->name('assignments.edit');
     Route::get('/new', [AssignmentController::class, 'create'])->name('assignments.new');
+
+    Route::get('/my', [MyAssignmentController::class, 'index'])->name('assignments.my');
 })->middleware(['auth']);
 
 Route::group(['prefix' => 'videoconferences'], function () {

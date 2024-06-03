@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Assignment;
+use App\Models\Testlog;
 use App\Policies\TruePolicy;
 use Carbon\Carbon;
 use Orion\Http\Controllers\Controller;
@@ -13,7 +13,7 @@ use Orion\Http\Requests\Request as Request;
 
 class MyAssignmentController extends Controller
 {
-    protected $model = Assignment::class;
+    protected $model = Testlog::class;
     protected $policy = TruePolicy::class;
 
     public function limit(): int
@@ -28,7 +28,7 @@ class MyAssignmentController extends Controller
 
     public function includes(): array
     {
-        return ['test', 'test.theme', 'user',];
+        return ['assignment.test.theme', 'assignment.user','assignment'];
     }
 
     public function filterableBy(): array
@@ -36,33 +36,36 @@ class MyAssignmentController extends Controller
         return [];
     }
 
+    public function sortableBy() : array
+    {
+        return [];
+    }
+
     protected function buildIndexFetchQuery(Request $request, array $requestedRelations): Builder
     {
         $query = parent::buildIndexFetchQuery($request, $requestedRelations);
-
-        $user = Auth::user();
-
-        $query->whereHas('testlogs', function (Builder $query) use ($user) {
-            $query->whereIn('user_id', $user->id);
-        });
+        $query->where('user_id', '=', request()->user()->id);
 
         if ($request->has('date')) {
             $date = Carbon::parse($request->date)
                 ->timezone('Europe/Moscow')
                 ->format('d.m.Y');
-            $query->whereDate('date', $date);
+
+            $query->whereHas('assignment', function (Builder $query) use ($date) {
+                $query->whereDate('date', $date);
+            });
         }
 
         if ($request->has('discipline')) {
             $discipline = $request->discipline;
             
             if (is_numeric($discipline)) {
-                $query->whereHas('test.theme', function (Builder $query) use ($discipline) {
+                $query->whereHas('assignment.test.theme', function (Builder $query) use ($discipline) {
                     $query->where('discipline_id', $discipline);
                 });
             }
         }
-        
+
         return $query;
     }
 }
