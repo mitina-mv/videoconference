@@ -375,6 +375,7 @@ onMounted(() => {
     border-radius: 6px;
     padding: 1em;
     bottom: 5em;
+    min-width: 300px;
 }
 
 .user-list ul {
@@ -408,6 +409,7 @@ onMounted(() => {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     min-width: 300px;
+    height: 80%;
     border-radius: 6px;
 }
 

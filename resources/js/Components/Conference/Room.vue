@@ -346,6 +346,7 @@ onMounted(() => {
     z-index: 1000;
     min-width: 300px;
     border-radius: 6px;
+    height: 80%;
 }
 
 .chat-panel header {
