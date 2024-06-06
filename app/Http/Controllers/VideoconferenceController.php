@@ -71,12 +71,19 @@ class VideoconferenceController extends Controller
                 'error' => 'Эта видеоконференция не существует' 
             ]);
         }
+
+        // проверка доступа студента к комнате
     
         $openViduService = new OpenViduService();
     
         try {
             // получаем сессию
             if(!$openViduService->sessionExists($vc->session)) {
+                if($vc->user_id != $user->id) {
+                    return Inertia::render('Videoconference/Conference', [
+                        'error' => 'Эта видеоконференция еще не началась' 
+                    ]);
+                }
                 // создаем сессию, если она не существует
                 $openViduService->createSession($vc->session);
             }
@@ -97,7 +104,9 @@ class VideoconferenceController extends Controller
     
             return Inertia::render('Videoconference/Conference', [
                 'sessionId' => $vc->session,
-                'token' => $connection['token']
+                'token' => $connection['token'],
+                'role' => $vc->user_id == $user->id ? 'MODERATOR' : 'SUBSCRIBER',
+                'type' => 'lection'
             ]);
     
         } catch (\Exception $e) {

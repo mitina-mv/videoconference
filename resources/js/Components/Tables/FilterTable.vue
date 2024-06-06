@@ -169,7 +169,7 @@ watch(
     <DataTable
         :value="tableData"
         dataKey="id"
-        :filterDisplay="filters.value ? 'row' : null"
+        :filterDisplay="(Object.keys(filters)['length'] > 0) ? 'row' : null"
         showGridlines
         :loading="loading"
         class="p-datatable-small user-table unvisible-clear-filter-btn"
@@ -295,5 +295,11 @@ watch(
 .unvisible-clear-filter-btn
     button.p-column-filter-clear-button.p-link.p-hidden-space {
     display: none;
+}
+.p-datatable .p-datatable-thead > tr > th {
+    background: none;
+}
+.p-datatable-table {
+    background: #fff;
 }
 </style>

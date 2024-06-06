@@ -4,11 +4,14 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage } from "@inertiajs/vue3";
 import Room from "@/Components/Conference/Room.vue";
 import labels from "@/locales/ru.js";
+import ModeratorLectionRoom from "@/Components/Conference/ModeratorLectionRoom.vue";
 
 const props = defineProps({
     sessionId: String,
     token: String,
-    error: String
+    error: String,
+    type: String,
+    role: String,
 });
 
 </script>
@@ -26,8 +29,12 @@ const props = defineProps({
         <div class="d-grid gap-4 content">
             <div class="content__container">
                 <div v-if="error">
-                {{ error }}</div>
-                <Room :sessionId="sessionId" :token="token" v-else></Room>
+                    {{ error }}
+                </div>
+                <template v-else>
+                    <ModeratorLectionRoom v-if="role == 'MODERATOR'" :sessionId="sessionId" :token="token"></ModeratorLectionRoom>
+                    <Room :sessionId="sessionId" :token="token" v-else></Room>
+                </template>
             </div>
         </div>
     </AuthenticatedLayout>

@@ -75,14 +75,14 @@ Route::group(['prefix' => 'assignments'], function () {
     Route::get('/my', [MyAssignmentController::class, 'index'])->name('assignments.my');
 })->middleware(['auth']);
 
-Route::group(['prefix' => 'videoconferences'], function () {
+Route::group(['prefix' => 'videoconferences', 'middleware' => ['auth']], function () {
     Route::get('/', [VideoconferenceController::class, 'index'])->name('videoconferences.index');
     Route::get('/edit/{id}', [VideoconferenceController::class, 'edit'])->name('videoconferences.edit');
     Route::get('/new', [VideoconferenceController::class, 'create'])->name('videoconferences.new');
     Route::get('/room/{session}', [VideoconferenceController::class, 'room'])->name('videoconferences.room');
     
     Route::get('/my', [MyVideoconferenceController::class, 'index'])->name('videoconferences.my');
-})->middleware(['auth']);
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

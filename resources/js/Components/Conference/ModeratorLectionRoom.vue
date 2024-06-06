@@ -1,59 +1,76 @@
 <template>
-    <div class="room" ref="roomConteiner">
+    <div class="room" ref="roomContainer">
         <div class="video-container" ref="videoContainer"></div>
+        <div class="username">
+            {{ username }}
+        </div>
         <div class="controls">
             <Button @click="toggleVideo" :class="toggleVideo ? 'btn_off' : 'btn_on'" rounded icon="pi pi-video" />
-            
             <Button @click="toggleAudio" :class="toggleAudio ? 'btn_off' : 'btn_on'" rounded icon="pi pi-microphone" />
-
             <Button @click="toggleFullScreen" class="btn_screen" rounded :icon="'pi ' + (fullScreen ? 'pi-window-minimize' : 'pi-window-maximize')" />
-
-            <Button @click="leaveConference" class="btn_leave" rounded icon="pi pi-stop-circle" />
+            <Button @click="endCall" class="btn_leave" rounded icon="pi pi-stop-circle" />
+        </div>
+        <div class="user-list">
+            <h3>Current Users</h3>
+            <ul>
+                <li v-for="student in students" :key="student.connectionId">
+                    {{ student.username }}
+                </li>
+            </ul>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import axios from "axios";
+import { ref, computed, onMounted } from "vue";
 import { OpenVidu } from "openvidu-browser";
 import Button from 'primevue/button';
 
 const props = defineProps({
     sessionId: String,
     token: String,
+    serverData: String,
+});
+
+const username = computed(() => {
+    try {
+        const data = JSON.parse(props.serverData);
+        return data.username || "Unknown User";
+    } catch (e) {
+        return "Unknown User";
+    }
 });
 
 const OV = new OpenVidu();
 const videoContainer = ref(null);
-const roomConteiner = ref(null);
+const roomContainer = ref(null);
 const subscribers = ref([]);
 const publisher = ref(null);
 const session = ref(null);
 const videoEnabled = ref(true);
 const audioEnabled = ref(true);
 const fullScreen = ref(false);
+const students = ref([]);
 
 const joinSession = async () => {
-    console.log(props.token);
     try {
-        // const response = await axios.get(`/connection/${mySessionId}`);
-        // const connectData = response.data;
-        // const myToken = connectData.token;
-
         session.value.on("streamCreated", ({ stream }) => {
-            const subscriber = session.value.subscribe(
-                stream,
-                videoContainer.value,
-                { insertMode: "APPEND" }
-            );
+            const subscriber = session.value.subscribe(stream, videoContainer.value, { insertMode: "APPEND" });
             subscribers.value.push(subscriber);
-            console.log(stream);
+            updateUserList();
+        });
+
+        session.value.on("streamDestroyed", ({ stream }) => {
+            const index = subscribers.value.findIndex(sub => sub.stream === stream);
+            if (index !== -1) subscribers.value.splice(index, 1);
+            updateUserList();
+        });
+
+        session.value.on("connectionCreated", (event) => {
+            updateUserList();
         });
 
         await session.value.connect(props.token);
-
-        console.log("Connected to session");
 
         publisher.value = OV.initPublisher(videoContainer.value, {
             videoSource: undefined,
@@ -66,9 +83,36 @@ const joinSession = async () => {
         });
 
         session.value.publish(publisher.value);
+        updateUserList();
     } catch (error) {
         console.error("Connection error:", error);
     }
+};
+
+const updateUserList = () => {
+    // console.log(session.value, session.value?.remoteConnections);
+    students.value = []
+    if(session.value.remoteConnections) {
+        session.value.remoteConnections.forEach(connection => {
+            const data = JSON.parse(connection.data);
+            console.log(data);
+
+            students.value.push({
+                connectionId: connection.connectionId,
+                username: data.username || "Unknown User",
+            })
+        })
+        
+        // .map(connection => {
+        //     console.log(connection);
+        //     // const data = JSON.parse(connection.data);
+        //     // return {
+        //     //     connectionId: connection.connectionId,
+        //     //     username: data.username || "Unknown User",
+        //     // };
+        // });
+    }
+    console.log(students.value);
 };
 
 const toggleVideo = () => {
@@ -86,89 +130,83 @@ const toggleAudio = () => {
 };
 
 const toggleFullScreen = () => {
-    const container = roomConteiner.value;
+    const container = roomContainer.value;
     if (!fullScreen.value) {
         if (container.requestFullscreen) {
             container.requestFullscreen();
         } else if (container.mozRequestFullScreen) {
-            /* Firefox */
             container.mozRequestFullScreen();
         } else if (container.webkitRequestFullscreen) {
-            /* Chrome, Safari & Opera */
             container.webkitRequestFullscreen();
         } else if (container.msRequestFullscreen) {
-            /* IE/Edge */
             container.msRequestFullscreen();
         }
     } else {
         if (document.exitFullscreen) {
             document.exitFullscreen();
         } else if (document.mozCancelFullScreen) {
-            /* Firefox */
             document.mozCancelFullScreen();
         } else if (document.webkitExitFullscreen) {
-            /* Chrome, Safari & Opera */
             document.webkitExitFullscreen();
         } else if (document.msExitFullscreen) {
-            /* IE/Edge */
             document.msExitFullscreen();
         }
     }
     fullScreen.value = !fullScreen.value;
 };
 
-const leaveConference = () => {
+const endCall = () => {
     if (session.value) {
         session.value.disconnect();
     }
+    // Implement logic to completely end the call for all participants if needed
 };
 
 onMounted(() => {
     session.value = OV.initSession();
     joinSession();
-})
+});
 </script>
 
 <style scoped>
+/* Ваш CSS код */
 .room {
-    position: relative;
-    width: 100%;
-    height: calc(100vh - 6.75em);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .video-container {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
-    height: 100%;
+    height: 70vh;
     background-color: black;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1em
+    margin-bottom: 10px;
+}
+
+.username {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 10px;
 }
 
 .controls {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    z-index: 1000;
-    background: #fff;
     display: flex;
-    gap: 1em;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
-/* .btn_off {
-    background: var(--primary-50);
+.user-list {
+    width: 100%;
+    text-align: left;
+    margin-top: 20px;
 }
-.btn_on {
-    background: var(--primary-600);
-} */
-.btn_screen{
 
+.user-list ul {
+    list-style: none;
+    padding: 0;
 }
-.btn_leave {
-    background: var(--red-600);
 
+.user-list li {
+    padding: 5px 0;
 }
 </style>
