@@ -54,15 +54,21 @@ const students = ref([]);
 
 const joinSession = async () => {
     try {
-        session.value.on("streamCreated", ({ stream }) => {
-            const subscriber = session.value.subscribe(stream, videoContainer.value, { insertMode: "APPEND" });
-            subscribers.value.push(subscriber);
-            updateUserList();
-        });
+        // session.value.on("streamCreated", ({ stream }) => {
+        //     const subscriber = session.value.subscribe(stream, videoContainer.value, { insertMode: "APPEND" });
+        //     subscribers.value.push(subscriber);
+        //     updateUserList();
+        // });
 
-        session.value.on("streamDestroyed", ({ stream }) => {
-            const index = subscribers.value.findIndex(sub => sub.stream === stream);
-            if (index !== -1) subscribers.value.splice(index, 1);
+        // session.value.on("streamDestroyed", ({ stream }) => {
+        //     // const index = subscribers.value.findIndex(sub => sub.stream === stream);
+        //     // if (index !== -1) subscribers.value.splice(index, 1);
+        //     updateUserList();
+        // });
+
+        session.value.on("connectionDestroyed", (event) => {
+            // const index = subscribers.value.findIndex(sub => sub.stream === stream);
+            // if (index !== -1) subscribers.value.splice(index, 1);
             updateUserList();
         });
 

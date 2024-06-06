@@ -55,17 +55,17 @@ const joinSession = async () => {
 
         console.log("Connected to session");
 
-        publisher.value = OV.initPublisher(videoContainer.value, {
-            videoSource: undefined,
-            audioSource: undefined,
-            publishAudio: audioEnabled.value,
-            publishVideo: videoEnabled.value,
-            resolution: "640x480",
-            insertMode: "APPEND",
-            mirror: true,
-        });
+        // publisher.value = OV.initPublisher(videoContainer.value, {
+        //     videoSource: undefined,
+        //     audioSource: undefined,
+        //     publishAudio: audioEnabled.value,
+        //     publishVideo: videoEnabled.value,
+        //     resolution: "640x480",
+        //     insertMode: "APPEND",
+        //     mirror: true,
+        // });
 
-        session.value.publish(publisher.value);
+        // session.value.publish(publisher.value);
     } catch (error) {
         console.error("Connection error:", error);
     }
