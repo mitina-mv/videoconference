@@ -79,7 +79,9 @@ class VideoconferenceController extends Controller
 
             if ($testSettings->question_ids) {
                 $questions = Question::whereIn('id', $testSettings->question_ids)
-                    ->with('answers')
+                    ->with(['answers' => function ($query) {
+                        $query->select('id', 'question_id', 'name');
+                    }])
                     ->get();
             } else {
                 return Inertia::render('Videoconference/Conference', [

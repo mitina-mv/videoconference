@@ -10,6 +10,27 @@
 
             <Button @click="leaveConference" class="btn_leave" rounded icon="pi pi-stop-circle" />
         </div>
+
+        <!-- Карточка с вопросом -->
+        <div v-if="currentQuestion" class="question-card">
+            <h3>{{ currentQuestion.text }}</h3>
+            <div v-if="currentQuestion.type === 'single'">
+                <div v-for="answer in currentQuestion.answers" :key="answer.id">
+                    <RadioButton :value="answer.id" v-model="userAnswer" />
+                    <label>{{ answer.name }}</label>
+                </div>
+            </div>
+            <div v-if="currentQuestion.type === 'multiple'">
+                <div v-for="answer in currentQuestion.answers" :key="answer.id">
+                    <Checkbox :value="answer.id" v-model="userAnswer" />
+                    <label>{{ answer.name }}</label>
+                </div>
+            </div>
+            <div v-if="currentQuestion.type === 'text'">
+                <InputText v-model="userAnswerText" />
+            </div>
+            <Button @click="submitAnswer">Submit</Button>
+        </div>
     </div>
 </template>
 
@@ -18,6 +39,9 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import { OpenVidu } from "openvidu-browser";
 import Button from 'primevue/button';
+import RadioButton from 'primevue/radiobutton';
+import Checkbox from 'primevue/checkbox';
+import InputText from 'primevue/inputtext';
 
 const props = defineProps({
     sessionId: String,
@@ -33,6 +57,11 @@ const session = ref(null);
 const videoEnabled = ref(true);
 const audioEnabled = ref(true);
 const fullScreen = ref(false);
+
+// Состояние для вопроса и ответа
+const currentQuestion = ref(null);
+const userAnswer = ref([]);
+const userAnswerText = ref('');
 
 const joinSession = async () => {
     console.log(props.token);
@@ -52,7 +81,11 @@ const joinSession = async () => {
         });
 
         session.value.on('signal:test', (event) => {
-            console.log(event.data);
+            const question = JSON.parse(event.data);
+            currentQuestion.value = question;
+            userAnswer.value = [];
+            userAnswerText.value = '';
+            setTimeout(() => { currentQuestion.value = null; }, 10 * 60 * 1000);
         });
 
         await session.value.connect(props.token);
@@ -127,6 +160,24 @@ const leaveConference = () => {
     }
 };
 
+const submitAnswer = async () => {
+    try {
+        let answer = userAnswer.value;
+        if (currentQuestion.value.type === 'text') {
+            answer = userAnswerText.value;
+        }
+
+        /* await axios.post('/api/submitAnswer', {
+            questionId: currentQuestion.value.id,
+            answer: answer,
+        }); */
+
+        currentQuestion.value = null;
+    } catch (error) {
+        console.error("Error submitting answer:", error);
+    }
+};
+
 onMounted(() => {
     session.value = OV.initSession();
     joinSession();
@@ -173,5 +224,16 @@ onMounted(() => {
 }
 .btn_leave {
     background: var(--red-600);
+}
+.question-card {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: white;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    z-index: 1000;
+    width: 300px;
 }
 </style>
