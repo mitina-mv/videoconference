@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Service\OpenViduService;
 use App\Http\Service\TestlogService;
+use App\Models\Question;
 use App\Models\Videoconference;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -71,6 +72,21 @@ class VideoconferenceController extends Controller
                 'error' => 'Эта видеоконференция не существует' 
             ]);
         }
+        $questions = null;
+
+        if($vc->assignment && $vc->user_id == $user->id) {
+            $testSettings = $vc->assignment->test->settings;
+
+            if ($testSettings->question_ids) {
+                $questions = Question::whereIn('id', $testSettings->question_ids)
+                    ->with('answers')
+                    ->get();
+            } else {
+                return Inertia::render('Videoconference/Conference', [
+                    'error' =>'Неправильные настройки используемого теста: необходимо использовать тест с предустановленными вопросами.'
+                ]);
+            }
+        }
 
         // проверка доступа студента к комнате
     
@@ -106,11 +122,11 @@ class VideoconferenceController extends Controller
                 'sessionId' => $vc->session,
                 'token' => $connection['token'],
                 'role' => $vc->user_id == $user->id ? 'MODERATOR' : 'SUBSCRIBER',
-                'type' => 'lection'
+                'type' => 'lection',
+                'questions' => $questions,
             ]);
     
         } catch (\Exception $e) {
-            dump($e); 
             return Inertia::render('Videoconference/Conference', [
                 'error' => 'Не удалось подключиться к видеоконференции'
             ]);

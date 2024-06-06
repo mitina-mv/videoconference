@@ -1,22 +1,41 @@
 <template>
     <div class="room" ref="roomContainer">
         <div class="video-container" ref="videoContainer"></div>
-        <div class="username">
-            {{ username }}
-        </div>
         <div class="controls">
-            <Button @click="toggleVideo" :class="toggleVideo ? 'btn_off' : 'btn_on'" rounded icon="pi pi-video" />
-            <Button @click="toggleAudio" :class="toggleAudio ? 'btn_off' : 'btn_on'" rounded icon="pi pi-microphone" />
-            <Button @click="toggleFullScreen" class="btn_screen" rounded :icon="'pi ' + (fullScreen ? 'pi-window-minimize' : 'pi-window-maximize')" />
-            <Button @click="endCall" class="btn_leave" rounded icon="pi pi-stop-circle" />
+            <div>
+
+            </div>
+            <div class="d-flex gap-3">
+                <Button @click="toggleVideo" :class="toggleVideo ? 'btn_off' : 'btn_on'" rounded icon="pi pi-video" />
+                <Button @click="toggleAudio" :class="toggleAudio ? 'btn_off' : 'btn_on'" rounded icon="pi pi-microphone" />
+                <Button @click="toggleFullScreen" class="btn_screen" rounded :icon="'pi ' + (fullScreen ? 'pi-window-minimize' : 'pi-window-maximize')" severity="secondary" />
+                <Button @click="endCall" class="btn_leave" rounded icon="pi pi-stop-circle" severity="danger" />
+            </div>
+            <div class="d-flex gap-3">
+                <Button @click="toggleUserPanel" icon="pi pi-users" rounded></Button>
+                <Button @click="toggleQuestionPanel" icon="pi pi-question-circle" rounded></Button>
+            </div>      
         </div>
-        <div class="user-list">
-            <h3>Current Users</h3>
-            <ul>
-                <li v-for="student in students" :key="student.connectionId">
-                    {{ student.username }}
-                </li>
-            </ul>
+
+        <div class="right-sidebar" v-show="displayUserPanel || displayQuestionPanel">
+            <div v-show="displayUserPanel" class="user-list">
+                <h3>Участники</h3>
+                <ul>
+                    <li v-for="student in students" :key="student.connectionId">
+                        {{ student.username }}
+                    </li>
+                </ul>
+            </div>
+
+            <div v-show="displayQuestionPanel" class="question-list">
+                <h3>Вопросы</h3>
+                <ul>
+                    <li v-for="question in questions" :key="question.id">
+                        {{ question.text }}
+                        <Button @click="sendQuestion(question)" icon="pi pi-send" text></Button>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </template>
@@ -30,45 +49,24 @@ const props = defineProps({
     sessionId: String,
     token: String,
     serverData: String,
-});
-
-const username = computed(() => {
-    try {
-        const data = JSON.parse(props.serverData);
-        return data.username || "Unknown User";
-    } catch (e) {
-        return "Unknown User";
-    }
+    questions: Array
 });
 
 const OV = new OpenVidu();
 const videoContainer = ref(null);
 const roomContainer = ref(null);
-const subscribers = ref([]);
 const publisher = ref(null);
 const session = ref(null);
 const videoEnabled = ref(true);
 const audioEnabled = ref(true);
 const fullScreen = ref(false);
 const students = ref([]);
+const displayUserPanel = ref(false)
+const displayQuestionPanel = ref(false)
 
 const joinSession = async () => {
     try {
-        // session.value.on("streamCreated", ({ stream }) => {
-        //     const subscriber = session.value.subscribe(stream, videoContainer.value, { insertMode: "APPEND" });
-        //     subscribers.value.push(subscriber);
-        //     updateUserList();
-        // });
-
-        // session.value.on("streamDestroyed", ({ stream }) => {
-        //     // const index = subscribers.value.findIndex(sub => sub.stream === stream);
-        //     // if (index !== -1) subscribers.value.splice(index, 1);
-        //     updateUserList();
-        // });
-
         session.value.on("connectionDestroyed", (event) => {
-            // const index = subscribers.value.findIndex(sub => sub.stream === stream);
-            // if (index !== -1) subscribers.value.splice(index, 1);
             updateUserList();
         });
 
@@ -83,7 +81,7 @@ const joinSession = async () => {
             audioSource: undefined,
             publishAudio: audioEnabled.value,
             publishVideo: videoEnabled.value,
-            resolution: "640x480",
+            resolution: "1200x980",
             insertMode: "APPEND",
             mirror: true,
         });
@@ -96,7 +94,6 @@ const joinSession = async () => {
 };
 
 const updateUserList = () => {
-    // console.log(session.value, session.value?.remoteConnections);
     students.value = []
     if(session.value.remoteConnections) {
         session.value.remoteConnections.forEach(connection => {
@@ -108,17 +105,7 @@ const updateUserList = () => {
                 username: data.username || "Unknown User",
             })
         })
-        
-        // .map(connection => {
-        //     console.log(connection);
-        //     // const data = JSON.parse(connection.data);
-        //     // return {
-        //     //     connectionId: connection.connectionId,
-        //     //     username: data.username || "Unknown User",
-        //     // };
-        // });
     }
-    console.log(students.value);
 };
 
 const toggleVideo = () => {
@@ -168,6 +155,28 @@ const endCall = () => {
     // Implement logic to completely end the call for all participants if needed
 };
 
+const sendQuestion = (question) => {
+    session.value.signal({
+      data: JSON.stringify(question),
+      to: [],
+      type: 'test'
+    })
+    .then(() => {
+        console.log('Message successfully sent');
+    })
+    .catch(error => {
+        console.error(error);
+    });
+}
+
+const toggleUserPanel = () => {
+    displayUserPanel.value = !displayUserPanel.value
+}
+
+const toggleQuestionPanel = () => {
+    displayQuestionPanel.value = !displayQuestionPanel.value
+}
+
 onMounted(() => {
     session.value = OV.initSession();
     joinSession();
@@ -175,44 +184,60 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Ваш CSS код */
 .room {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 6.75em);
 }
 
 .video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: 70vh;
+    height: 100%;
     background-color: black;
-    margin-bottom: 10px;
-}
-
-.username {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 10px;
+    display: grid;
+    gap: 1em
 }
 
 .controls {
+    position: absolute;
+    bottom: 20px;
+    z-index: 1000;
     display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 1em;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 20px;
 }
 
-.user-list {
-    width: 100%;
+.right-sidebar {
     text-align: left;
     margin-top: 20px;
+    z-index: 1000;
+    background: #fff;
+    position: absolute;
+    width: 20vw;
+    right: 10px;
+    height: 80%;
+    border-radius: 6px;
+    padding: 1em;
+    bottom: 5em;
 }
 
 .user-list ul {
-    list-style: none;
+    list-style: decimal;
     padding: 0;
+    padding-left: 1em;
 }
 
 .user-list li {
     padding: 5px 0;
+}
+
+.right-sidebar h3 {
+    font-weight: bold;
 }
 </style>

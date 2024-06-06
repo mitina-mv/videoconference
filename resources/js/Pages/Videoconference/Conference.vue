@@ -12,6 +12,7 @@ const props = defineProps({
     error: String,
     type: String,
     role: String,
+    questions: [Array, null]
 });
 
 </script>
@@ -32,7 +33,7 @@ const props = defineProps({
                     {{ error }}
                 </div>
                 <template v-else>
-                    <ModeratorLectionRoom v-if="role == 'MODERATOR'" :sessionId="sessionId" :token="token"></ModeratorLectionRoom>
+                    <ModeratorLectionRoom v-if="role == 'MODERATOR'" :sessionId="sessionId" :token="token" :questions="questions"></ModeratorLectionRoom>
                     <Room :sessionId="sessionId" :token="token" v-else></Room>
                 </template>
             </div>

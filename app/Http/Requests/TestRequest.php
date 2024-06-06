@@ -38,7 +38,7 @@ class TestRequest extends Request
 
     public function prepareForValidation()
     {            
-        $settings = $this->input('settings', []);
+        // $settings = $this->input('settings', []);
 
         return $this->merge([
             'id' => request()->test,

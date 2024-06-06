@@ -51,6 +51,10 @@ const joinSession = async () => {
             console.log(stream);
         });
 
+        session.value.on('signal:test', (event) => {
+            console.log(event.data);
+        });
+
         await session.value.connect(props.token);
 
         console.log("Connected to session");
@@ -169,6 +173,5 @@ onMounted(() => {
 }
 .btn_leave {
     background: var(--red-600);
-
 }
 </style>
