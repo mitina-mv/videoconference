@@ -6,8 +6,8 @@
 
             </div>
             <div class="d-flex gap-3">
-                <Button @click="toggleVideo" :class="toggleVideo ? 'btn_off' : 'btn_on'" rounded icon="pi pi-video" />
-                <Button @click="toggleAudio" :class="toggleAudio ? 'btn_off' : 'btn_on'" rounded icon="pi pi-microphone" />
+                <Button @click="toggleVideo" :class="videoEnabled ? 'btn_off' : 'btn_on'" rounded icon="pi pi-video" />
+                <Button @click="toggleAudio" :class="audioEnabled ? 'btn_off' : 'btn_on'" rounded icon="pi pi-microphone" />
                 <Button @click="toggleFullScreen" class="btn_screen" rounded :icon="'pi ' + (fullScreen ? 'pi-window-minimize' : 'pi-window-maximize')" severity="secondary" />
                 <Button @click="endCall" class="btn_leave" rounded icon="pi pi-stop-circle" severity="danger" />
             </div>
@@ -32,7 +32,7 @@
                 <ul>
                     <li v-for="question in questions" :key="question.id">
                         {{ question.text }}
-                        <Button @click="sendQuestion(question)" icon="pi pi-send" text></Button>
+                        <Button @click="sendQuestion(question)" :icon="question.sent ? 'pi pi-check' : 'pi pi-send'" :disabled="question.sent" text></Button>
                     </li>
                 </ul>
             </div>
@@ -150,10 +150,23 @@ const toggleFullScreen = () => {
 
 const endCall = () => {
     if (session.value) {
-        session.value.disconnect();
+        session.value.signal({
+            data: '',
+            to: [],
+            type: 'endCall'
+        })
+        .then(() => {
+            console.log('End call signal sent');
+            session.value.disconnect();
+            window.location.href = '/videoconferences'
+        })
+        .catch(error => {
+            console.error(error);
+        });
     }
-    // Implement logic to completely end the call for all participants if needed
 };
+
+
 
 const sendQuestion = (question) => {
     session.value.signal({
@@ -163,6 +176,7 @@ const sendQuestion = (question) => {
     })
     .then(() => {
         console.log('Message successfully sent');
+        question.sent = true;
     })
     .catch(error => {
         console.error(error);
@@ -170,11 +184,21 @@ const sendQuestion = (question) => {
 }
 
 const toggleUserPanel = () => {
-    displayUserPanel.value = !displayUserPanel.value
+    if (displayUserPanel.value) {
+        displayUserPanel.value = false;
+    } else {
+        displayUserPanel.value = true;
+        displayQuestionPanel.value = false;
+    }
 }
 
 const toggleQuestionPanel = () => {
-    displayQuestionPanel.value = !displayQuestionPanel.value
+    if (displayQuestionPanel.value) {
+        displayQuestionPanel.value = false;
+    } else {
+        displayQuestionPanel.value = true;
+        displayUserPanel.value = false;
+    }
 }
 
 onMounted(() => {
@@ -239,5 +263,13 @@ onMounted(() => {
 
 .right-sidebar h3 {
     font-weight: bold;
+}
+.btn_off {
+    background: var(--green-400);
+    border: var(--green-400);
+}
+.btn_on {
+    border: var(--gray-400);
+    background: var(--gray-400);
 }
 </style>

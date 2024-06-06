@@ -8,7 +8,7 @@
 
             <Button @click="toggleFullScreen" class="btn_screen" rounded :icon="'pi ' + (fullScreen ? 'pi-window-minimize' : 'pi-window-maximize')" />
 
-            <Button @click="leaveConference" class="btn_leave" rounded icon="pi pi-stop-circle" />
+            <Button @click="leaveConference" class="btn_leave" rounded icon="pi pi-phone" />
         </div>
 
         <!-- Карточка с вопросом -->
@@ -77,7 +77,6 @@ const joinSession = async () => {
                 { insertMode: "APPEND" }
             );
             subscribers.value.push(subscriber);
-            console.log(stream);
         });
 
         session.value.on('signal:test', (event) => {
@@ -86,6 +85,10 @@ const joinSession = async () => {
             userAnswer.value = [];
             userAnswerText.value = '';
             setTimeout(() => { currentQuestion.value = null; }, 10 * 60 * 1000);
+        });
+
+        session.value.on('signal:endCall', (event) => {
+            leaveConference();
         });
 
         await session.value.connect(props.token);
@@ -157,6 +160,8 @@ const toggleFullScreen = () => {
 const leaveConference = () => {
     if (session.value) {
         session.value.disconnect();
+        window.location.href = '/videoconferences/my'
+
     }
 };
 
@@ -213,15 +218,13 @@ onMounted(() => {
     gap: 1em;
 }
 
-/* .btn_off {
-    background: var(--primary-50);
+.btn_off {
+    background: var(--green-400);
 }
 .btn_on {
-    background: var(--primary-600);
-} */
-.btn_screen{
-
+    background: var(--red-400);
 }
+
 .btn_leave {
     background: var(--red-600);
 }
