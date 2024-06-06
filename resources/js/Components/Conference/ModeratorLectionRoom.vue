@@ -2,22 +2,73 @@
     <div class="room" ref="roomContainer">
         <div class="video-container" ref="videoContainer"></div>
         <div class="controls">
-            <div>
-
+            <div class="d-flex gap-3">
+                <Button
+                    @click="toggleChatPanel"
+                    icon="pi pi-comments"
+                    rounded
+                    :severity="displayChatPanel ? '' : 'secondary'"
+                ></Button>
+                <Button
+                    @click="checkActive"
+                    icon="pi pi-flag"
+                    rounded
+                    severity="info"
+                ></Button>
             </div>
             <div class="d-flex gap-3">
-                <Button @click="toggleVideo" :class="videoEnabled ? 'btn_off' : 'btn_on'" rounded icon="pi pi-video" />
-                <Button @click="toggleAudio" :class="audioEnabled ? 'btn_off' : 'btn_on'" rounded icon="pi pi-microphone" />
-                <Button @click="toggleFullScreen" class="btn_screen" rounded :icon="'pi ' + (fullScreen ? 'pi-window-minimize' : 'pi-window-maximize')" severity="secondary" />
-                <Button @click="endCall" class="btn_leave" rounded icon="pi pi-stop-circle" severity="danger" />
+                <Button
+                    @click="toggleVideo"
+                    :class="videoEnabled ? 'btn_off' : 'btn_on'"
+                    rounded
+                    icon="pi pi-video"
+                />
+                <Button
+                    @click="toggleAudio"
+                    :class="audioEnabled ? 'btn_off' : 'btn_on'"
+                    rounded
+                    icon="pi pi-microphone"
+                />
+                <Button
+                    @click="toggleFullScreen"
+                    class="btn_screen"
+                    rounded
+                    :icon="
+                        'pi ' +
+                        (fullScreen
+                            ? 'pi-window-minimize'
+                            : 'pi-window-maximize')
+                    "
+                    severity="secondary"
+                />
+                <Button
+                    @click="endCall"
+                    class="btn_leave"
+                    rounded
+                    icon="pi pi-stop-circle"
+                    severity="danger"
+                />
             </div>
             <div class="d-flex gap-3">
-                <Button @click="toggleUserPanel" icon="pi pi-users" rounded></Button>
-                <Button @click="toggleQuestionPanel" icon="pi pi-question-circle" rounded></Button>
-            </div>      
+                <Button
+                    @click="toggleUserPanel"
+                    icon="pi pi-users"
+                    rounded
+                    :severity="displayUserPanel ? '' : 'secondary'"
+                ></Button>
+                <Button
+                    @click="toggleQuestionPanel"
+                    icon="pi pi-question-circle"
+                    rounded
+                    :severity="displayQuestionPanel ? '' : 'secondary'"
+                ></Button>
+            </div>
         </div>
 
-        <div class="right-sidebar" v-show="displayUserPanel || displayQuestionPanel">
+        <div
+            class="right-sidebar"
+            v-show="displayUserPanel || displayQuestionPanel"
+        >
             <div v-show="displayUserPanel" class="user-list">
                 <h3>Участники</h3>
                 <ul>
@@ -32,9 +83,31 @@
                 <ul>
                     <li v-for="question in questions" :key="question.id">
                         {{ question.text }}
-                        <Button @click="sendQuestion(question)" :icon="question.sent ? 'pi pi-check' : 'pi pi-send'" :disabled="question.sent" text></Button>
+                        <Button
+                            @click="sendQuestion(question)"
+                            :icon="question.sent ? 'pi pi-check' : 'pi pi-send'"
+                            :disabled="question.sent"
+                            text
+                        ></Button>
                     </li>
                 </ul>
+            </div>
+        </div>
+
+        <!-- Чат -->
+        <div class="chat-panel" v-show="displayChatPanel">
+            <header>
+                <h3>Чат</h3>
+                <Button icon="pi pi-times" text @click="toggleChatPanel"></Button>
+            </header>
+            <div class="chat-messages">
+                <div v-for="message in messages" :key="message.timestamp" class="chat-message">
+                    <strong>{{ message.username }}:</strong> {{ message.text }}
+                </div>
+            </div>
+            <div class="chat-input d-flex gap-3">
+                <InputText v-model="chatMessage" placeholder="Введите сообщение..." @keyup.enter="sendMessage" />
+                <Button @click="sendMessage" icon="pi pi-send" text></Button>
             </div>
         </div>
     </div>
@@ -43,13 +116,14 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { OpenVidu } from "openvidu-browser";
-import Button from 'primevue/button';
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
 
 const props = defineProps({
     sessionId: String,
     token: String,
     serverData: String,
-    questions: Array
+    questions: Array,
 });
 
 const OV = new OpenVidu();
@@ -61,8 +135,15 @@ const videoEnabled = ref(true);
 const audioEnabled = ref(true);
 const fullScreen = ref(false);
 const students = ref([]);
-const displayUserPanel = ref(false)
-const displayQuestionPanel = ref(false)
+
+const displayUserPanel = ref(false);
+const displayQuestionPanel = ref(false);
+const displayChatPanel = ref(false);
+const checkActiveCount = ref(0)
+
+// Чат
+const messages = ref([]);
+const chatMessage = ref("");
 
 const joinSession = async () => {
     try {
@@ -72,6 +153,11 @@ const joinSession = async () => {
 
         session.value.on("connectionCreated", (event) => {
             updateUserList();
+        });
+
+        session.value.on("signal:chat", (event) => {
+            const message = JSON.parse(event.data);
+            messages.value.push(message);
         });
 
         await session.value.connect(props.token);
@@ -94,17 +180,17 @@ const joinSession = async () => {
 };
 
 const updateUserList = () => {
-    students.value = []
-    if(session.value.remoteConnections) {
-        session.value.remoteConnections.forEach(connection => {
+    students.value = [];
+    if (session.value.remoteConnections) {
+        session.value.remoteConnections.forEach((connection) => {
             const data = JSON.parse(connection.data);
             console.log(data);
 
             students.value.push({
                 connectionId: connection.connectionId,
                 username: data.username || "Unknown User",
-            })
-        })
+            });
+        });
     }
 };
 
@@ -151,37 +237,35 @@ const toggleFullScreen = () => {
 const endCall = () => {
     if (session.value) {
         session.value.signal({
-            data: '',
+            data: "",
             to: [],
-            type: 'endCall'
+            type: "endCall",
         })
         .then(() => {
-            console.log('End call signal sent');
+            console.log("End call signal sent");
             session.value.disconnect();
-            window.location.href = '/videoconferences'
+            window.location.href = "/videoconferences";
         })
-        .catch(error => {
+        .catch((error) => {
             console.error(error);
         });
     }
 };
 
-
-
 const sendQuestion = (question) => {
     session.value.signal({
-      data: JSON.stringify(question),
-      to: [],
-      type: 'test'
+        data: JSON.stringify(question),
+        to: [],
+        type: "test",
     })
     .then(() => {
-        console.log('Message successfully sent');
+        console.log("Message successfully sent");
         question.sent = true;
     })
-    .catch(error => {
+    .catch((error) => {
         console.error(error);
     });
-}
+};
 
 const toggleUserPanel = () => {
     if (displayUserPanel.value) {
@@ -190,7 +274,7 @@ const toggleUserPanel = () => {
         displayUserPanel.value = true;
         displayQuestionPanel.value = false;
     }
-}
+};
 
 const toggleQuestionPanel = () => {
     if (displayQuestionPanel.value) {
@@ -199,7 +283,49 @@ const toggleQuestionPanel = () => {
         displayQuestionPanel.value = true;
         displayUserPanel.value = false;
     }
+};
+
+const toggleChatPanel = () => {
+    displayChatPanel.value = !displayChatPanel.value
 }
+
+const checkActive = () => {
+    if (session.value) {
+        session.value.signal({
+            data: "",
+            to: [],
+            type: "active",
+        })
+        .then(() => {
+            checkActiveCount.value += 1
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+    }
+}
+
+const sendMessage = () => {
+    if (chatMessage.value.trim() !== '') {
+        const message = {
+            username: 'You',
+            text: chatMessage.value,
+            timestamp: Date.now()
+        };
+
+        session.value.signal({
+            data: JSON.stringify(message),
+            to: [],
+            type: 'chat'
+        }).then(() => {
+            console.log('Chat message sent');
+        }).catch(error => {
+            console.error('Error sending chat message:', error);
+        });
+
+        chatMessage.value = '';
+    }
+};
 
 onMounted(() => {
     session.value = OV.initSession();
@@ -222,7 +348,7 @@ onMounted(() => {
     height: 100%;
     background-color: black;
     display: grid;
-    gap: 1em
+    gap: 1em;
 }
 
 .controls {
@@ -261,7 +387,7 @@ onMounted(() => {
     padding: 5px 0;
 }
 
-.right-sidebar h3 {
+.right-sidebar h3, .chat-panel header h3 {
     font-weight: bold;
 }
 .btn_off {
@@ -271,5 +397,38 @@ onMounted(() => {
 .btn_on {
     border: var(--gray-400);
     background: var(--gray-400);
+}
+.chat-panel {
+    position: absolute;
+    bottom: 6em;
+    left: 20px;
+    width: 20vw;
+    background: #fff;
+    padding: 1em;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 300px;
+    border-radius: 6px;
+}
+
+.chat-panel header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.chat-messages {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 1em;
+}
+
+.chat-message {
+    margin-bottom: 0.5em;
+}
+
+.chat-input {
+    display: flex;
+    gap: 0.5em;
 }
 </style>
