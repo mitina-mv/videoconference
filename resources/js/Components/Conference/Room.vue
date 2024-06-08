@@ -2,82 +2,128 @@
     <div class="room" ref="roomConteiner">
         <div class="video-container" ref="videoContainer"></div>
         <div class="controls">
-            <Button
-                @click="toggleVideo"
-                :class="toggleVideo ? 'btn_off' : 'btn_on'"
-                rounded
-                icon="pi pi-video"
-            />
+            <div class="d-flex gap-3">
+                <Button
+                    @click="toggleChatPanel"
+                    icon="pi pi-comments"
+                    rounded
+                    :severity="displayChatPanel ? '' : 'secondary'"
+                ></Button>
+            </div>
+            <div class="d-flex gap-3">
+                <Button
+                    @click="toggleFullScreen"
+                    class="btn_screen"
+                    rounded
+                    :icon="
+                        'pi ' +
+                        (fullScreen
+                            ? 'pi-window-minimize'
+                            : 'pi-window-maximize')
+                    "
+                    severity="secondary"
+                />
 
-            <Button
-                @click="toggleAudio"
-                :class="toggleAudio ? 'btn_off' : 'btn_on'"
-                rounded
-                icon="pi pi-microphone"
-            />
-
-            <Button
-                @click="toggleFullScreen"
-                class="btn_screen"
-                rounded
-                :icon="
-                    'pi ' +
-                    (fullScreen ? 'pi-window-minimize' : 'pi-window-maximize')
-                "
-            />
-
-            <Button
-                @click="leaveConference"
-                class="btn_leave"
-                rounded
-                icon="pi pi-phone"
-            />
-
-            <Button @click="toggleChatPanel" icon="pi pi-comments" rounded :severity="displayChatPanel ? '' : 'secondary'"></Button>
+                <Button
+                    @click="leaveConference"
+                    class="btn_leave"
+                    rounded
+                    icon="pi pi-phone"
+                    severity="danger"
+                />
+            </div>
+            <div></div>
         </div>
 
         <!-- Карточка с вопросом -->
         <div v-if="currentQuestion" class="question-card">
-            <h3>{{ currentQuestion.text }}</h3>
+            <h3 class="mb-2">{{ currentQuestion.text }}</h3>
             <div v-if="currentQuestion.type === 'single'">
-                <div v-for="answer in currentQuestion.answers" :key="answer.id">
-                    <RadioButton :value="answer.id" v-model="userAnswer" />
-                    <label>{{ answer.name }}</label>
+                <div
+                    v-for="answer in currentQuestion.answers"
+                    :key="answer.id"
+                    class="mb-1"
+                >
+                    <RadioButton
+                        :inputId="'ans_' + answer.id"
+                        :value="answer.id"
+                        v-model="userAnswer"
+                        class="mr-2"
+                    />
+                    <label :for="'ans_' + answer.id">{{ answer.name }}</label>
                 </div>
             </div>
             <div v-if="currentQuestion.type === 'multiple'">
-                <div v-for="answer in currentQuestion.answers" :key="answer.id">
-                    <Checkbox :value="answer.id" v-model="userAnswer" />
-                    <label>{{ answer.name }}</label>
+                <div
+                    v-for="answer in currentQuestion.answers"
+                    :key="answer.id"
+                    class="mb-1"
+                >
+                    <Checkbox
+                        :inputId="'ans_' + answer.id"
+                        :value="answer.id"
+                        v-model="userAnswer"
+                        class="mr-2"
+                    />
+                    <label :for="'ans_' + answer.id">{{ answer.name }}</label>
                 </div>
             </div>
             <div v-if="currentQuestion.type === 'text'">
                 <InputText v-model="userAnswerText" />
             </div>
-            <Button @click="submitAnswer">Ответить</Button>
+            <Button @click="submitAnswer" class="mt-3">Ответить</Button>
         </div>
 
         <!-- Чат -->
         <div class="chat-panel" v-show="displayChatPanel">
             <header>
                 <h3>Чат</h3>
-                <Button icon="pi pi-times" text @click="toggleChatPanel"></Button>
+                <Button
+                    icon="pi pi-times"
+                    text
+                    @click="toggleChatPanel"
+                ></Button>
             </header>
-            <div class="chat-messages">
-                <div v-for="message in messages" :key="message.timestamp" class="chat-message">
-                    <strong>{{ message.username }}:</strong> {{ message.text }}
+            <div class="chat-body">
+                <div class="chat-messages">
+                    <div
+                        v-for="message in messages"
+                        :key="message.timestamp"
+                        :class="message.class || ''"
+                        class="chat-message"
+                    >
+                        <strong>{{ message.username }}:</strong>
+                        {{ message.text }}
+                    </div>
                 </div>
-            </div>
-            <div class="chat-input d-flex gap-3">
-                <InputText v-model="chatMessage" placeholder="Введите сообщение..." @keyup.enter="sendMessage" />
-                <Button @click="sendMessage" icon="pi pi-send" text></Button>
+                <div class="chat-input d-flex gap-3">
+                    <InputText
+                        v-model="chatMessage"
+                        placeholder="Введите сообщение..."
+                        @keyup.enter="sendMessage"
+                    />
+                    <Button
+                        @click="sendMessage"
+                        icon="pi pi-send"
+                        text
+                    ></Button>
+                </div>
             </div>
         </div>
 
         <!-- Окно подтверждения присутствия -->
-        <div v-if="showPresencePrompt" class="presence-prompt" :style="presencePromptStyle">
+        <div
+            v-if="showPresencePrompt"
+            class="presence-prompt"
+            :style="presencePromptStyle"
+        >
             <p>Подтвердите ваше присутствие</p>
-            <Button @click="confirmPresence" label="Подтвердить" icon="pi pi-check" severity="success"></Button>
+            <Button
+                @click="confirmPresence"
+                label="Подтвердить"
+                icon="pi pi-check"
+                severity="success"
+            ></Button>
         </div>
     </div>
 </template>
@@ -94,6 +140,7 @@ import InputText from "primevue/inputtext";
 const props = defineProps({
     sessionId: String,
     token: String,
+    user: Object,
 });
 
 const OV = new OpenVidu();
@@ -114,9 +161,9 @@ const userAnswerText = ref("");
 // Состояние для окна подтверждения присутствия
 const showPresencePrompt = ref(false);
 const presencePromptStyle = ref({
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)'
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
 });
 
 // Чат
@@ -167,21 +214,6 @@ const joinSession = async () => {
         console.error("Connection error:", error);
     }
 };
-
-const toggleVideo = () => {
-    videoEnabled.value = !videoEnabled.value;
-    if (publisher.value) {
-        publisher.value.publishVideo(videoEnabled.value);
-    }
-};
-
-const toggleAudio = () => {
-    audioEnabled.value = !audioEnabled.value;
-    if (publisher.value) {
-        publisher.value.publishAudio(audioEnabled.value);
-    }
-};
-
 const toggleFullScreen = () => {
     const container = roomConteiner.value;
     if (!fullScreen.value) {
@@ -240,24 +272,27 @@ const submitAnswer = async () => {
 };
 
 const sendMessage = () => {
-    if (chatMessage.value.trim() !== '') {
+    if (chatMessage.value.trim() !== "") {
         const message = {
-            username: 'You',
+            username: props.user.lastname + ' ' + `(${props.user.sg_name})`,
             text: chatMessage.value,
-            timestamp: Date.now()
+            timestamp: Date.now(),
         };
 
-        session.value.signal({
-            data: JSON.stringify(message),
-            to: [],
-            type: 'chat'
-        }).then(() => {
-            console.log('Chat message sent');
-        }).catch(error => {
-            console.error('Error sending chat message:', error);
-        });
+        session.value
+            .signal({
+                data: JSON.stringify(message),
+                to: [],
+                type: "chat",
+            })
+            .then(() => {
+                console.log("Chat message sent");
+            })
+            .catch((error) => {
+                console.error("Error sending chat message:", error);
+            });
 
-        chatMessage.value = '';
+        chatMessage.value = "";
     }
 };
 
@@ -272,12 +307,12 @@ const toggleChatPanel = () => {
 const movePresencePrompt = () => {
     const roomWidth = roomConteiner.value.clientWidth;
     const roomHeight = roomConteiner.value.clientHeight;
-    const newTop = Math.random() * (roomHeight - 100) + 'px';
-    const newLeft = Math.random() * (roomWidth - 200) + 'px';
+    const newTop = Math.random() * (roomHeight - 100) + "px";
+    const newLeft = Math.random() * (roomWidth - 200) + "px";
 
     presencePromptStyle.value.top = newTop;
     presencePromptStyle.value.left = newLeft;
-}
+};
 
 onMounted(() => {
     session.value = OV.initSession();
@@ -300,18 +335,19 @@ onMounted(() => {
     height: 100%;
     background-color: black;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
     gap: 1em;
 }
 
 .controls {
     position: absolute;
     bottom: 20px;
-    left: 20px;
     z-index: 1000;
-    background: #fff;
     display: flex;
     gap: 1em;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 20px;
 }
 
 .btn_off {
@@ -326,18 +362,22 @@ onMounted(() => {
 }
 .question-card {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    bottom: 5em;
+    right: 50%;
+    margin-right: -35%;
     background: white;
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
     z-index: 1000;
-    width: 300px;
+    width: 70%;
+}
+.question-card h3 {
+    font-weight: bold;
 }
 .chat-panel {
     position: absolute;
-    bottom: 6em;
+    bottom: 5em;
     left: 20px;
     width: 20vw;
     background: #fff;
@@ -345,8 +385,8 @@ onMounted(() => {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     min-width: 300px;
-    border-radius: 6px;
     height: 80%;
+    border-radius: 6px;
 }
 
 .chat-panel header {
@@ -354,11 +394,15 @@ onMounted(() => {
     align-items: center;
     justify-content: space-between;
 }
-.chat-panel header h3 {
-    font-weight: bold;
+
+.chat-body {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 50px);
 }
 .chat-messages {
-    max-height: 200px;
+    flex: 1 auto;
+    overflow-y: auto;
     overflow-y: auto;
     margin-bottom: 1em;
 }
@@ -366,10 +410,20 @@ onMounted(() => {
 .chat-message {
     margin-bottom: 0.5em;
 }
-
+.chat-message strong {
+    color: var(--gray-500);
+}
+.chat-message.moderator strong {
+    color: var(--red-600);
+}
 .chat-input {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    max-width: 100%;
     gap: 0.5em;
+}
+.chat-input input {
+    max-width: 220px;
 }
 
 .presence-prompt {

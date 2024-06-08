@@ -12,9 +12,8 @@ const props = defineProps({
     error: String,
     type: String,
     role: String,
-    questions: [Array, null]
+    questions: [Array, null],
 });
-
 </script>
 
 <template>
@@ -33,8 +32,19 @@ const props = defineProps({
                     {{ error }}
                 </div>
                 <template v-else>
-                    <ModeratorLectionRoom v-if="role == 'MODERATOR'" :sessionId="sessionId" :token="token" :questions="questions"></ModeratorLectionRoom>
-                    <Room :sessionId="sessionId" :token="token" v-else></Room>
+                    <ModeratorLectionRoom
+                        v-if="role == 'MODERATOR'"
+                        :sessionId="sessionId"
+                        :token="token"
+                        :questions="questions"
+                        :user="$page.props.auth.user"
+                    ></ModeratorLectionRoom>
+                    <Room
+                        :sessionId="sessionId"
+                        :token="token"
+                        :user="$page.props.auth.user"
+                        v-else
+                    ></Room>
                 </template>
             </div>
         </div>

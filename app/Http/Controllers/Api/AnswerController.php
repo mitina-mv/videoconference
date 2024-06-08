@@ -14,7 +14,6 @@ class AnswerController extends Controller
 
     protected $model = Answer::class;
     protected $policy = TruePolicy::class;
-    // protected $request = QuestionRequest::class;
 
     public function limit() : int
     {

@@ -81,7 +81,11 @@
             <div v-show="displayQuestionPanel" class="question-list">
                 <h3>Вопросы</h3>
                 <ul>
-                    <li v-for="question in questions" :key="question.id">
+                    <li
+                        v-for="question in questions"
+                        :key="question.id"
+                        class="d-flex flex-between question-list__item"
+                    >
                         {{ question.text }}
                         <Button
                             @click="sendQuestion(question)"
@@ -98,16 +102,36 @@
         <div class="chat-panel" v-show="displayChatPanel">
             <header>
                 <h3>Чат</h3>
-                <Button icon="pi pi-times" text @click="toggleChatPanel"></Button>
+                <Button
+                    icon="pi pi-times"
+                    text
+                    @click="toggleChatPanel"
+                ></Button>
             </header>
-            <div class="chat-messages">
-                <div v-for="message in messages" :key="message.timestamp" class="chat-message">
-                    <strong>{{ message.username }}:</strong> {{ message.text }}
+            <div class="chat-body">
+                <div class="chat-messages">
+                    <div
+                        v-for="message in messages"
+                        :key="message.timestamp"
+                        class="chat-message"
+                        :class="message.class || ''"
+                    >
+                        <strong>{{ message.username }}:</strong>
+                        {{ message.text }}
+                    </div>
                 </div>
-            </div>
-            <div class="chat-input d-flex gap-3">
-                <InputText v-model="chatMessage" placeholder="Введите сообщение..." @keyup.enter="sendMessage" />
-                <Button @click="sendMessage" icon="pi pi-send" text></Button>
+                <div class="chat-input d-flex gap-3">
+                    <InputText
+                        v-model="chatMessage"
+                        placeholder="Введите сообщение..."
+                        @keyup.enter="sendMessage"
+                    />
+                    <Button
+                        @click="sendMessage"
+                        icon="pi pi-send"
+                        text
+                    ></Button>
+                </div>
             </div>
         </div>
     </div>
@@ -124,6 +148,7 @@ const props = defineProps({
     token: String,
     serverData: String,
     questions: Array,
+    user: Object
 });
 
 const OV = new OpenVidu();
@@ -139,7 +164,7 @@ const students = ref([]);
 const displayUserPanel = ref(false);
 const displayQuestionPanel = ref(false);
 const displayChatPanel = ref(false);
-const checkActiveCount = ref(0)
+const checkActiveCount = ref(0);
 
 // Чат
 const messages = ref([]);
@@ -236,35 +261,37 @@ const toggleFullScreen = () => {
 
 const endCall = () => {
     if (session.value) {
-        session.value.signal({
-            data: "",
-            to: [],
-            type: "endCall",
-        })
-        .then(() => {
-            console.log("End call signal sent");
-            session.value.disconnect();
-            window.location.href = "/videoconferences";
-        })
-        .catch((error) => {
-            console.error(error);
-        });
+        session.value
+            .signal({
+                data: "",
+                to: [],
+                type: "endCall",
+            })
+            .then(() => {
+                console.log("End call signal sent");
+                session.value.disconnect();
+                window.location.href = "/videoconferences";
+            })
+            .catch((error) => {
+                console.error(error);
+            });
     }
 };
 
 const sendQuestion = (question) => {
-    session.value.signal({
-        data: JSON.stringify(question),
-        to: [],
-        type: "test",
-    })
-    .then(() => {
-        console.log("Message successfully sent");
-        question.sent = true;
-    })
-    .catch((error) => {
-        console.error(error);
-    });
+    session.value
+        .signal({
+            data: JSON.stringify(question),
+            to: [],
+            type: "test",
+        })
+        .then(() => {
+            console.log("Message successfully sent");
+            question.sent = true;
+        })
+        .catch((error) => {
+            console.error(error);
+        });
 };
 
 const toggleUserPanel = () => {
@@ -286,44 +313,49 @@ const toggleQuestionPanel = () => {
 };
 
 const toggleChatPanel = () => {
-    displayChatPanel.value = !displayChatPanel.value
-}
+    displayChatPanel.value = !displayChatPanel.value;
+};
 
 const checkActive = () => {
     if (session.value) {
-        session.value.signal({
-            data: "",
-            to: [],
-            type: "active",
-        })
-        .then(() => {
-            checkActiveCount.value += 1
-        })
-        .catch((error) => {
-            console.error(error);
-        });
+        session.value
+            .signal({
+                data: "",
+                to: [],
+                type: "active",
+            })
+            .then(() => {
+                checkActiveCount.value += 1;
+            })
+            .catch((error) => {
+                console.error(error);
+            });
     }
-}
+};
 
 const sendMessage = () => {
-    if (chatMessage.value.trim() !== '') {
+    if (chatMessage.value.trim() !== "") {
         const message = {
-            username: 'You',
+            username: props.user.full_name,
             text: chatMessage.value,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            class: 'moderator',
         };
 
-        session.value.signal({
-            data: JSON.stringify(message),
-            to: [],
-            type: 'chat'
-        }).then(() => {
-            console.log('Chat message sent');
-        }).catch(error => {
-            console.error('Error sending chat message:', error);
-        });
+        session.value
+            .signal({
+                data: JSON.stringify(message),
+                to: [],
+                type: "chat",
+            })
+            .then(() => {
+                console.log("Chat message sent");
+            })
+            .catch((error) => {
+                console.error("Error sending chat message:", error);
+            });
 
-        chatMessage.value = '';
+        chatMessage.value = "";
     }
 };
 
@@ -378,6 +410,14 @@ onMounted(() => {
     min-width: 300px;
 }
 
+.question-list__item {
+    display: grid;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5em;
+    grid-template-columns: 1fr auto;
+}
+
 .user-list ul {
     list-style: decimal;
     padding: 0;
@@ -388,7 +428,8 @@ onMounted(() => {
     padding: 5px 0;
 }
 
-.right-sidebar h3, .chat-panel header h3 {
+.right-sidebar h3,
+.chat-panel header h3 {
     font-weight: bold;
 }
 .btn_off {
@@ -401,7 +442,7 @@ onMounted(() => {
 }
 .chat-panel {
     position: absolute;
-    bottom: 6em;
+    bottom: 5em;
     left: 20px;
     width: 20vw;
     background: #fff;
@@ -419,8 +460,14 @@ onMounted(() => {
     justify-content: space-between;
 }
 
+.chat-body {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 50px);
+}
 .chat-messages {
-    max-height: 200px;
+    flex: 1 auto;
+    overflow-y: auto;
     overflow-y: auto;
     margin-bottom: 1em;
 }
@@ -428,9 +475,20 @@ onMounted(() => {
 .chat-message {
     margin-bottom: 0.5em;
 }
+.chat-message strong {
+    color: var(--gray-500);
+}
+.chat-message.moderator strong {
+    color: var(--red-600);
+}
 
 .chat-input {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    max-width: 100%;
     gap: 0.5em;
+}
+.chat-input input {
+    max-width: 220px;
 }
 </style>
