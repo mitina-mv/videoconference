@@ -5,7 +5,7 @@
             <a
                 v-if="field.header"
                 :href="route(field.header.addRoute)"
-                class="text-gray"
+                class="text-gray form-control__add-link"
                 >Добавить</a
             >
         </div>

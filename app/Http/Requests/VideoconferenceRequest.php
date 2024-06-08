@@ -13,7 +13,7 @@ class VideoconferenceRequest extends Request
             'date' => ['required', 'date'],
             'name' => ['required', 'string', 'max:255'],
             'user_id' => ['required', 'exists:users,id', 'bail'],
-            'settings' => ['sometimes', 'json'],
+            'settings' => ['sometimes', 'array'],
         ];
     }
 
@@ -23,7 +23,7 @@ class VideoconferenceRequest extends Request
             'date' => ['required', 'date'],
             'name' => ['required', 'string', 'max:255'],
             'user_id' => ['required', 'exists:users,id', 'bail'],
-            'settings' => ['sometimes', 'json'],
+            'settings' => ['sometimes', 'array'],
         ];
     }
 

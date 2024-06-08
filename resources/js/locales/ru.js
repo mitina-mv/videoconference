@@ -238,6 +238,16 @@ export default {
                     type: "bool",
                     default: true,
                 },
+                {
+                    id: "type",
+                    name: "Тип занятия",
+                    type: "dropdown",
+                    values: [
+                        { id: "lecture", name: "Лекция" },
+                        { id: "practice", name: "Практика" },
+                    ],
+                    default: "lecture",
+                },
             ],
         },
 

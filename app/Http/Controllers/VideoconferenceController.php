@@ -124,7 +124,7 @@ class VideoconferenceController extends Controller
                 'sessionId' => $vc->session,
                 'token' => $connection['token'],
                 'role' => $vc->user_id == $user->id ? 'MODERATOR' : 'SUBSCRIBER',
-                'type' => 'lection',
+                'type' => 'lecture',
                 'questions' => $questions,
             ]);
     

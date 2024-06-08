@@ -112,9 +112,9 @@ const processTableData = (data) => {
     data.forEach((element, index) => {
         data[index].theme = element?.theme?.name || "Не указано";
 
-        let settings = JSON.parse(element.settings);
+        let settings = element.settings;
 
-        if (Object.keys(settings).length > 0) {
+        if (settings && Object.keys(settings).length > 0) {
             let settingsString = labels.test_fields.settings.values
                 .filter((a) => settings.hasOwnProperty(a.id))
                 .map((a) => {

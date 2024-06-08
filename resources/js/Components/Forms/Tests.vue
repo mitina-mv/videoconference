@@ -65,11 +65,12 @@ const settingsData = ref({
 });
 
 onBeforeMount(() => {
-    let settings = props.data ? JSON.parse(props.data.settings) : {};
+    let settings = props?.data?.settings || {};
+    console.log(settings);
 
     labels.test_fields.settings.values.forEach((item) => {
         settingsData.value[item.id] = {
-            value: settings[item.id] || item.default,
+            value: Object.hasOwn(settings, item.id) ? settings[item.id] : item.default,
             type: item.type,
             title: item.name,
         };
@@ -136,7 +137,7 @@ const sendData = async () => {
         name: name.value,
         description: description.value,
         theme_id: theme_id.value,
-        settings: JSON.stringify(settings),
+        settings: settings,
     };
 
     const url = `/api/tests${id.value ? `/${id.value}` : ""}`;

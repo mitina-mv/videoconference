@@ -59,14 +59,20 @@ const fieldData = ref({
 });
 
 onMounted(() => {
-    let st = props.data ? JSON.parse(props.data.settings) : {};
+    let st = props?.data?.settings || {};
 
     labels[labelgroup].settings.values.forEach((item) => {
-        settingsData.value[item.id] = {
-            value: st[item.id] || item.default,
+        let value = {
+            value: Object.hasOwn(st, item.id) ? st[item.id] : item.default,
             type: item.type,
             label: item.name,
         };
+
+        if(value.type == 'dropdown') {
+            value.options = item.values
+        }
+
+        settingsData.value[item.id] = value
     });
 
     if (props.data && props.data.studgroups) {
@@ -90,7 +96,7 @@ const sendData = async () => {
     const url = "/api/videoconferences" + (id.value ? `/${id.value}` : "");
 
     let data = prepareData();
-    data.settings = JSON.stringify(prepareData(settingsData.value));
+    data.settings = prepareData(settingsData.value);
 
     console.log(data);
     try {

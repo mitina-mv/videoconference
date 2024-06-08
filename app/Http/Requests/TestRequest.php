@@ -13,7 +13,7 @@ class TestRequest extends Request
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1024'],
             'theme_id' => ['required', 'exists:themes,id', 'bail'],
-            'settings' => ['sometimes', 'json'],
+            'settings' => ['sometimes', 'array'],
             'settings.count_questions' => ['nullable', 'integer', 'between:1,100'],
             'settings.is_random' => ['nullable', 'boolean'],
             'settings.fixed_questions' => ['nullable', 'boolean'],
@@ -28,7 +28,7 @@ class TestRequest extends Request
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1024'],
             'theme_id' => ['required', 'exists:themes,id', 'bail'],
-            'settings' => ['sometimes', 'json'],
+            'settings' => ['sometimes', 'array'],
             'settings.count_questions' => ['nullable', 'integer', 'between:1,100'],
             'settings.is_random' => ['nullable', 'boolean'],
             'settings.question_ids' => ['nullable', 'array'],
@@ -38,12 +38,10 @@ class TestRequest extends Request
 
     public function prepareForValidation()
     {            
-        // $settings = $this->input('settings', []);
 
         return $this->merge([
             'id' => request()->test,
             'user_id' => auth()->id(),
-            // 'settings' => json_decode($settings, true)
         ]);
     }
 }
