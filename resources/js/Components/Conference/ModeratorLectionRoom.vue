@@ -71,11 +71,14 @@
         >
             <div v-show="displayUserPanel" class="user-list">
                 <h3>Участники</h3>
-                <ul>
-                    <li v-for="student in students" :key="student.connectionId">
-                        {{ student.username }}
-                    </li>
-                </ul>
+                <div v-for="(group, index) in students" :key="index">
+                    <u>{{ index }}</u>
+                    <ul>
+                        <li v-for="student in group" :key="student.connectionId">
+                            {{ student.username }}
+                        </li>
+                    </ul>
+                </div>
             </div>
 
             <div v-show="displayQuestionPanel" class="question-list">
@@ -147,6 +150,7 @@ const props = defineProps({
     sessionId: String,
     token: String,
     serverData: String,
+    messages: [Array, null],
     questions: Array,
     user: Object
 });
@@ -167,7 +171,7 @@ const displayChatPanel = ref(false);
 const checkActiveCount = ref(0);
 
 // Чат
-const messages = ref([]);
+const messages = ref(props.messages || []);
 const chatMessage = ref("");
 
 const joinSession = async () => {
@@ -205,15 +209,18 @@ const joinSession = async () => {
 };
 
 const updateUserList = () => {
-    students.value = [];
+    students.value = {};
     if (session.value.remoteConnections) {
         session.value.remoteConnections.forEach((connection) => {
             const data = JSON.parse(connection.data);
-            console.log(data);
 
-            students.value.push({
+            if(!students.value.hasOwnProperty(data.sg_name)) {
+                students.value[data.sg_name] = []
+            }
+
+            students.value[data.sg_name].push({
                 connectionId: connection.connectionId,
-                username: data.username || "Unknown User",
+                username: `${data.username}` || "Unknown User",
             });
         });
     }
@@ -349,7 +356,10 @@ const sendMessage = () => {
                 type: "chat",
             })
             .then(() => {
-                console.log("Chat message sent");
+                axios.post(
+                    route('api.videoconferences.chat', {session: props.sessionId}),
+                    {message: message}
+                )
             })
             .catch((error) => {
                 console.error("Error sending chat message:", error);

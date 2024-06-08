@@ -21,11 +21,13 @@ class Videoconference extends Model
         'settings',
         'name',
         'session', // uuid
+        'messages',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'settings' => AsArrayObject::class,
+        'messages' => AsArrayObject::class,
         'date' => 'datetime',
     ];
 

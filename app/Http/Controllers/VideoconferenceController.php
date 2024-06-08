@@ -124,7 +124,11 @@ class VideoconferenceController extends Controller
                 // Пользователь не владелец конференции, подключаем как слушателя
                 $connection = $openViduService->connectToSession($vc->session, [
                     'role' => 'SUBSCRIBER',
-                    'data' => json_encode(['user_id' => $user->id, 'username' => $user->full_name])
+                    'data' => json_encode([
+                            'user_id' => $user->id,
+                            'username' => $user->full_name,
+                            'sg_name' => $user->sg_name
+                        ])
                 ]);
             }
     
@@ -133,6 +137,7 @@ class VideoconferenceController extends Controller
                 'token' => $connection['token'],
                 'role' => $vc->user_id == $user->id ? 'MODERATOR' : 'SUBSCRIBER',
                 'type' => $vc->settings->type,
+                'messages' => $vc->messages,
                 'questions' => $questions,
                 'backLink' => 'videoconferences.index',
 

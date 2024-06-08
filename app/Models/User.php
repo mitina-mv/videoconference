@@ -65,7 +65,8 @@ class User extends Authenticatable
 
     public function getSgNameAttribute()
     {
-        return $this->studgroup()->first()->name;
+        $sg = $this->studgroup()->first();
+        return $sg ? $sg->name : null;
     }
 
     public function getInitialsAttribute()

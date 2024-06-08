@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\Videoconference;
 use App\Policies\TruePolicy;
 use Carbon\Carbon;
+use Exception;
 use Orion\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Date;
@@ -90,6 +91,23 @@ class VideoconferenceController extends Controller
             if ($curDate < $nowDate) {
                 abort(422, 'Нельзя редактировать уже прошедшее назначение.');
             }
+        }
+    }
+
+    public function sendMessage(Request $request)
+    {
+        try {
+            $vc = Videoconference::where('session', $request->session)
+            ->first();
+        
+            $messages = $vc->messages;
+            $messages[] = $request->message;
+            $vc->update(['messages' => $messages]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Не удалось отправить сообщение',
+                422
+            ]);
         }
     }
 }

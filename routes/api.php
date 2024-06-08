@@ -61,6 +61,7 @@ Route::group(['as' => 'api.'], function() {
     Route::post('/assignments/themes', [AssignmentController::class, 'themes'])->name('api.assignments.disciplines');
 
     Orion::resource('videoconferences', VideoconferenceController::class)->withSoftDeletes();
+    Route::post('/videoconferences/{session}/chat', [VideoconferenceController::class, 'sendMessage'])->name('videoconferences.chat');
     
     Orion::belongsToManyResource('videoconferences', 'studgroups', VideoconferenceStudgroupController::class);
 

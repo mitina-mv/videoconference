@@ -141,6 +141,7 @@ const props = defineProps({
     sessionId: String,
     token: String,
     user: Object,
+    messages: [Array, null],
 });
 
 const OV = new OpenVidu();
@@ -167,7 +168,7 @@ const presencePromptStyle = ref({
 });
 
 // Чат
-const messages = ref([]);
+const messages = ref(props.messages || []);
 const chatMessage = ref("");
 const displayChatPanel = ref(false);
 
@@ -286,7 +287,10 @@ const sendMessage = () => {
                 type: "chat",
             })
             .then(() => {
-                console.log("Chat message sent");
+                axios.post(
+                    route('api.videoconferences.chat', {session: props.sessionId}),
+                    {message: message}
+                )
             })
             .catch((error) => {
                 console.error("Error sending chat message:", error);
@@ -373,6 +377,9 @@ onMounted(() => {
     width: 70%;
 }
 .question-card h3 {
+    font-weight: bold;
+}
+.chat-panel header h3 {
     font-weight: bold;
 }
 .chat-panel {
