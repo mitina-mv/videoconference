@@ -28,6 +28,7 @@ class QuestionController extends Controller
         return Inertia::render('Question/Form', [
             'id' => $id,
             'themes' => Theme::all(),
+            'backLink' => 'questions.index',
             'disciplines' => Discipline::all(),
         ]);
     }
@@ -36,6 +37,7 @@ class QuestionController extends Controller
     {
         return Inertia::render('Question/Form', [
             'themes' => Theme::all(),
+            'backLink' => 'questions.index',
             'disciplines' => Discipline::all(),
         ]);
     }

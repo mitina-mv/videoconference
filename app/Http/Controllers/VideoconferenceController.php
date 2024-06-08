@@ -48,6 +48,7 @@ class VideoconferenceController extends Controller
         return Inertia::render('Videoconference/Form', [
             'id' => $id,
             'tests' => $user->tests,
+            'backLink' => 'videoconferences.index',
             'studgroups' => $user->studgroups,
         ]);
     }
@@ -58,6 +59,7 @@ class VideoconferenceController extends Controller
         
         return Inertia::render('Videoconference/Form', [
             'tests' => $user->tests,
+            'backLink' => 'videoconferences.index',
             'studgroups' => $user->studgroups,            
         ]);
     }
@@ -84,7 +86,11 @@ class VideoconferenceController extends Controller
                     ->with(['answers' => function ($query) {
                         $query->select('id', 'question_id', 'name');
                     }])
-                    ->get();
+                    ->select('id', 'text')
+                    ->get()
+                    ->each(function($row){
+                        $row->setHidden(['correct_answers']);
+                    });
             } else {
                 return Inertia::render('Videoconference/Conference', [
                     'error' =>'Неправильные настройки используемого теста: необходимо использовать тест с предустановленными вопросами.'
@@ -128,6 +134,8 @@ class VideoconferenceController extends Controller
                 'role' => $vc->user_id == $user->id ? 'MODERATOR' : 'SUBSCRIBER',
                 'type' => $vc->settings->type,
                 'questions' => $questions,
+                'backLink' => 'videoconferences.index',
+
             ]);
     
         } catch (\Exception $e) {

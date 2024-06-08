@@ -1,10 +1,11 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, usePage } from "@inertiajs/vue3";
 import toastService from "@/Services/toastService";
 import LoadingSpinner from "@/Components/Common/LoadingSpinner.vue";
 import Videoconference from "@/Components/Forms/Videoconference.vue";
+import labels from "@/locales/ru.js";
 
 const props = defineProps({
     id: {
@@ -29,18 +30,24 @@ onMounted(() => {
                 toastService.showErrorToast(`Редактирование данных`, "Не удалось получить данные.")
             })
     }
+})
 
+const title = computed(() => {
+    let str = '';
+    if(id == null) str = 'Добавление ';
+    else str = 'Редактирование ';
 
+    return str + labels.videoconferences.case[1]
 })
 </script>
 
 <template>
-    <Head :title="(id == null ? 'Добавление ' : 'Редактирование ')" />
+    <Head :title="title" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ (id == null ? 'Добавление ' : 'Редактирование ') }}
+                {{ title }}
             </h2>
         </template>
 
