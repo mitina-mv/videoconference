@@ -66,6 +66,8 @@ class VideoconferenceController extends Controller
     {
         $vc = Videoconference::where('session', $session)->first();
         $user = auth()->user();
+
+        // проверка, что конференция еще не прошла и подключиться еще можно
     
         if(!$vc) {
             return Inertia::render('Videoconference/Conference', [
@@ -124,7 +126,7 @@ class VideoconferenceController extends Controller
                 'sessionId' => $vc->session,
                 'token' => $connection['token'],
                 'role' => $vc->user_id == $user->id ? 'MODERATOR' : 'SUBSCRIBER',
-                'type' => 'lecture',
+                'type' => $vc->settings->type,
                 'questions' => $questions,
             ]);
     

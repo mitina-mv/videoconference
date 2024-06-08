@@ -6,8 +6,6 @@ import labels from "@/locales/ru.js";
 import Button from "primevue/button";
 import toastService from "@/Services/toastService";
 import InputSwitch from "primevue/inputswitch";
-import Textarea from "primevue/textarea";
-import Toolbar from "primevue/toolbar";
 import Message from "primevue/message";
 import Checkbox from "primevue/checkbox";
 import FormField from "@/Components/Common/FormField.vue"

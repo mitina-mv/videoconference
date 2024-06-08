@@ -121,6 +121,9 @@ export default {
         theme_id: {
             title: "Тема",
         },
+        discipline_id: {
+            title: "Дисциплина",
+        },
         type: {
             title: "Тип вопроса",
             values: [

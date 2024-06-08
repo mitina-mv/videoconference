@@ -12,6 +12,7 @@ const props = defineProps({
         req: false,
     },
     themes: Array,
+    disciplines: Array,
 });
 
 const id = props?.id || null;
@@ -20,7 +21,7 @@ const data = ref(null);
 onMounted(() => {
     if (id) {
         axios
-            .get("/api/questions/" + id + "?include=answers")
+            .get("/api/questions/" + id + "?include=answers,theme")
             .then((response) => {
                 data.value = response.data.data;
             })
@@ -50,6 +51,7 @@ onMounted(() => {
                     v-if="(id && data && themes) || (!id && themes)"
                     :data="data"
                     :themes="themes"
+                    :disciplines="disciplines"
                 ></question>
                 <loading-spinner v-else></loading-spinner>
             </div>
