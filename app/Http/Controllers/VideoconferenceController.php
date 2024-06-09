@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Service\OpenViduService;
 use App\Http\Service\TestlogService;
+use App\Models\Answerlog;
 use App\Models\Question;
+use App\Models\Testlog;
 use App\Models\Videoconference;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -12,7 +14,8 @@ use Inertia\Inertia;
 class VideoconferenceController extends Controller
 {
     public function __construct(
-        public TestlogService $testlogService
+        public TestlogService $testlogService,
+        public OpenViduService $openViduService,
     )
     {  
     }
@@ -69,84 +72,151 @@ class VideoconferenceController extends Controller
         $vc = Videoconference::where('session', $session)->first();
         $user = auth()->user();
 
-        // проверка, что конференция еще не прошла и подключиться еще можно
-    
-        if(!$vc) {
-            return Inertia::render('Videoconference/Conference', [
-                'error' => 'Эта видеоконференция не существует' 
-            ]);
+        if (!$vc) {
+            return $this->renderError('Эта видеоконференция не существует');
         }
-        $questions = null;
 
-        if($vc->assignment && $vc->user_id == $user->id) {
+        $questions = $this->getQuestions($vc, $user);
+        if ($questions instanceof \Illuminate\Http\Response) {
+            return $questions; // здесь возвращаем ошибку
+        }
+
+        if (!$this->userCanAccessRoom($vc, $user)) {
+            return $this->renderError('У вас нет доступа к этой видеоконференции');
+        }
+
+        return $this->connectToSession($vc, $user, $questions);
+    }
+
+    private function renderError(string $message)
+    {
+        return Inertia::render('Videoconference/Conference', ['error' => $message]);
+    }
+
+    private function getQuestions($vc, $user)
+    {
+        if ($vc->assignment && $vc->user_id == $user->id) {
             $testSettings = $vc->assignment->test->settings;
 
             if ($testSettings->question_ids) {
-                $questions = Question::whereIn('id', $testSettings->question_ids)
+                return Question::whereIn('id', $testSettings->question_ids)
                     ->with(['answers' => function ($query) {
                         $query->select('id', 'question_id', 'name');
                     }])
                     ->select('id', 'text', 'type')
                     ->get()
-                    ->each(function($row){
+                    ->each(function($row) {
                         $row->setHidden(['correct_answers']);
                     });
             } else {
-                return Inertia::render('Videoconference/Conference', [
-                    'error' =>'Неправильные настройки используемого теста: необходимо использовать тест с предустановленными вопросами.'
-                ]);
+                return $this->renderError('Неправильные настройки используемого теста: необходимо использовать тест с предустановленными вопросами.');
             }
         }
 
-        // проверка доступа студента к комнате
-    
-        $openViduService = new OpenViduService();
-    
-        try {
-            // получаем сессию
-            if(!$openViduService->sessionExists($vc->session)) {
-                if($vc->user_id != $user->id) {
-                    return Inertia::render('Videoconference/Conference', [
-                        'error' => 'Эта видеоконференция еще не началась' 
-                    ]);
-                }
-                // создаем сессию, если она не существует
-                $openViduService->createSession($vc->session);
-            }
+        return null;
+    }
 
-            if ($vc->user_id == $user->id) {
-                // Пользователь владелец конференции, подключаем как модератора
-                $connection = $openViduService->connectToSession($vc->session, [
-                    'role' => 'MODERATOR',
-                    'data' => json_encode(['user_id' => $user->id, 'username' => $user->full_name])
-                ]);
-            } else {
-                // Пользователь не владелец конференции, подключаем как слушателя
-                $connection = $openViduService->connectToSession($vc->session, [
-                    'role' => 'SUBSCRIBER',
-                    'data' => json_encode([
-                            'user_id' => $user->id,
-                            'username' => $user->full_name,
-                            'sg_name' => $user->sg_name
-                        ])
-                ]);
+    private function userCanAccessRoom($vc, $user)
+    {
+        // завершена ли конференция
+        if ($vc->is_completed) {
+            return false;
+        }
+
+        // активна ли конференция
+        if (!$vc->is_active) {
+            return false;
+        }
+        
+        // создатель конференции
+        if ($vc->user_id == $user->id) {
+            return true;
+        }
+
+        // принадлежит ли студент к разрешенной группе
+        if ($user->studgroup_id) {
+            $userGroupIds = [$user->studgroup_id];
+
+            $hasAccess = $vc->studgroups()->whereIn('studgroup_id', $userGroupIds)->exists();
+    
+            return $hasAccess;
+        }
+
+        // по умолчанию всем запрещаем
+        return false;
+    }
+
+    private function connectToSession($vc, $user, $questions)
+    {
+        try {
+            if (!$this->openViduService->sessionExists($vc->session)) {
+                if ($vc->user_id != $user->id) {
+                    return $this->renderError('Эта видеоконференция еще не началась');
+                }
+                $this->openViduService->createSession($vc->session);
             }
+    
+            $connection = $this->getConnection($vc, $user, $this->openViduService, $questions);
     
             return Inertia::render('Videoconference/Conference', [
                 'sessionId' => $vc->session,
                 'token' => $connection['token'],
-                'role' => $vc->user_id == $user->id ? 'MODERATOR' : 'SUBSCRIBER',
+                'role' => $vc->user_id == $user->id 
+                        ? 'MODERATOR' 
+                        : ($vc->settings->type == 'practice' ? 'PUBLISHER' : 'SUBSCRIBER'),
                 'type' => $vc->settings->type,
                 'messages' => $vc->messages,
                 'questions' => $questions,
                 'backLink' => 'videoconferences.index',
-
             ]);
     
         } catch (\Exception $e) {
-            return Inertia::render('Videoconference/Conference', [
-                'error' => 'Не удалось подключиться к видеоконференции'
+            return $this->renderError('Не удалось подключиться к видеоконференции');
+        }
+    }
+
+    private function getConnection($vc, $user, $questions)
+    {
+        if ($vc->user_id == $user->id) {
+            return $this->openViduService->connectToSession($vc->session, [
+                'role' => 'MODERATOR',
+                'data' => json_encode(['user_id' => $user->id, 'username' => $user->full_name])
             ]);
+        } else {
+            $role = 'SUBSCRIBER';
+            if ($vc->settings->type == 'practice') {
+                $role = 'PUBLISHER';
+                $this->createTestLogAndAnswerLogs($vc, $user, $questions);
+            }
+    
+            return $this->openViduService->connectToSession($vc->session, [
+                'role' => $role,
+                'data' => json_encode([
+                    'user_id' => $user->id,
+                    'username' => $user->full_name,
+                    'sg_name' => $user->sg_name
+                ])
+            ]);
+        }
+    }
+    private function createTestLogAndAnswerLogs($vc, $user, $questions)
+    {
+        if ($vc->assignment) {
+            $testLog = Testlog::create([
+                'mark' => 0,
+                'time' => 0,
+                'user_id' => $user->id,
+                'assignment_id' => $vc->assignment->id,
+                'uncorrect_answers' => 0,
+            ]);
+
+            foreach ($questions as $question) {
+                Answerlog::create([
+                    'question_id' => $question->id,
+                    'testlog_id' => $testLog->id,
+                    'mark' => 0,
+                ]);
+            }
         }
     }
 }
