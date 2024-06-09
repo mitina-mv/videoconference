@@ -76,13 +76,13 @@ class VideoconferenceController extends Controller
             return $this->renderError('Эта видеоконференция не существует');
         }
 
+        if (!$this->userCanAccessRoom($vc, $user)) {
+            return $this->renderError('У вас нет доступа к этой видеоконференции');
+        }
+
         $questions = $this->getQuestions($vc, $user);
         if ($questions instanceof \Illuminate\Http\Response) {
             return $questions; // здесь возвращаем ошибку
-        }
-
-        if (!$this->userCanAccessRoom($vc, $user)) {
-            return $this->renderError('У вас нет доступа к этой видеоконференции');
         }
 
         return $this->connectToSession($vc, $user, $questions);
@@ -95,10 +95,10 @@ class VideoconferenceController extends Controller
 
     private function getQuestions($vc, $user)
     {
-        if ($vc->assignment && $vc->user_id == $user->id) {
+        if ($vc->assignment) {
             $testSettings = $vc->assignment->test->settings;
 
-            if ($testSettings->question_ids) {
+            if($vc->user_id == $user->id && $testSettings->question_ids) {
                 return Question::whereIn('id', $testSettings->question_ids)
                     ->with(['answers' => function ($query) {
                         $query->select('id', 'question_id', 'name');
@@ -108,8 +108,10 @@ class VideoconferenceController extends Controller
                     ->each(function($row) {
                         $row->setHidden(['correct_answers']);
                     });
-            } else {
+            } else if (!$testSettings->question_ids && $vc->user_id == $user->id){
                 return $this->renderError('Неправильные настройки используемого теста: необходимо использовать тест с предустановленными вопросами.');
+            } else {
+                return $testSettings->question_ids;
             }
         }
 
@@ -117,9 +119,9 @@ class VideoconferenceController extends Controller
     }
 
     private function userCanAccessRoom($vc, $user)
-    {
+    {        
         // завершена ли конференция
-        if ($vc->is_completed) {
+        if ($vc->is_completed && !$vc->is_active) {
             return false;
         }
 
@@ -132,6 +134,7 @@ class VideoconferenceController extends Controller
         if ($vc->user_id == $user->id) {
             return true;
         }
+
 
         // принадлежит ли студент к разрешенной группе
         if ($user->studgroup_id) {
@@ -156,7 +159,10 @@ class VideoconferenceController extends Controller
                 $this->openViduService->createSession($vc->session);
             }
     
-            $connection = $this->getConnection($vc, $user, $this->openViduService, $questions);
+            $connection = $this->getConnection($vc, $user, $questions);
+            $testlog = Testlog::where('user_id', $user->id)
+            ->where('assignment_id', $vc->assignment->id)
+            ->first();
     
             return Inertia::render('Videoconference/Conference', [
                 'sessionId' => $vc->session,
@@ -168,6 +174,7 @@ class VideoconferenceController extends Controller
                 'messages' => $vc->messages,
                 'questions' => $questions,
                 'backLink' => 'videoconferences.index',
+                'testlog' => $testlog == null ? null : $testlog->id
             ]);
     
         } catch (\Exception $e) {
@@ -176,17 +183,18 @@ class VideoconferenceController extends Controller
     }
 
     private function getConnection($vc, $user, $questions)
-    {
+    {        
         if ($vc->user_id == $user->id) {
             return $this->openViduService->connectToSession($vc->session, [
                 'role' => 'MODERATOR',
                 'data' => json_encode(['user_id' => $user->id, 'username' => $user->full_name])
             ]);
         } else {
+            $this->createTestLogAndAnswerLogs($vc, $user, $questions);
+
             $role = 'SUBSCRIBER';
             if ($vc->settings->type == 'practice') {
                 $role = 'PUBLISHER';
-                $this->createTestLogAndAnswerLogs($vc, $user, $questions);
             }
     
             return $this->openViduService->connectToSession($vc->session, [
@@ -199,22 +207,27 @@ class VideoconferenceController extends Controller
             ]);
         }
     }
+
     private function createTestLogAndAnswerLogs($vc, $user, $questions)
     {
         if ($vc->assignment) {
+            $existingTestLog = Testlog::where('user_id', $user->id)
+                ->where('assignment_id', $vc->assignment->id)
+                ->first();
+
+            if ($existingTestLog) {
+                return;
+            }
+
             $testLog = Testlog::create([
-                'mark' => 0,
-                'time' => 0,
                 'user_id' => $user->id,
                 'assignment_id' => $vc->assignment->id,
-                'uncorrect_answers' => 0,
             ]);
 
-            foreach ($questions as $question) {
+            foreach ($questions as $id) {
                 Answerlog::create([
-                    'question_id' => $question->id,
+                    'question_id' => $id,
                     'testlog_id' => $testLog->id,
-                    'mark' => 0,
                 ]);
             }
         }

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Answer;
+use App\Models\Answerlog;
+use App\Models\Testlog;
 use App\Models\Videoconference;
 use App\Policies\TruePolicy;
 use Carbon\Carbon;
@@ -105,9 +108,58 @@ class VideoconferenceController extends Controller
             $vc->update(['messages' => $messages]);
         } catch (Exception $e) {
             return response()->json([
-                'error' => 'Не удалось отправить сообщение',
-                422
-            ]);
+                'error' => $e->getMessage()
+            ],
+            422);
+        }
+    }
+
+    public function saveAnswer(Request $request)
+    {
+        try {
+            $testlog = Testlog::where('id', $request->testlog_id)
+            ->first();
+
+            if (!$testlog) {
+                throw new Exception('Не найдено тестирование');
+            }
+
+            $answerlog = Answerlog::where('testlog_id', $testlog->id)
+                ->where('question_id', $request->question_id)
+                ->first();
+
+            if (!$answerlog) {
+                throw new Exception('Не найдено задание');
+            }
+
+            // записываем ответы
+            if(is_array($request->answer)) {
+                $answerlog->answers()->detach();
+
+                foreach ($request->answer as $answerId) {
+                    $answerlog->answers()->attach($answerId);
+                }
+            } else {
+                $answer = Answer::where('question_id', $request->question_id)
+                    ->where('name', $request->answer)
+                    ->first();
+
+                if ($answer) {
+                    $answerlog->answers()->detach();
+                    $answerlog->answers()->attach($answer->id);
+                } else {
+                    $uncorrect = $testlog->uncorrect_answers;
+                    $uncorrect[$request->question_id] = $request->answer;
+                    $testlog->update(['uncorrect_answers' => $uncorrect]);
+                }
+            }
+        
+            
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ],
+            422);
         }
     }
 }

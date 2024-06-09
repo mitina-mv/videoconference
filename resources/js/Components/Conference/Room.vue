@@ -142,16 +142,14 @@ const props = defineProps({
     token: String,
     user: Object,
     messages: [Array, null],
+    testlog: [Number, null],
 });
 
 const OV = new OpenVidu();
 const videoContainer = ref(null);
 const roomConteiner = ref(null);
 const subscribers = ref([]);
-const publisher = ref(null);
 const session = ref(null);
-const videoEnabled = ref(true);
-const audioEnabled = ref(true);
 const fullScreen = ref(false);
 
 // Состояние для вопроса и ответа
@@ -259,12 +257,16 @@ const submitAnswer = async () => {
         let answer = userAnswer.value;
         if (currentQuestion.value.type === "text") {
             answer = userAnswerText.value;
+        } else if (currentQuestion.value.type === "single") {
+            answer = [answer]
         }
 
-        /* await axios.post('/api/submitAnswer', {
-            questionId: currentQuestion.value.id,
+        await axios.post(route('api.videoconferences.answer', {session: props.sessionId}), 
+        {
+            testlog_id: props.testlog,
+            question_id: currentQuestion.value.id,
             answer: answer,
-        }); */
+        });
 
         currentQuestion.value = null;
     } catch (error) {

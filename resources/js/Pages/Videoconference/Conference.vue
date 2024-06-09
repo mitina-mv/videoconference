@@ -14,6 +14,7 @@ const props = defineProps({
     role: String,
     questions: [Array, null],
     messages: [Array, null],
+    testlog: [Number, null],
 });
 </script>
 
@@ -46,6 +47,7 @@ const props = defineProps({
                         :messages="messages"
                         :token="token"
                         :user="$page.props.auth.user"
+                        :testlog="testlog"
                         v-else
                     ></Room>
                 </template>
