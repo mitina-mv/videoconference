@@ -74,8 +74,9 @@
                 <div v-for="(group, index) in students" :key="index">
                     <u>{{ index }}</u>
                     <ul>
-                        <li v-for="student in group" :key="student.connectionId">
-                            {{ student.username }}
+                        <li v-for="student in group" :key="student.connectionId" class="d-flex flex-between">
+                            <p style="flex:1 auto;">{{ student.username }}</p>
+                            <Button icon="pi pi-sign-out" severity="danger" @click="destroyConnection(student.connection)" text></Button>
                         </li>
                     </ul>
                 </div>
@@ -221,6 +222,7 @@ const updateUserList = () => {
             students.value[data.sg_name].push({
                 connectionId: connection.connectionId,
                 username: `${data.username}` || "Unknown User",
+                connection: connection,
             });
         });
     }
@@ -368,6 +370,12 @@ const sendMessage = () => {
         chatMessage.value = "";
     }
 };
+
+const destroyConnection = (connetcion) => {
+    if (session.value) {
+        session.value.forceDisconnect(connetcion);
+    }
+}
 
 onMounted(() => {
     session.value = OV.initSession();

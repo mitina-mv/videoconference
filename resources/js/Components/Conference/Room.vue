@@ -182,6 +182,10 @@ const joinSession = async () => {
             subscribers.value.push(subscriber);
         });
 
+        session.value.on("sessionDisconnected", (event) => {
+            window.location.href = "/videoconferences/my";
+        });
+
         session.value.on("signal:test", (event) => {
             const question = JSON.parse(event.data);
             currentQuestion.value = question;
