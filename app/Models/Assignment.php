@@ -27,7 +27,7 @@ class Assignment extends Model
         'date' => 'datetime',
     ];
 
-    protected $appends = ['studgroups', 'is_completed'];
+    protected $appends = ['studgroups', 'is_old'];
     
     public function getDateAttribute($value)
     {

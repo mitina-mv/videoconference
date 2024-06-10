@@ -335,6 +335,7 @@ const checkActive = () => {
             })
             .then(() => {
                 checkActiveCount.value += 1;
+                axios.post(route('api.videoconferences.checking', {session: props.sessionId}))
             })
             .catch((error) => {
                 console.error(error);

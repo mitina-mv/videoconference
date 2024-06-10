@@ -121,7 +121,7 @@ class VideoconferenceController extends Controller
     private function userCanAccessRoom($vc, $user)
     {        
         // завершена ли конференция
-        if ($vc->is_completed && !$vc->is_active) {
+        if ($vc->is_old && !$vc->is_active) {
             return false;
         }
 

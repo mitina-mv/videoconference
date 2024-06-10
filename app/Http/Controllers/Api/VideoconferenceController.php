@@ -162,4 +162,47 @@ class VideoconferenceController extends Controller
             422);
         }
     }
+
+    public function addCheckControl(Request $request)
+    {
+        try {
+            $vc = Videoconference::where('session', $request->session)
+            ->first();
+        
+            $metrics = $vc->metrics;
+            $metrics['count_check'] += 1;
+            $vc->update(['metrics' => $metrics]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ],
+            422);
+        }
+    }
+
+    public function addStudentAction(Request $request)
+    {
+        try {
+            $vc = Videoconference::where('session', $request->session)
+            ->first();
+        
+            $metrics = $vc->metrics;
+
+            if (!$metrics['students'][$request->user_id]) {
+                $metrics['students'][$request->user_id] = [
+                    'count_check' => 0,
+                    'count_message' => 0,
+                    'count_hand' => 0,
+                ];
+            }
+
+            $metrics['students'][$request->user_id]["count_{$request->action}"] += 1;
+            $vc->update(['metrics' => $metrics]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ],
+            422);
+        }
+    }
 }

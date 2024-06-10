@@ -15,6 +15,13 @@ const token = import.meta.env.TOKEN_APP
 
 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
 
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faHand } from '@fortawesome/free-regular-svg-icons'
+
+/* add icons to the library */
+library.add(faHand)
+
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
@@ -22,6 +29,7 @@ createInertiaApp({
         return createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
+            .component('font-awesome-icon', FontAwesomeIcon)
             .use(PrimeVue)
             .use(ToastService)
             .mount(el);

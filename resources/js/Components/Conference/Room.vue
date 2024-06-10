@@ -9,6 +9,11 @@
                     rounded
                     :severity="displayChatPanel ? '' : 'secondary'"
                 ></Button>
+                <Button
+                    @click="toggleChatPanel"
+                    rounded
+                    severity="info"
+                ><font-awesome-icon :icon="['far', 'hand']" /></Button>
             </div>
             <div class="d-flex gap-3">
                 <Button
@@ -136,6 +141,7 @@ import Button from "primevue/button";
 import RadioButton from "primevue/radiobutton";
 import Checkbox from "primevue/checkbox";
 import InputText from "primevue/inputtext";
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 const props = defineProps({
     sessionId: String,
@@ -297,6 +303,10 @@ const sendMessage = () => {
                     route('api.videoconferences.chat', {session: props.sessionId}),
                     {message: message}
                 )
+                axios.post(route('api.videoconferences.action', {session: props.sessionId}), {
+                    user_id: props.user.id,
+                    action: 'message'
+                })
             })
             .catch((error) => {
                 console.error("Error sending chat message:", error);
@@ -308,6 +318,11 @@ const sendMessage = () => {
 
 const confirmPresence = () => {
     showPresencePrompt.value = false;
+    
+    axios.post(route('api.videoconferences.action', {session: props.sessionId}), {
+        user_id: props.user.id,
+        action: 'check'
+    })
 };
 
 const toggleChatPanel = () => {

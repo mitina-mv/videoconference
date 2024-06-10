@@ -228,7 +228,7 @@ watch(
             :style="{ width: '2%' }"
         >
             <template #body="row">
-                <div v-if="(typeof row.data.is_completed !== 'undefined' && !row.data.is_completed) || (typeof row.data.is_completed == 'undefined')">
+                <div v-if="(typeof row.data.is_old !== 'undefined' && !row.data.is_old) || (typeof row.data.is_old == 'undefined')">
                     <a :href="route(routeName + '.edit', row.data.id)">
                         <Button
                             icon="pi pi-pencil"
@@ -253,7 +253,7 @@ watch(
                     </a>
                 </div>
 
-                <div v-if="typeof row.data.is_active !== 'undefined' && !row.data.is_active && typeof row.data.is_completed !== 'undefined' && row.data.is_completed">
+                <div v-if="typeof row.data.is_active !== 'undefined' && !row.data.is_active && typeof row.data.is_old !== 'undefined' && row.data.is_old">
                     отчет
                 </div>
             </template>

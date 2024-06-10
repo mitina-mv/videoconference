@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('videoconferences', function (Blueprint $table) {
-            $table->boolean('is_old')->default(false);
+            $table->jsonb('metrics')->default(json_encode([
+                "count_check" => 0,
+                "students" => []
+            ]));
         });
     }
 
@@ -22,7 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('videoconferences', function (Blueprint $table) {
-            $table->dropColumn('is_old');
+            $table->dropColumn('metrics');
         });
     }
 };

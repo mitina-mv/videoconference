@@ -22,18 +22,22 @@ class Videoconference extends Model
         'name',
         'session', // uuid
         'messages',
+        'metrics',
+        'metrics',
+        'is_completed',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'settings' => AsArrayObject::class,
         'messages' => AsArrayObject::class,
+        'metrics' => AsArrayObject::class,
         'date' => 'datetime',
     ];
 
-    protected $appends = ['is_completed', 'is_active'];
+    protected $appends = ['is_old', 'is_active'];
 
-    public function getIsCompletedAttribute()
+    public function getIsOldAttribute()
     {
         $now = Carbon::now()->timezone('Europe/Moscow')->addMinutes(6);
         $date = Carbon::parse($this->date, 3);
