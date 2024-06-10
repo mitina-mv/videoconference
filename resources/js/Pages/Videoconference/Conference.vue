@@ -34,22 +34,27 @@ const props = defineProps({
                     {{ error }}
                 </div>
                 <template v-else>
-                    <ModeratorLectionRoom
+                    <div
+                        class="moderator-lecture-room"
                         v-if="role == 'MODERATOR'"
-                        :sessionId="sessionId"
-                        :token="token"
-                        :questions="questions"
-                        :messages="messages"
-                        :user="$page.props.auth.user"
-                    ></ModeratorLectionRoom>
-                    <Room
-                        :sessionId="sessionId"
-                        :messages="messages"
-                        :token="token"
-                        :user="$page.props.auth.user"
-                        :testlog="testlog"
-                        v-else
-                    ></Room>
+                    >
+                        <ModeratorLectionRoom
+                            :sessionId="sessionId"
+                            :token="token"
+                            :questions="questions"
+                            :messages="messages"
+                            :user="$page.props.auth.user"
+                        ></ModeratorLectionRoom>
+                    </div>
+                    <div v-else class="lecture-room">
+                        <Room
+                            :sessionId="sessionId"
+                            :messages="messages"
+                            :token="token"
+                            :user="$page.props.auth.user"
+                            :testlog="testlog"
+                        ></Room>
+                    </div>
                 </template>
             </div>
         </div>
