@@ -39,9 +39,4 @@ class Test extends Model
     {
         return $this->belongsTo(Theme::class);
     }
-
-    public function questionCount()
-    {
-        return isset($this->test_settings) ? json_decode($this->test_settings)->question_count : 0;
-    }
 }

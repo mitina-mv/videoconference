@@ -101,6 +101,7 @@ export default {
         tests: "Шаблоны тестов",
         assignments: "Тестирования",
         videoconferences: "Видеоконференции",
+        testing: 'Тестирование'
     },
     questions_fields: {
         text: {
@@ -175,6 +176,18 @@ export default {
                 {
                     id: "is_random",
                     name: "Случайный порядок вопросов",
+                    type: "bool",
+                    default: false,
+                },
+                {
+                    id: "time_limit",
+                    name: "Ограничение времени прохождения, (мин)",
+                    type: "number",
+                    default: 60,
+                },
+                {
+                    id: "permission_switch_questions",
+                    name: "Разрешено переклюать вопрос",
                     type: "bool",
                     default: false,
                 },
