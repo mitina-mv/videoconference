@@ -27,18 +27,28 @@ class Assignment extends Model
         'date' => 'datetime',
     ];
 
-    protected $appends = ['studgroups', 'is_completed'];
+    protected $appends = ['studgroups', 'is_old', 'is_active'];
     
     public function getDateAttribute($value)
     {
         return Carbon::parse($value)->timezone('Europe/Moscow')->format('d.m.Y H:i');
     }
 
-    public function getIsCompletedAttribute()
+    public function getIsOldAttribute()
     {
         $now = Carbon::now()->timezone('Europe/Moscow');
         $date = Carbon::parse($this->date)->timezone('Europe/Moscow');
         return $date && $date->lt($now);
+    }
+
+    public function getIsActiveAttribute()
+    {
+        $now = Carbon::now()->timezone('Europe/Moscow');
+        $date = Carbon::parse($this->date, 3);
+        $start = $date->copy()->subMinutes(5);
+        $end = $date->copy()->addMinutes(30);
+
+        return $now->between($date, $end);
     }
 
     public function test()

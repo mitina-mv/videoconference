@@ -24,6 +24,10 @@ const props = defineProps({
         type: String,
     },
     total: Number,
+    includeControls: {
+        type: Boolean,
+        default: true,
+    },
     includeCrudActions: {
         type: Boolean,
         default: true,
@@ -223,26 +227,29 @@ watch(
 
         <Column
             :exportable="false"
-            v-if="includeCrudActions"
+            v-if="includeControls"
             header="Управление"
             :style="{ width: '2%' }"
         >
             <template #body="row">
-                <div v-if="(typeof row.data.is_old !== 'undefined' && !row.data.is_old) || (typeof row.data.is_old == 'undefined')">
-                    <a :href="route(routeName + '.edit', row.data.id)">
+                <template v-if="includeCrudActions">
+                    <div v-if="(typeof row.data.is_old !== 'undefined' && !row.data.is_old) || (typeof row.data.is_old == 'undefined')">
+                        <a :href="route(routeName + '.edit', row.data.id)">
+                            <Button
+                                icon="pi pi-pencil"
+                                severity="secondary"
+                                text
+                            ></Button>
+                        </a>
                         <Button
-                            icon="pi pi-pencil"
-                            severity="secondary"
+                            icon="pi pi-trash"
+                            severity="danger"
                             text
+                            @click="confirmDelete(row.data)"
                         ></Button>
-                    </a>
-                    <Button
-                        icon="pi pi-trash"
-                        severity="danger"
-                        text
-                        @click="confirmDelete(row.data)"
-                    ></Button>
-                </div>
+                    </div>
+                </template>
+                
 
                 <div v-if="(typeof row.data.is_active !== 'undefined' && row.data.is_active && labelgroup == 'videoconferences')">
                     <a :href="route(routeName + '.room', row.data.session)">
@@ -256,6 +263,7 @@ watch(
                 <div v-if="typeof row.data.is_active !== 'undefined' && !row.data.is_active && typeof row.data.is_old !== 'undefined' && row.data.is_old">
                     отчет
                 </div>
+                <slot name="controls" :data="row.data"></slot>
             </template>
         </Column>
 

@@ -203,6 +203,12 @@ export default {
         studgroups: {
             title: 'Группы студентов',
         },
+        mark:  {
+            title: "Оценка",
+        },
+        settings:  {
+            title: "Настройки",
+        },
     },
     videoconferences_fields:  {
         session: {

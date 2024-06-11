@@ -9,6 +9,7 @@ import toastService from "@/Services/toastService";
 import Calendar from "primevue/calendar";
 import Dropdown from "primevue/dropdown";
 import FilterTable from "@/Components/Tables/FilterTable.vue";
+import Button from "primevue/button";
 
 const props = defineProps({
     disciplines: [Array, null],
@@ -18,7 +19,7 @@ const tableColumns = ref({
     name: {
         code: "name",
         sort: true,
-        title: labels.videoconferences_fields.name.title,
+        title: labels.assignments_fields.themes.title,
         style: {
             width: "20%",
         },
@@ -26,15 +27,23 @@ const tableColumns = ref({
     date: {
         code: "date",
         sort: false,
-        title: labels.videoconferences_fields.date.title,
+        title: labels.assignments_fields.date.title,
         style: {
             width: "23%",
+        },
+    },
+    mark: {
+        code: "mark_value",
+        sort: false,
+        title: labels.assignments_fields.mark.title,
+        style: {
+            width: "3%",
         },
     },
     settings: {
         sort: false,
         code: "settings",
-        title: labels.videoconferences_fields.settings.title,
+        title: labels.assignments_fields.settings.title,
         type: "html",
         style: {
             width: "45%",
@@ -89,8 +98,6 @@ const fetchData = async (filters = null, page = null, limit = null) => {
         totalPage.value = response.data.meta.total;
 
         loadData.value = true;
-
-        console.log(totalPage.value);
     } catch (error) {
         console.error(error);
         toastService.showErrorToast("Заголовок", "Текст");
@@ -101,11 +108,12 @@ const processTableData = (data) => {
     data.forEach((element, index) => {
         data[index].name = element.assignment.test.theme.name;
         data[index].date = element.assignment.date;
+        data[index].mark_value = element.assignment.mark || 'Нет';
 
         let speakerString = `Проводит: ${element.assignment.user.full_name}`;
         data[index].settings = `${speakerString}`;
 
-        let settings = JSON.parse(element.assignment.test.settings);
+        let settings = element.assignment.test.settings;
 
         if (Object.keys(settings).length > 0) {
             let settingsString = labels.test_fields.settings.values
@@ -173,7 +181,20 @@ watch(disciplineFilter, () => {
                         @fetchData="fetchData"
                         :total="totalPage"
                         routeName="assignments"
-                    ></filter-table>
+                        :includeCrudActions="false"
+                    >
+                        <template #controls="{ data }">
+                            <a
+                                :href="route('assignments.testing', data.id)"
+                                v-if="data.assignment.is_active && !data.mark && !data.assignment.vc_id"
+                            >
+                                <Button icon="pi pi-play" text />
+                            </a>
+                            <a v-if="data.path">
+                                <Button icon="pi pi-file-check" text severity="info" size="large" />
+                            </a>
+                        </template>
+                    </filter-table>
                 </template>
             </div>
         </div>

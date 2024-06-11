@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Testlog;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Request;
 
 class MyAssignmentController extends Controller
 {
@@ -27,5 +28,11 @@ class MyAssignmentController extends Controller
         return Inertia::render('Assignment/My', [
             'disciplines' => $disciplines
         ]);
+    }
+
+    public function testing(Request $request)
+    {
+        $user = Auth::user();
+        dd($user);
     }
 }

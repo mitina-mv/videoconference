@@ -73,6 +73,7 @@ Route::group(['prefix' => 'assignments'], function () {
     Route::get('/new', [AssignmentController::class, 'create'])->name('assignments.new');
 
     Route::get('/my', [MyAssignmentController::class, 'index'])->name('assignments.my');
+    Route::get('/testing/{testlog_id}', [MyAssignmentController::class, 'testing'])->name('assignments.testing');
 })->middleware(['auth']);
 
 Route::group(['prefix' => 'videoconferences', 'middleware' => ['auth']], function () {

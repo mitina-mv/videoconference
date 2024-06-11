@@ -135,7 +135,6 @@ class VideoconferenceController extends Controller
             return true;
         }
 
-
         // принадлежит ли студент к разрешенной группе
         if ($user->studgroup_id) {
             $userGroupIds = [$user->studgroup_id];
@@ -187,7 +186,6 @@ class VideoconferenceController extends Controller
             ]);
     
         } catch (\Exception $e) {
-            dd($e->getMessage());
             return $this->renderError('Не удалось подключиться к видеоконференции');
         }
     }
