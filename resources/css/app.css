@@ -455,6 +455,31 @@ svg.w-20.h-20.fill-current.text-gray-500.guest-logo {
     .chat-input input {
         max-width: 220px;
     }
+    .hand-panel {
+        position: absolute;
+        width: 30%;
+        left: calc(100% - 30%);
+        margin-left: -35%;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background: #fff;
+        padding: 1em;
+        top: 35%;
+    }
+    .hand-panel header {
+        align-items: center;
+        margin-bottom: 1em;
+    }
+    .hand-body {
+        display: grid;
+      }
+    .hand-panel h3 {
+        font-weight: 500;
+    }
+    .hand-body {
+        display: grid;
+        gap: 1em;
+    }
 }
 .lecture-room {
     .room {
@@ -491,6 +516,9 @@ svg.w-20.h-20.fill-current.text-gray-500.guest-logo {
     }
     .btn_on {
         background: var(--red-400);
+    }
+    .hand-btn{
+        padding: .75em;
     }
     
     .btn_leave {

@@ -188,7 +188,7 @@ class VideoconferenceController extends Controller
         
             $metrics = $vc->metrics;
 
-            if (!$metrics['students'][$request->user_id]) {
+            if (empty($metrics['students'][$request->user_id])) {
                 $metrics['students'][$request->user_id] = [
                     'count_check' => 0,
                     'count_message' => 0,

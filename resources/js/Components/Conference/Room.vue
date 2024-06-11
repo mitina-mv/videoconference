@@ -10,7 +10,8 @@
                     :severity="displayChatPanel ? '' : 'secondary'"
                 ></Button>
                 <Button
-                    @click="toggleChatPanel"
+                    @click="handAction"
+                    class="hand-btn"
                     rounded
                     severity="info"
                 ><font-awesome-icon :icon="['far', 'hand']" /></Button>
@@ -157,6 +158,7 @@ const roomConteiner = ref(null);
 const subscribers = ref([]);
 const session = ref(null);
 const fullScreen = ref(false);
+const teacher = ref(null)
 
 // Состояние для вопроса и ответа
 const currentQuestion = ref(null);
@@ -179,13 +181,14 @@ const displayChatPanel = ref(false);
 const joinSession = async () => {
     console.log(props.token);
     try {
-        session.value.on("streamCreated", ({ stream }) => {
+        session.value.on("streamCreated", ({stream}) => {
             const subscriber = session.value.subscribe(
                 stream,
                 videoContainer.value,
                 { insertMode: "APPEND" }
             );
             subscribers.value.push(subscriber);
+            teacher.value = stream.connection
         });
 
         session.value.on("sessionDisconnected", (event) => {
@@ -338,6 +341,28 @@ const movePresencePrompt = () => {
     presencePromptStyle.value.top = newTop;
     presencePromptStyle.value.left = newLeft;
 };
+
+const handAction = () => {
+    if(session.value) {
+        session.value
+            .signal({
+                data: JSON.stringify({
+                    username: `${props.user.lastname} (${props.user.sg_name})`
+                }),
+                to: [teacher.value],
+                type: "hand",
+            })
+            .then(() => {
+                axios.post(route('api.videoconferences.action', {session: props.sessionId}), {
+                    user_id: props.user.id,
+                    action: 'hand'
+                })
+            })
+            .catch((error) => {
+                console.error("Error sending hand active:", error);
+            });
+    }
+}
 
 onMounted(() => {
     session.value = OV.initSession();

@@ -138,6 +138,29 @@
                 </div>
             </div>
         </div>
+
+        <!-- Поднятие руки -->
+        <div class="hand-panel" v-if="hands.length !== 0">
+            <header class="d-flex flex-between">
+                <h3>Поднятие руки</h3>
+                <Button
+                    icon="pi pi-times"
+                    text
+                    @click="toggleHandAction"
+                ></Button>
+            </header>
+            <div class="hand-body">
+                <p>
+                    Студент(ы) <b>{{ hands.join(', ') }}</b> поднял(и) руку.
+                </p>
+                <Button
+                    icon="pi pi-check"
+                    label="Прочитано"
+                    severity="secondary"
+                    @click="toggleHandAction"
+                ></Button>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -175,6 +198,13 @@ const checkActiveCount = ref(0);
 const messages = ref(props.messages || []);
 const chatMessage = ref("");
 
+// поднятие руки
+const hands = ref([]) 
+
+const toggleHandAction = () => {
+    hands.value = [];
+}
+
 const joinSession = async () => {
     try {
         session.value.on("connectionDestroyed", (event) => {
@@ -188,6 +218,12 @@ const joinSession = async () => {
         session.value.on("signal:chat", (event) => {
             const message = JSON.parse(event.data);
             messages.value.push(message);
+        });
+
+        session.value.on("signal:hand", (event) => {
+            const user = JSON.parse(event.data);
+            hands.value.push(user.username);
+            hands.value = [...new Set(hands.value)] 
         });
 
         await session.value.connect(props.token);
