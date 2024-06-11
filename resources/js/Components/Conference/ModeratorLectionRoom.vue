@@ -48,6 +48,13 @@
                     icon="pi pi-stop-circle"
                     severity="danger"
                 />
+
+                <Button
+                    @click="toggleScreenShare"
+                    rounded
+                    icon="pi pi-desktop"
+                    :class="screenPublisher ? 'btn_off' : 'btn_on'"
+                />
             </div>
             <div class="d-flex gap-3">
                 <Button
@@ -165,7 +172,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, warn } from "vue";
 import { OpenVidu } from "openvidu-browser";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
@@ -173,21 +180,25 @@ import InputText from "primevue/inputtext";
 const props = defineProps({
     sessionId: String,
     token: String,
-    serverData: String,
+    tokenScreen: String,
     messages: [Array, null],
     questions: [Array, null],
     user: Object
 });
 
 const OV = new OpenVidu();
-const videoContainer = ref(null);
-const roomContainer = ref(null);
+const OVScreen = new OpenVidu();
 const publisher = ref(null);
-const session = ref(null);
 const videoEnabled = ref(true);
 const audioEnabled = ref(true);
 const fullScreen = ref(false);
 const students = ref([]);
+const screenPublisher = ref(null);
+
+const videoContainer = ref(null);
+const roomContainer = ref(null);
+const session = ref(null);
+const sessionScreen  = ref(null);
 
 const displayUserPanel = ref(false);
 const displayQuestionPanel = ref(false);
@@ -223,7 +234,7 @@ const joinSession = async () => {
         session.value.on("signal:hand", (event) => {
             const user = JSON.parse(event.data);
             hands.value.push(user.username);
-            hands.value = [...new Set(hands.value)] 
+            hands.value = [...new Set(hands.value)]
         });
 
         await session.value.connect(props.token);
@@ -240,6 +251,9 @@ const joinSession = async () => {
 
         session.value.publish(publisher.value);
         updateUserList();
+
+        // Подключение к sessionScreen
+        await sessionScreen.value.connect(props.tokenScreen);
     } catch (error) {
         console.error("Connection error:", error);
     }
@@ -251,15 +265,17 @@ const updateUserList = () => {
         session.value.remoteConnections.forEach((connection) => {
             const data = JSON.parse(connection.data);
 
-            if(!students.value.hasOwnProperty(data.sg_name)) {
-                students.value[data.sg_name] = []
-            }
 
-            students.value[data.sg_name].push({
-                connectionId: connection.connectionId,
-                username: `${data.username}` || "Unknown User",
-                connection: connection,
-            });
+            if(data.username != 'screen') {
+                if(!students.value.hasOwnProperty(data.sg_name)) {
+                    students.value[data.sg_name] = []
+                }
+                students.value[data.sg_name].push({
+                    connectionId: connection.connectionId,
+                    username: `${data.username}` || "Unknown User",
+                    connection: connection,
+                });
+            }
         });
     }
 };
@@ -315,6 +331,7 @@ const endCall = () => {
             .then(() => {
                 console.log("End call signal sent");
                 session.value.disconnect();
+                sessionScreen.value.disconnect();
                 window.location.href = "/videoconferences";
             })
             .catch((error) => {
@@ -414,8 +431,70 @@ const destroyConnection = (connetcion) => {
     }
 }
 
+const startScreenSharing = () => {
+    if (screenPublisher.value) return;
+
+    screenPublisher.value = OVScreen.initPublisher(videoContainer.value, {
+        videoSource: "screen",
+        publishAudio: audioEnabled.value,
+        publishVideo: true,
+        resolution: "1200x980",
+        mirror: false,
+    });
+
+    videoEnabled.value = false;
+
+    screenPublisher.value.once("accessAllowed", () => {
+        sessionScreen.value.publish(screenPublisher.value);
+        screenPublisher.value.stream.getMediaStream().getVideoTracks()[0].addEventListener("ended", () => {
+            stopScreenSharing();
+        });
+    });
+
+    sessionScreen.value.on("signal:hand", (event) => {
+        const user = JSON.parse(event.data);
+        hands.value.push(user.username);
+        hands.value = [...new Set(hands.value)]
+    });
+
+    screenPublisher.value.once('accessDenied', () => {
+        stopScreenSharing();
+    });
+
+    session.value.unpublish(publisher.value);
+};
+
+// Остановка публикации экрана
+const stopScreenSharing = () => {
+    if (!screenPublisher.value) return;
+    sessionScreen.value.unpublish(screenPublisher.value);
+    screenPublisher.value = null;
+
+    videoEnabled.value = true;
+    publisher.value = OV.initPublisher(videoContainer.value, {
+        videoSource: undefined,
+        audioSource: undefined,
+        publishAudio: audioEnabled.value,
+        publishVideo: videoEnabled.value,
+        resolution: "1200x980",
+        insertMode: "APPEND",
+        mirror: true,
+    });
+
+    session.value.publish(publisher.value);
+};
+
+const toggleScreenShare = () => {
+    if (!screenPublisher.value) {
+        startScreenSharing()
+    } else {
+        stopScreenSharing()
+    }
+}
+
 onMounted(() => {
     session.value = OV.initSession();
+    sessionScreen.value = OVScreen.initSession();
     joinSession();
 });
 </script>

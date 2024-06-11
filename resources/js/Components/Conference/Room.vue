@@ -343,6 +343,7 @@ const movePresencePrompt = () => {
 };
 
 const handAction = () => {
+    console.warn(teacher.value);
     if(session.value) {
         session.value
             .signal({

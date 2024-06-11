@@ -160,13 +160,22 @@ class VideoconferenceController extends Controller
             }
     
             $connection = $this->getConnection($vc, $user, $questions);
+
+            $conScreen = null;
+            if($vc->user_id == $user->id) {
+                $conScreen = $this->openViduService->connectToSession($vc->session, [
+                    'data' => json_encode(['user_id' => $user->id, 'username' => 'screen'])
+                ]);
+            }
+
             $testlog = Testlog::where('user_id', $user->id)
-            ->where('assignment_id', $vc->assignment->id)
-            ->first();
+                ->where('assignment_id', $vc->assignment->id)
+                ->first();
     
             return Inertia::render('Videoconference/Conference', [
                 'sessionId' => $vc->session,
                 'token' => $connection['token'],
+                'tokenScreen' => $conScreen ? $conScreen['token'] : $conScreen,
                 'role' => $vc->user_id == $user->id 
                         ? 'MODERATOR' 
                         : ($vc->settings->type == 'practice' ? 'PUBLISHER' : 'SUBSCRIBER'),
@@ -178,6 +187,7 @@ class VideoconferenceController extends Controller
             ]);
     
         } catch (\Exception $e) {
+            dd($e->getMessage());
             return $this->renderError('Не удалось подключиться к видеоконференции');
         }
     }

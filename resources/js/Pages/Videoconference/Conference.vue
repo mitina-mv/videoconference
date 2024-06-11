@@ -9,6 +9,7 @@ import ModeratorLectionRoom from "@/Components/Conference/ModeratorLectionRoom.v
 const props = defineProps({
     sessionId: String,
     token: String,
+    tokenScreen: [String, null],
     error: String,
     type: String,
     role: String,
@@ -42,6 +43,7 @@ const props = defineProps({
                             :sessionId="sessionId"
                             :token="token"
                             :questions="questions"
+                            :tokenScreen="tokenScreen"
                             :messages="messages"
                             :user="$page.props.auth.user"
                         ></ModeratorLectionRoom>
