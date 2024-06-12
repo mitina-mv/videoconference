@@ -612,3 +612,12 @@ svg.w-20.h-20.fill-current.text-gray-500.guest-logo {
         align-items: center;
     }
 }
+
+.test-body * {
+    font-size: 1.5rem;
+}
+
+.test-body .p-radiobutton.p-component.mr-2 {
+    width: 1.5rem;
+    height: 1.55rem;
+}

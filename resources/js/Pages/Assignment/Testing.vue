@@ -1,99 +1,86 @@
-<script setup>
-import { ref, onMounted, watch } from "vue";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, usePage } from "@inertiajs/vue3";
-import axios from "axios";
-import labels from "@/locales/ru.js";
-import LoadingSpinner from "@/Components/Common/LoadingSpinner.vue";
-import toastService from "@/Services/toastService";
-import Button from "primevue/button";
-import RadioButton from "primevue/radiobutton";
-import Checkbox from "primevue/checkbox";
-import InputText from "primevue/inputtext";
-
-const props = defineProps({
-    error: [String, null],
-    dd: String,
-    questions: [Array, null],
-    settings: [Object, null],
-    answerlogs: [Object, null],
-});
-
-const answers = ref({});
-const curQuestion = ref(null)
-
-onMounted(() => {
-    if(props.answerlogs) {
-        props.questions.forEach(q => {
-            answers.value[q.id] = {
-                answerlog_id: props.answerlogs[q.id],
-                value: null
-            }
-        })
-
-        curQuestion.value = props.questions[0];
-    }
-})
-</script>
-
 <template>
     <Head :title="labels.page_titles.testing" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ labels.page_titles.testing }} {{ dd }}
+                {{ labels.page_titles.testing }}
             </h2>
         </template>
 
         <div class="d-grid gap-4 content">
-            {{ dd }}
             <div class="content__container">
-
-                <div v-if="error">
-                    {{ error }}
-                </div>
-                <template v-else>
-                    <div class="test-body" v-if="curQuestion">
-                        <h3 class="mb-3">{{ curQuestion.text }}</h3>
-                        <div class="answers">
-                            <div v-if="curQuestion.type === 'single'">
-                                <div
-                                    v-for="answer in curQuestion.answers"
-                                    :key="answer.id"
-                                    class="mb-1"
-                                >
-                                    <RadioButton
-                                        :inputId="'ans_' + answer.id"
-                                        :value="answer.id"
-                                        v-model="answers[`${curQuestion.id}`].value"
-                                        class="mr-2"
-                                    />
-                                    <label :for="'ans_' + answer.id">{{ answer.name }}</label>
-                                </div>
-                            </div>
-                            <div v-if="curQuestion.type === 'multiple'">
-                                <div
-                                    v-for="answer in curQuestion.answers"
-                                    :key="answer.id"
-                                    class="mb-1"
-                                >
-                                    <Checkbox
-                                        :inputId="'ans_' + answer.id"
-                                        :value="answer.id"
-                                        v-model="answers[`${curQuestion.id}`].value"
-                                        class="mr-2"
-                                    />
-                                    <label :for="'ans_' + answer.id">{{ answer.name }}</label>
-                                </div>
-                            </div>
-                            <div v-if="curQuestion.type === 'text'">
-                                <InputText v-model="answers[`${curQuestion.id}`].value" />
-                            </div>
-                        </div>
-                    </div>
+                <div v-if="error">{{ error }}</div>
+                <template v-else-if="curQuestion">
+                    <QuestionList
+                        v-if="permissionSwitchQuestions"
+                        :questions="questions"
+                        :currentQuestion="curQuestion"
+                        @select="setCurrentQuestion"
+                    />
+                    <Question :question="curQuestion" :answers="answers" />
+                    <TestNavigation
+                        :curQuestionIndex="curQuestionIndex"
+                        :questions="questions"
+                        :permissionSwitchQuestions="permissionSwitchQuestions"
+                        @navigate="navigate"
+                        @finish="finishTest"
+                    />
                 </template>
             </div>
         </div>
     </AuthenticatedLayout>
 </template>
+
+<script setup>
+import { ref, onMounted } from "vue";
+import { Head, usePage } from "@inertiajs/vue3";
+import Question from "@/Components/Testing/Question.vue";
+import QuestionList from "@/Components/Testing/QuestionList.vue";
+import TestNavigation from "@/Components/Testing/TestNavigation.vue";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import labels from "@/locales/ru.js";
+
+const props = defineProps({
+    error: [String, null],
+    questions: [Array, null],
+    settings: [Object, null],
+    answerlogs: [Object, null],
+});
+
+const answers = ref({});
+const curQuestion = ref(null);
+const curQuestionIndex = ref(0);
+const permissionSwitchQuestions = props.settings.permission_switch_questions
+const questions = ref(props.questions)
+
+const setCurrentQuestion = (question) => {
+    curQuestion.value = question;
+    curQuestionIndex.value = questions.value.findIndex(
+        (q) => q.id === question.id
+    );
+};
+
+const navigate = (index) => {
+    console.log(curQuestion.value);
+    curQuestion.value = questions.value[index];
+    curQuestionIndex.value = index;
+};
+
+const finishTest = () => {
+    console.log("Test finished", answers.value);
+};
+
+onMounted(() => {
+    if (props.answerlogs) {
+        props.questions.forEach((q) => {
+            answers.value[q.id] = {
+                answerlog_id: props.answerlogs[q.id],
+                value: null,
+            };
+        });
+
+        curQuestion.value = props.questions[0];
+    }
+});
+</script>
