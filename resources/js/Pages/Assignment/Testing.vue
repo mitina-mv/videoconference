@@ -11,22 +11,34 @@
         <div class="d-grid gap-4 content">
             <div class="content__container">
                 <div v-if="error">{{ error }}</div>
-                <template v-else-if="curQuestion">
+                <div class="test" v-else-if="curQuestion && !finishFlag">
+                    <div class="test-main">
+                        <Question :question="curQuestion" :answers="answers" />
+                        <TestNavigation
+                            :curQuestionIndex="curQuestionIndex"
+                            :questions="questions"
+                            :permissionSwitchQuestions="
+                                permissionSwitchQuestions
+                            "
+                            @navigate="navigate"
+                            @finish="finishTest"
+                        />
+                    </div>
+
                     <QuestionList
                         v-if="permissionSwitchQuestions"
                         :questions="questions"
                         :currentQuestion="curQuestion"
                         @select="setCurrentQuestion"
                     />
-                    <Question :question="curQuestion" :answers="answers" />
-                    <TestNavigation
-                        :curQuestionIndex="curQuestionIndex"
-                        :questions="questions"
-                        :permissionSwitchQuestions="permissionSwitchQuestions"
-                        @navigate="navigate"
-                        @finish="finishTest"
-                    />
-                </template>
+                </div>
+                <Finish
+                    v-else-if="finishFlag"
+                    :questions="questions"
+                    :answers="answers"
+                    @cancel="cancelFinish"
+                    @send="sendAnswers"
+                />
             </div>
         </div>
     </AuthenticatedLayout>
@@ -40,6 +52,7 @@ import QuestionList from "@/Components/Testing/QuestionList.vue";
 import TestNavigation from "@/Components/Testing/TestNavigation.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import labels from "@/locales/ru.js";
+import Finish from "@/Components/Testing/Finish.vue";
 
 const props = defineProps({
     error: [String, null],
@@ -51,8 +64,9 @@ const props = defineProps({
 const answers = ref({});
 const curQuestion = ref(null);
 const curQuestionIndex = ref(0);
-const permissionSwitchQuestions = props.settings.permission_switch_questions
-const questions = ref(props.questions)
+const permissionSwitchQuestions = props.settings.permission_switch_questions;
+const questions = ref(props.questions);
+const finishFlag = ref(false);
 
 const setCurrentQuestion = (question) => {
     curQuestion.value = question;
@@ -68,6 +82,14 @@ const navigate = (index) => {
 };
 
 const finishTest = () => {
+    finishFlag.value = true;
+};
+
+const cancelFinish = () => {
+    finishFlag.value = false;
+};
+
+const sendAnswers = () => {
     console.log("Test finished", answers.value);
 };
 

@@ -183,7 +183,7 @@ export default {
                     id: "time_limit",
                     name: "Ограничение времени прохождения, (мин)",
                     type: "number",
-                    default: 60,
+                    default: null,
                 },
                 {
                     id: "permission_switch_questions",

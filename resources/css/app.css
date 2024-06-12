@@ -614,10 +614,38 @@ svg.w-20.h-20.fill-current.text-gray-500.guest-logo {
 }
 
 .test-body * {
-    font-size: 1.5rem;
+    font-size: 1.35rem;
 }
 
 .test-body .p-radiobutton.p-component.mr-2 {
     width: 1.5rem;
     height: 1.55rem;
+}
+
+.test {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 1em;
+    align-items: start;
+}
+
+.question-list {
+    background: #fff;
+    border: 1px solid var(--surface-200);
+    border-radius: 6px;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    -ms-border-radius: 6px;
+    -o-border-radius: 6px;
+}
+.question-list header {
+    background: var(--surface-200);
+    padding: .75em 1em;
+    color: var(--surface-700);
+    font-size: 1em;
+    font-weight: bold;
+}
+.question-list div {
+    padding: .5em 1em;
+    border-bottom: 1px solid var(--surface-200);
 }

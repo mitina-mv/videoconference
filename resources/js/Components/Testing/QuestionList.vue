@@ -1,15 +1,14 @@
 <template>
     <div class="question-list">
-        <ul>
-            <li
-                v-for="question in questions"
-                :key="question.id"
-                @click="selectQuestion(question)"
-                :class="{ active: currentQuestion.id === question.id }"
-            >
-                {{ question.text }}
-            </li>
-        </ul>
+        <header>Список вопросов</header>
+        <div
+            v-for="question in questions"
+            :key="question.id"
+            @click="selectQuestion(question)"
+            :class="{ active: currentQuestion.id === question.id }"
+        >
+            {{ question.text }}
+        </div>
     </div>
 </template>
 
@@ -28,6 +27,7 @@ const selectQuestion = (question) => {
 
 <style scoped>
 .active {
-    font-weight: bold;
+    font-weight: 500;
+    color: var(--primary-500);
 }
 </style>
