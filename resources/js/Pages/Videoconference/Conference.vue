@@ -7,12 +7,12 @@ import labels from "@/locales/ru.js";
 import ModeratorLectionRoom from "@/Components/Conference/ModeratorLectionRoom.vue";
 
 const props = defineProps({
-    sessionId: String,
-    token: String,
+    sessionId: [String, null],
+    token: [String, null],
     tokenScreen: [String, null],
-    error: String,
-    type: String,
-    role: String,
+    error: [String, null],
+    type: [String, null],
+    role: [String, null],
     questions: [Array, null],
     messages: [Array, null],
     testlog: [Number, null],
@@ -25,7 +25,7 @@ const props = defineProps({
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ labels.page_titles.videoconferences }}
+                {{ labels.page_titles.videoconferences }} {{ dd }}
             </h2>
         </template>
 

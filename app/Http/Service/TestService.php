@@ -115,7 +115,7 @@ class TestService
         $testlog->update(['uncorrect_answers' => $uncorrect]);
     }
 
-    private function calculateMark($answerlog)
+    public function calculateMark($answerlog)
     {
         $question = $answerlog->question;
         $correctAnswersGet = $answerlog->answers()->where('is_correct', true)->count();

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Service\TestService;
 use App\Models\Answer;
 use App\Models\Answerlog;
+use App\Models\Question;
 use App\Models\Testlog;
 use App\Models\Videoconference;
 use App\Policies\TruePolicy;
@@ -117,13 +119,12 @@ class VideoconferenceController extends Controller
     public function saveAnswer(Request $request)
     {
         try {
-            $testlog = Testlog::where('id', $request->testlog_id)
-            ->first();
+            // Проверяем, существует ли тестирование
+            $testlog = Testlog::where('id', $request->testlog_id)->first();
 
             if (!$testlog) {
                 throw new Exception('Не найдено тестирование');
             }
-
             $answerlog = Answerlog::where('testlog_id', $testlog->id)
                 ->where('question_id', $request->question_id)
                 ->first();
@@ -132,36 +133,47 @@ class VideoconferenceController extends Controller
                 throw new Exception('Не найдено задание');
             }
 
-            // записываем ответы
-            if(is_array($request->answer)) {
-                $answerlog->answers()->detach();
+            // структурa answers для передачи в сервис
+            $answers = [
+                $request->question_id => [
+                    'answerlog_id' => $answerlog->id,
+                    'value' => $request->answer
+                ]
+            ];
 
-                foreach ($request->answer as $answerId) {
-                    $answerlog->answers()->attach($answerId);
-                }
-            } else {
-                $answer = Answer::where('question_id', $request->question_id)
-                    ->where('name', $request->answer)
-                    ->first();
+            $testService = new TestService();
 
-                if ($answer) {
-                    $answerlog->answers()->detach();
-                    $answerlog->answers()->attach($answer->id);
-                } else {
-                    $uncorrect = $testlog->uncorrect_answers;
-                    $uncorrect[$request->question_id] = $request->answer;
-                    $testlog->update(['uncorrect_answers' => $uncorrect]);
-                }
-            }
-        
-            
+            // cохраняем ответы через сервис
+            $testService->saveAnswers($request->testlog_id, $answers);
+
+            // считаем текущую оценку за тест
+            $questionIds = $testlog->assignment->test->settings['question_ids'];
+            $questionMarks = Question::whereIn('id', $questionIds)
+                ->select('mark')
+                ->get()
+                ->pluck('mark')
+                ->toArray();
+            $testAmount = array_sum($questionMarks);
+            $answerlogMarks = Answerlog::where('testlog_id', $testlog->id)
+                ->whereIn('question_id', $questionIds)
+                ->pluck('mark')
+                ->toArray();
+            $testMark = array_sum($answerlogMarks);
+
+            $testlog->update([
+                'mark' => round(($testMark / $testAmount) * 100, 2),
+            ]);
+
+            return response()->json([
+                'message' => 'Ответ сохранен успешно'
+            ], 200);
         } catch (Exception $e) {
             return response()->json([
                 'error' => $e->getMessage()
-            ],
-            422);
+            ], 422);
         }
     }
+
 
     public function addCheckControl(Request $request)
     {

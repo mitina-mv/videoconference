@@ -10,6 +10,7 @@ use App\Models\Testlog;
 use App\Models\Videoconference;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 
 class VideoconferenceController extends Controller
 {
@@ -81,16 +82,22 @@ class VideoconferenceController extends Controller
         }
 
         $questions = $this->getQuestions($vc, $user);
-        if ($questions instanceof \Illuminate\Http\Response) {
+        if ($questions instanceof InertiaResponse) {
             return $questions; // здесь возвращаем ошибку
         }
+
 
         return $this->connectToSession($vc, $user, $questions);
     }
 
     private function renderError(string $message)
     {
-        return Inertia::render('Videoconference/Conference', ['error' => $message]);
+        return Inertia::render(
+            'Videoconference/Conference', 
+            [
+                'error' => $message,
+            ]
+        );
     }
 
     private function getQuestions($vc, $user)
@@ -98,7 +105,7 @@ class VideoconferenceController extends Controller
         if ($vc->assignment) {
             $testSettings = $vc->assignment->test->settings;
 
-            if($vc->user_id == $user->id && $testSettings->question_ids) {
+            if($vc->user_id == $user->id && isset($testSettings['question_ids'])) {
                 return Question::whereIn('id', $testSettings->question_ids)
                     ->with(['answers' => function ($query) {
                         $query->select('id', 'question_id', 'name');
@@ -108,10 +115,10 @@ class VideoconferenceController extends Controller
                     ->each(function($row) {
                         $row->setHidden(['correct_answers']);
                     });
-            } else if (!$testSettings->question_ids && $vc->user_id == $user->id){
+            } else if (empty($testSettings['question_ids']) && $vc->user_id == $user->id){
                 return $this->renderError('Неправильные настройки используемого теста: необходимо использовать тест с предустановленными вопросами.');
             } else {
-                return $testSettings->question_ids;
+                return $testSettings['question_ids'];
             }
         }
 
