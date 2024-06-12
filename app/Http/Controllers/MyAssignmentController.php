@@ -126,4 +126,22 @@ class MyAssignmentController extends Controller
             'error' => $message,
         ]);
     }
+
+    public function saveAnswer(Request $request)
+    {
+        try {
+            $this->validate($request, [
+                'testlog_id' => 'required|integer',
+                'answers' => 'required|array',
+            ]);
+
+            $this->testService->saveAnswers($request->testlog_id, $request->answers);
+
+            return response()->json(['message' => 'Ответы успешно сохранены']);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 422);
+        }
+    }
 }
