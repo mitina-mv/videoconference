@@ -21,16 +21,16 @@ class Answerlog extends Model
     
     public function question()
     {
-        return $this->hasOne(Question::class, 'id', 'question_id');
+        return $this->belongsTo(Question::class);
     } 
 
     public function testlog()
     {
-        return $this->hasOne(Testlog::class);
+        return $this->belongsTo(Testlog::class);
     } 
 
-    public function get_answer()
+    public function answers()
     {
         return $this->belongsToMany(Answer::class, 'answers_answerlogs');
-    } 
+    }
 }

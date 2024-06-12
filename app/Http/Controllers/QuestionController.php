@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Discipline;
 use App\Models\Question;
 use App\Models\Theme;
 use Illuminate\Http\Request;
@@ -27,6 +28,8 @@ class QuestionController extends Controller
         return Inertia::render('Question/Form', [
             'id' => $id,
             'themes' => Theme::all(),
+            'backLink' => 'questions.index',
+            'disciplines' => Discipline::all(),
         ]);
     }
 
@@ -34,6 +37,8 @@ class QuestionController extends Controller
     {
         return Inertia::render('Question/Form', [
             'themes' => Theme::all(),
+            'backLink' => 'questions.index',
+            'disciplines' => Discipline::all(),
         ]);
     }
 }

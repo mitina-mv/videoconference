@@ -6,8 +6,6 @@ import labels from "@/locales/ru.js";
 import Button from "primevue/button";
 import toastService from "@/Services/toastService";
 import InputSwitch from "primevue/inputswitch";
-import Textarea from "primevue/textarea";
-import Toolbar from "primevue/toolbar";
 import Message from "primevue/message";
 import Checkbox from "primevue/checkbox";
 import FormField from "@/Components/Common/FormField.vue"
@@ -65,11 +63,12 @@ const settingsData = ref({
 });
 
 onBeforeMount(() => {
-    let settings = props.data ? JSON.parse(props.data.settings) : {};
+    let settings = props?.data?.settings || {};
+    console.log(settings);
 
     labels.test_fields.settings.values.forEach((item) => {
         settingsData.value[item.id] = {
-            value: settings[item.id] || item.default,
+            value: Object.hasOwn(settings, item.id) ? settings[item.id] : item.default,
             type: item.type,
             title: item.name,
         };
@@ -136,7 +135,7 @@ const sendData = async () => {
         name: name.value,
         description: description.value,
         theme_id: theme_id.value,
-        settings: JSON.stringify(settings),
+        settings: settings,
     };
 
     const url = `/api/tests${id.value ? `/${id.value}` : ""}`;

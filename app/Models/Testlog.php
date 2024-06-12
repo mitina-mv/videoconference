@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,7 +24,7 @@ class Testlog extends Model
     ];
 
     protected $casts = [
-        'uncorrect_answers' => 'array',
+        'uncorrect_answers' => AsArrayObject::class,
         'created_at' => 'datetime',
     ];
 

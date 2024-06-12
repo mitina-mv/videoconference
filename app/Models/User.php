@@ -55,12 +55,18 @@ class User extends Authenticatable
     ];
 
     // Виртуальный атрибут для главной фотографии объявления
-    protected $appends = ['full_name', 'initials'];
+    protected $appends = ['full_name', 'initials', 'sg_name'];
 
     public function getFullNameAttribute()
     {
         return $this->lastname . " " . $this->name 
         . ($this->patronymic ? ' ' . $this->patronymic : '');
+    }
+
+    public function getSgNameAttribute()
+    {
+        $sg = $this->studgroup()->first();
+        return $sg ? $sg->name : null;
     }
 
     public function getInitialsAttribute()

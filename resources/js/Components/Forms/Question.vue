@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import InputText from "primevue/inputtext";
 import InputNumber from "primevue/inputnumber";
 import MultiSelect from "primevue/multiselect";
@@ -11,6 +11,7 @@ import InputSwitch from "primevue/inputswitch";
 import Textarea from "primevue/textarea";
 import Toolbar from "primevue/toolbar";
 import Message from "primevue/message";
+import FormField from "@/Components/Common/FormField.vue"
 
 const props = defineProps({
     data: {
@@ -18,6 +19,7 @@ const props = defineProps({
         req: false,
     },
     themes: Array,
+    disciplines: Array,
 });
 
 const id = ref(props?.data?.id || null);
@@ -25,24 +27,36 @@ const errors = ref({});
 const fieldData = ref({
     text: {
         value: props?.data?.text || null,
+        label: labels.questions_fields.text.title,
         type: "text",
+        class: 'grid-self-col-1'
+    },
+    discipline_id: {
+        value: props?.data?.theme?.discipline_id || null,
+        type: "dropdown",
+        label: labels.questions_fields.discipline_id.title,
+        options: props.disciplines,
     },
     theme_id: {
         value: props?.data?.theme_id || null,
         type: "dropdown",
+        label: labels.questions_fields.theme_id.title,
         options: props.themes,
     },
     type: {
         value: props?.data?.type || null,
         type: "dropdown",
+        label: labels.questions_fields.type.title,
         options: labels.questions_fields.type.values,
     },
     mark: {
         value: Number(props?.data?.mark) || 1,
         type: "number",
+        label: labels.questions_fields.mark.title,
         min: 1,
     },
     is_private: {
+        label: labels.questions_fields.is_private.title,
         value: props?.data?.is_private || false,
         type: "bool",
     },
@@ -148,39 +162,6 @@ const deleteAnswer = (index) => {
     }
 };
 
-const sendAnswer = (index) => {
-    let item = answersData.value[index];
-    if (!item.name) {
-        toastService.showWarnToast(
-            `Сохранение ответа`,
-            "Не все обязательные поля заполнены"
-        );
-        return;
-    }
-    const url = "/api/answers" + (item.id ? `/${item.id}` : "");
-
-    axios({
-        method: item.id != null ? "put" : "post",
-        url: url,
-        data: item,
-    })
-        .then((response) => {
-            answersData.value[index].id = response.data.data.id;
-
-            toastService.showSuccessToast(
-                `Сохранение ответа`,
-                "Успешно сохранили!"
-            );
-        })
-        .catch((error) => {
-            toastService.showErrorToast(
-                `Сохранение ответа`,
-                "Ошибка при отправке данных. Ознакомьтесь с ошибками и попробуйте заново."
-            );
-            errors.value = error.response.data.errors;
-        });
-};
-
 const showErrorMessage = computed(() => {
     const correctAnswersCount = answersData.value.filter(
         (answer) => answer.status === true
@@ -194,59 +175,94 @@ const showErrorMessage = computed(() => {
         return correctAnswersCount == 0
     }
 });
+
+const filterThemes = () => {
+    if(fieldData.value.discipline_id.value) {
+        let id = fieldData.value.discipline_id.value;
+        let themes = []
+        props.themes.forEach(a => {
+            if (a.discipline_id == id) {
+                themes.push(a)
+            }
+        });
+
+        fieldData.value.theme_id.options = themes;
+        fieldData.value.theme_id.value = themes.length > 0 ? themes[0].id : null;
+    }
+}
+
+const saveAnswers = () => {
+    let allFilled = answersData.value.every(answer => answer.name && answer.status !== undefined);
+
+    if (!allFilled) {
+        toastService.showWarnToast(
+            `Сохранение данных`,
+            "Не все обязательные поля заполнены"
+        );
+        return;
+    }
+
+    let newAnswers = [];
+    let existingAnswers = {};
+
+    answersData.value.forEach(answer => {
+        if(!answer.id) {
+            newAnswers.push(answer)
+        } else {
+            existingAnswers[answer.id] = answer
+        }
+    })
+
+    const requests = [];
+
+    if (newAnswers.length > 0) {
+        requests.push(
+            axios.post('/api/answers/batch', {resources: newAnswers})
+                .then(response => {
+                    response.data.data.forEach((newAnswer, index) => {
+                        const originalIndex = answersData.value.findIndex(answer => !answer.id && answer.name === newAnswers[index].name);
+                        answersData.value[originalIndex] = newAnswer;
+                    });
+                })
+        );
+    }
+
+    if (Object.keys(existingAnswers).length > 0) {
+        requests.push(
+            axios.patch('/api/answers/batch', {resources: existingAnswers})
+                .then(response => {
+                    console.log(newAnswers, existingAnswers);
+
+                })
+        );
+    }
+
+    Promise.all(requests)
+        .then(() => {
+            toastService.showSuccessToast(
+                `Сохранение ответов`,
+                "Все ответы успешно сохранены!"
+            );
+        })
+        .catch(error => {
+            toastService.showErrorToast(
+                `Сохранение данных`,
+                "Ошибка при отправке данных. Ознакомьтесь с ошибками и попробуйте заново."
+            );
+            errors.value = error.response.data.errors;
+        });
+};
+
+
+watch(() => fieldData.value.discipline_id.value, filterThemes);
 </script>
 
 <template>
     <form @submit.prevent="sendData" class="form d-grid gap-3 grid-col-2">
-        <div
-            class="form-control"
-            v-for="(field, code) in fieldData"
-            :key="code"
-            :class="field.type == 'text' ? 'grid-self-col-1' : ''"
-        >
-            <label :for="code + '_input'">{{
-                labels.questions_fields[code].title
-            }}</label>
-            <InputSwitch
-                v-if="field.type == 'bool'"
-                v-model="fieldData[code].value"
-                :invalid="errors[code] ? true : false"
-            />
-
-            <InputNumber
-                v-else-if="field.type == 'number'"
-                v-model="fieldData[code].value"
-                inputId="minmax"
-                :min="field.min"
-                :max="field.max || 100"
-            />
-
-            <Textarea
-                v-else-if="field.type == 'text'"
-                v-model="fieldData[code].value"
-            />
-
-            <Dropdown
-                :id="field.code"
-                v-else-if="field.type && field.type == 'dropdown'"
-                v-model="fieldData[code].value"
-                :options="field.options"
-                optionLabel="name"
-                optionValue="id"
-                filter
-            />
-
-            <InputText
-                v-else
-                :id="code + '_input'"
-                v-model="fieldData[code].value"
-                type="text"
-                :class="{ 'p-invalid': errors[`${code}`] }"
-            />
-            <small class="p-error" v-if="errors[code]">{{
-                errors[code] ? errors[code][0] : "&nbsp;"
-            }}</small>
-        </div>
+        <FormField v-for="(field, code) in fieldData"
+                :key="code"
+                :field="field"
+                :errors="errors" />
 
         <div class="form-footer mt-2">
             <Button @click="sendData" label="Сохранить"> </Button>
@@ -262,7 +278,14 @@ const showErrorMessage = computed(() => {
                 <Button
                     :label="'Добавить '"
                     icon="pi pi-plus"
+                    class="mr-3"
                     @click="addAnswerForm"
+                />
+                <Button
+                    label="Сохранить все"
+                    icon="pi pi-check"
+                    severity="success"
+                    @click="saveAnswers"
                 />
             </template>
         </Toolbar>
@@ -273,7 +296,17 @@ const showErrorMessage = computed(() => {
 
         <div class="d-grid grid-col-3 gap-4" v-if="answersData.length > 0">
             <form v-for="(answer, index) in answersData" :key="index">
-                <b>Ответ {{ index + 1 }}</b>
+                <header class="d-flex flex-between">
+                    <b>Ответ {{ index + 1 }}</b>
+                    <Button
+                        icon="pi pi-times"
+                        size="small"
+                        severity="danger"
+                        outlined
+                        rounded
+                        @click="deleteAnswer(index)"
+                    />
+                </header>
                 <div
                     class="form-control"
                     v-for="(field, code) in answerField"
@@ -303,23 +336,6 @@ const showErrorMessage = computed(() => {
                     <small class="p-error" v-if="errors[code]">{{
                         errors[code] ? errors[code][0] : "&nbsp;"
                     }}</small>
-                </div>
-
-                <div class="buttons-group mt-3">
-                    <Button
-                        @click="sendAnswer(index)"
-                        :label="answer.id ? 'Сохранить' : 'Создать'"
-                        size="small"
-                        severity="success"
-                        outlined
-                    />
-                    <Button
-                        label="Удалить"
-                        size="small"
-                        severity="danger"
-                        outlined
-                        @click="deleteAnswer(index)"
-                    />
                 </div>
             </form>
         </div>

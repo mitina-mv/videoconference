@@ -133,7 +133,7 @@ const processTableData = (data) => {
             data[index].studgroup_id = "не указано";
         }
 
-        let settings = JSON.parse(element.settings);
+        let settings = element.settings;
         let sessionString = `,<br />${labels.videoconferences_fields.session.title}: ${element.session}`;
         let testString = `,<br />${
             labels.videoconferences_fields.test.title
@@ -143,12 +143,17 @@ const processTableData = (data) => {
             let settingsString = labels.videoconferences_fields.settings.values
                 .filter((a) => settings.hasOwnProperty(a.id))
                 .map((a) => {
-                    let val =
-                        a.type === "bool"
-                            ? settings[a.id]
-                                ? "да"
-                                : "нет"
-                            : settings[a.id];
+                    let val = settings[a.id];
+
+                    switch (a.type) {
+                        case "bool":
+                            val = settings[a.id] ? "да" : "нет"
+                            break;
+                        case 'dropdown':
+                            let ind = a.values.findIndex(value => value.id == settings[a.id])
+                            val = a.values[ind].name
+                            break;
+                    }
                     return `${a.name}: ${val}`;
                 })
                 .join(",<br />");

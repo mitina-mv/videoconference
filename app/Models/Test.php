@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -26,13 +27,8 @@ class Test extends Model
     protected $primaryKey = 'id';
 
     protected $casts = [
-        'settings' => 'array'
+        'settings' => AsArrayObject::class,
     ];
-
-    public function getSettingsAttribute($value)
-    {
-        return json_decode($value, true);
-    }
 
     public function user()
     {
@@ -42,10 +38,5 @@ class Test extends Model
     public function theme()
     {
         return $this->belongsTo(Theme::class);
-    }
-
-    public function questionCount()
-    {
-        return isset($this->test_settings) ? json_decode($this->test_settings)->question_count : 0;
     }
 }

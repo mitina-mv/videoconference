@@ -101,6 +101,7 @@ export default {
         tests: "Шаблоны тестов",
         assignments: "Тестирования",
         videoconferences: "Видеоконференции",
+        testing: 'Тестирование'
     },
     questions_fields: {
         text: {
@@ -120,6 +121,9 @@ export default {
         },
         theme_id: {
             title: "Тема",
+        },
+        discipline_id: {
+            title: "Дисциплина",
         },
         type: {
             title: "Тип вопроса",
@@ -176,6 +180,18 @@ export default {
                     default: false,
                 },
                 {
+                    id: "time_limit",
+                    name: "Ограничение времени прохождения, (мин)",
+                    type: "number",
+                    default: null,
+                },
+                {
+                    id: "permission_switch_questions",
+                    name: "Разрешено переклюать вопрос",
+                    type: "bool",
+                    default: false,
+                },
+                {
                     id: "fixed_questions",
                     name: "Предустановленные вопросы",
                     type: "bool",
@@ -199,6 +215,12 @@ export default {
         },
         studgroups: {
             title: 'Группы студентов',
+        },
+        mark:  {
+            title: "Оценка",
+        },
+        settings:  {
+            title: "Настройки",
         },
     },
     videoconferences_fields:  {
@@ -237,6 +259,16 @@ export default {
                     name: "Функция «заглушить всех»",
                     type: "bool",
                     default: true,
+                },
+                {
+                    id: "type",
+                    name: "Тип занятия",
+                    type: "dropdown",
+                    values: [
+                        { id: "lecture", name: "Лекция" },
+                        { id: "practice", name: "Практика" },
+                    ],
+                    default: "lecture",
                 },
             ],
         },

@@ -24,6 +24,10 @@ const props = defineProps({
         type: String,
     },
     total: Number,
+    includeControls: {
+        type: Boolean,
+        default: true,
+    },
     includeCrudActions: {
         type: Boolean,
         default: true,
@@ -169,7 +173,7 @@ watch(
     <DataTable
         :value="tableData"
         dataKey="id"
-        :filterDisplay="filters.value ? 'row' : null"
+        :filterDisplay="(Object.keys(filters)['length'] > 0) ? 'row' : null"
         showGridlines
         :loading="loading"
         class="p-datatable-small user-table unvisible-clear-filter-btn"
@@ -223,28 +227,31 @@ watch(
 
         <Column
             :exportable="false"
-            v-if="includeCrudActions"
+            v-if="includeControls"
             header="Управление"
             :style="{ width: '2%' }"
         >
             <template #body="row">
-                <div v-if="(typeof row.data.is_completed !== 'undefined' && !row.data.is_completed) || (typeof row.data.is_completed == 'undefined')">
-                    <a :href="route(routeName + '.edit', row.data.id)">
+                <template v-if="includeCrudActions">
+                    <div v-if="(typeof row.data.is_old !== 'undefined' && !row.data.is_old) || (typeof row.data.is_old == 'undefined')">
+                        <a :href="route(routeName + '.edit', row.data.id)">
+                            <Button
+                                icon="pi pi-pencil"
+                                severity="secondary"
+                                text
+                            ></Button>
+                        </a>
                         <Button
-                            icon="pi pi-pencil"
-                            severity="secondary"
+                            icon="pi pi-trash"
+                            severity="danger"
                             text
+                            @click="confirmDelete(row.data)"
                         ></Button>
-                    </a>
-                    <Button
-                        icon="pi pi-trash"
-                        severity="danger"
-                        text
-                        @click="confirmDelete(row.data)"
-                    ></Button>
-                </div>
+                    </div>
+                </template>
+                
 
-                <div v-if="(typeof row.data.is_active !== 'undefined' && row.data.is_active && labelgroup == 'videoconferences') || (typeof row.data.is_active == 'undefined')">
+                <div v-if="(typeof row.data.is_active !== 'undefined' && row.data.is_active && labelgroup == 'videoconferences')">
                     <a :href="route(routeName + '.room', row.data.session)">
                         <Button
                             icon="pi pi-video"
@@ -253,9 +260,10 @@ watch(
                     </a>
                 </div>
 
-                <div v-if="typeof row.data.is_active !== 'undefined' && !row.data.is_active && typeof row.data.is_completed !== 'undefined' && row.data.is_completed">
+                <div v-if="typeof row.data.is_active !== 'undefined' && !row.data.is_active && typeof row.data.is_old !== 'undefined' && row.data.is_old">
                     отчет
                 </div>
+                <slot name="controls" :data="row.data"></slot>
             </template>
         </Column>
 
@@ -295,5 +303,11 @@ watch(
 .unvisible-clear-filter-btn
     button.p-column-filter-clear-button.p-link.p-hidden-space {
     display: none;
+}
+.p-datatable .p-datatable-thead > tr > th {
+    background: none;
+}
+.p-datatable-table {
+    background: #fff;
 }
 </style>

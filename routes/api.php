@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AnswerController;
 use App\Http\Controllers\Api\AssignmentController;
 use App\Http\Controllers\Api\AssignmentTestlogController;
 use App\Http\Controllers\Api\DisciplineController;
+use App\Http\Controllers\Api\MyAssignmentController;
 use App\Http\Controllers\Api\MyVideoconferenceController;
 use App\Http\Controllers\Api\QuestionController;
 use App\Http\Controllers\Api\StudgroupController;
@@ -60,7 +61,16 @@ Route::group(['as' => 'api.'], function() {
     Route::post('/assignments/themes', [AssignmentController::class, 'themes'])->name('api.assignments.disciplines');
 
     Orion::resource('videoconferences', VideoconferenceController::class)->withSoftDeletes();
-    Orion::resource('my-videoconferences', MyVideoconferenceController::class);
-    Orion::belongsToManyResource('videoconferences', 'studgroups', VideoconferenceStudgroupController::class);
+    Route::post('/videoconferences/{session}/chat', [VideoconferenceController::class, 'sendMessage'])->name('videoconferences.chat');
+    Route::post('/videoconferences/{session}/answer', [VideoconferenceController::class, 'saveAnswer'])->name('videoconferences.answer');
+    Route::post('/videoconferences/{session}/checking', [VideoconferenceController::class, 'addCheckControl'])->name('videoconferences.checking');
+    Route::post('/videoconferences/{session}/action', [VideoconferenceController::class, 'addStudentAction'])->name('videoconferences.action');
     
+    Orion::belongsToManyResource('videoconferences', 'studgroups', VideoconferenceStudgroupController::class);
+
+    // получение данных студента
+    Orion::resource('my-assignments', MyAssignmentController::class)->except(['batchStore', 'batchUpdate', 'store', 'update', 'destroy', 'restore', 'batchRestore', 'batchDestroy']);
+    Route::post('/my-assignments/{testlog_id}/save', [MyAssignmentController::class, 'saveAnswer'])->name('my-assignments.saveAnswer');
+    
+    Orion::resource('my-videoconferences', MyVideoconferenceController::class)->except(['batchStore', 'batchUpdate', 'store', 'update', 'destroy', 'restore', 'batchRestore', 'batchDestroy']);
 });

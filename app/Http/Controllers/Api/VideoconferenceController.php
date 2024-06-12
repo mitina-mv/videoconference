@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Service\TestService;
+use App\Models\Answer;
+use App\Models\Answerlog;
+use App\Models\Question;
+use App\Models\Testlog;
 use App\Models\Videoconference;
 use App\Policies\TruePolicy;
 use Carbon\Carbon;
+use Exception;
 use Orion\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Date;
@@ -90,6 +96,125 @@ class VideoconferenceController extends Controller
             if ($curDate < $nowDate) {
                 abort(422, 'Нельзя редактировать уже прошедшее назначение.');
             }
+        }
+    }
+
+    public function sendMessage(Request $request)
+    {
+        try {
+            $vc = Videoconference::where('session', $request->session)
+            ->first();
+        
+            $messages = $vc->messages;
+            $messages[] = $request->message;
+            $vc->update(['messages' => $messages]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ],
+            422);
+        }
+    }
+
+    public function saveAnswer(Request $request)
+    {
+        try {
+            // Проверяем, существует ли тестирование
+            $testlog = Testlog::where('id', $request->testlog_id)->first();
+
+            if (!$testlog) {
+                throw new Exception('Не найдено тестирование');
+            }
+            $answerlog = Answerlog::where('testlog_id', $testlog->id)
+                ->where('question_id', $request->question_id)
+                ->first();
+
+            if (!$answerlog) {
+                throw new Exception('Не найдено задание');
+            }
+
+            // структурa answers для передачи в сервис
+            $answers = [
+                $request->question_id => [
+                    'answerlog_id' => $answerlog->id,
+                    'value' => $request->answer
+                ]
+            ];
+
+            $testService = new TestService();
+
+            // cохраняем ответы через сервис
+            $testService->saveAnswers($request->testlog_id, $answers);
+
+            // считаем текущую оценку за тест
+            $questionIds = $testlog->assignment->test->settings['question_ids'];
+            $questionMarks = Question::whereIn('id', $questionIds)
+                ->select('mark')
+                ->get()
+                ->pluck('mark')
+                ->toArray();
+            $testAmount = array_sum($questionMarks);
+            $answerlogMarks = Answerlog::where('testlog_id', $testlog->id)
+                ->whereIn('question_id', $questionIds)
+                ->pluck('mark')
+                ->toArray();
+            $testMark = array_sum($answerlogMarks);
+
+            $testlog->update([
+                'mark' => round(($testMark / $testAmount) * 100, 2),
+            ]);
+
+            return response()->json([
+                'message' => 'Ответ сохранен успешно'
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+
+    public function addCheckControl(Request $request)
+    {
+        try {
+            $vc = Videoconference::where('session', $request->session)
+            ->first();
+        
+            $metrics = $vc->metrics;
+            $metrics['count_check'] += 1;
+            $vc->update(['metrics' => $metrics]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ],
+            422);
+        }
+    }
+
+    public function addStudentAction(Request $request)
+    {
+        try {
+            $vc = Videoconference::where('session', $request->session)
+            ->first();
+        
+            $metrics = $vc->metrics;
+
+            if (empty($metrics['students'][$request->user_id])) {
+                $metrics['students'][$request->user_id] = [
+                    'count_check' => 0,
+                    'count_message' => 0,
+                    'count_hand' => 0,
+                ];
+            }
+
+            $metrics['students'][$request->user_id]["count_{$request->action}"] += 1;
+            $vc->update(['metrics' => $metrics]);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ],
+            422);
         }
     }
 }

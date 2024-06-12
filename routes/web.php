@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\ConferenceController;
+use App\Http\Controllers\MyAssignmentController;
 use App\Http\Controllers\MyVideoconferenceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionController;
@@ -70,16 +71,19 @@ Route::group(['prefix' => 'assignments'], function () {
     Route::get('/', [AssignmentController::class, 'index'])->name('assignments.index');
     Route::get('/edit/{id}', [AssignmentController::class, 'edit'])->name('assignments.edit');
     Route::get('/new', [AssignmentController::class, 'create'])->name('assignments.new');
+
+    Route::get('/my', [MyAssignmentController::class, 'index'])->name('assignments.my');
+    Route::get('/testing/{testlog_id}', [MyAssignmentController::class, 'testing'])->name('assignments.testing');
 })->middleware(['auth']);
 
-Route::group(['prefix' => 'videoconferences'], function () {
+Route::group(['prefix' => 'videoconferences', 'middleware' => ['auth']], function () {
     Route::get('/', [VideoconferenceController::class, 'index'])->name('videoconferences.index');
     Route::get('/edit/{id}', [VideoconferenceController::class, 'edit'])->name('videoconferences.edit');
     Route::get('/new', [VideoconferenceController::class, 'create'])->name('videoconferences.new');
     Route::get('/room/{session}', [VideoconferenceController::class, 'room'])->name('videoconferences.room');
     
     Route::get('/my', [MyVideoconferenceController::class, 'index'])->name('videoconferences.my');
-})->middleware(['auth']);
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

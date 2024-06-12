@@ -26,6 +26,7 @@ class TestController extends Controller
     {
         return Inertia::render('Test/Form', [
             'id' => $id,
+            'backLink' => 'tests.index',
             'disciplines' => Discipline::all(),
         ]);
     }
@@ -33,8 +34,8 @@ class TestController extends Controller
     public function create()
     {
         return Inertia::render('Test/Form', [
+            'backLink' => 'tests.index',
             'disciplines' => Discipline::all(),
-            
         ]);
     }
 }

@@ -55,6 +55,7 @@ class AssignmentController extends Controller
 
         $query = parent::buildIndexFetchQuery($request, $requestedRelations);
         $query->where('user_id', '=', request()->user()->id);
+        $query->where('vc_id', '=', null);
 
         if (!empty($fitlerFields) 
             && ($key = array_search('date', $fitlerFields)) !== false

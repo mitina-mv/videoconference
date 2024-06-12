@@ -9,59 +9,63 @@ import toastService from "@/Services/toastService";
 import Calendar from "primevue/calendar";
 import Dropdown from "primevue/dropdown";
 import FilterTable from "@/Components/Tables/FilterTable.vue";
+import Button from "primevue/button";
 
 const props = defineProps({
-    disciplines: [Array, null]
+    disciplines: [Array, null],
 });
 
 const tableColumns = ref({
     name: {
         code: "name",
         sort: true,
-        title: labels.videoconferences_fields.name.title,
+        title: labels.assignments_fields.themes.title,
         style: {
-            width: "10%",
+            width: "20%",
         },
     },
     date: {
         code: "date",
         sort: false,
-        title: labels.videoconferences_fields.date.title,
+        title: labels.assignments_fields.date.title,
         style: {
             width: "23%",
+        },
+    },
+    mark: {
+        code: "mark_value",
+        sort: false,
+        title: labels.assignments_fields.mark.title,
+        style: {
+            width: "3%",
         },
     },
     settings: {
         sort: false,
         code: "settings",
-        title: labels.videoconferences_fields.settings.title,
+        title: labels.assignments_fields.settings.title,
         type: "html",
         style: {
-            width: "55%",
+            width: "45%",
         },
     },
 });
 const tableData = ref(null);
 const totalPage = ref(null);
-const years = ref(props?.years || null);
 const loadData = ref(false);
-const dateFilter = ref(new Date())
-const disciplineFilter = ref(null)
+const dateFilter = ref(new Date());
+const disciplineFilter = ref(null);
 
 onMounted(async () => {
-    disciplineFilter.value = props.disciplines[0].id
+    disciplineFilter.value = props.disciplines[0].id;
     await fetchData();
 });
 
 const fetchData = async (filters = null, page = null, limit = null) => {
     let params = {
         includes: [
-            { relation: "user" },
+            { relation: "assignment.user" },
             { relation: "assignment.test.theme" },
-        ],
-        sort: [
-            { field: "date", direction: "asc" },
-            { field: "name", direction: "asc" },
         ],
     };
 
@@ -74,17 +78,17 @@ const fetchData = async (filters = null, page = null, limit = null) => {
         params.limit = limit;
     }
 
-    let url = "/api/my-videoconferences/search";
+    let url = "/api/my-assignments/search";
 
     if (dateFilter.value) {
-        url += `?date=${dateFilter.value.toISOString()}`
+        url += `?date=${dateFilter.value.toISOString()}`;
     }
 
     if (disciplineFilter.value !== null) {
         if (!dateFilter.value) url += "?";
         else url += "&";
 
-        url += `discipline=${disciplineFilter.value}`
+        url += `discipline=${disciplineFilter.value}`;
     }
 
     try {
@@ -102,37 +106,49 @@ const fetchData = async (filters = null, page = null, limit = null) => {
 
 const processTableData = (data) => {
     data.forEach((element, index) => {
-        let sessionString = `${labels.videoconferences_fields.session.title}: ${element.session}`;
-        let testString = `,<br />Тестирование: ${element.assignment ? 'да' : "нет"}`;
-        let speakerString = `,<br />Проводит: ${element.user.full_name}`;
-        let themeString = `,<br />Тема: ${element.assignment ? element.assignment.test.theme.name : "нет"}`;
+        data[index].name = element.assignment.test.theme.name;
+        data[index].date = element.assignment.date;
+        data[index].mark_value = element.assignment.mark || 'Нет';
 
-        data[index].settings = `${sessionString}${testString}${speakerString}${themeString}`
+        let speakerString = `Проводит: ${element.assignment.user.full_name}`;
+        data[index].settings = `${speakerString}`;
+
+        let settings = element.assignment.test.settings;
+
+        if (Object.keys(settings).length > 0) {
+            let settingsString = labels.test_fields.settings.values
+                .filter((a) => settings.hasOwnProperty(a.id))
+                .map((a) => {
+                    let val =
+                        a.type === "bool"
+                            ? settings[a.id]
+                                ? "да"
+                                : "нет"
+                            : settings[a.id];
+                    return `${a.name}: ${val}`;
+                })
+                .join(",<br />");
+            data[index].settings += ",<br />" + settingsString;
+        }
     });
 };
 
-watch(
-    dateFilter,
-    () => {
-        fetchData();
-    },
-);
+watch(dateFilter, () => {
+    fetchData();
+});
 
-watch(
-    disciplineFilter,
-    () => {
-        fetchData();
-    },
-);
+watch(disciplineFilter, () => {
+    fetchData();
+});
 </script>
 
 <template>
-    <Head :title="labels.page_titles.videoconferences" />
+    <Head :title="labels.page_titles.assignments" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ labels.page_titles.videoconferences }}
+                {{ labels.page_titles.assignments }}
             </h2>
         </template>
 
@@ -155,16 +171,30 @@ watch(
                             iconDisplay="input"
                             dateFormat="dd.mm.yy"
                             placeholder="Выберите дату"
+                            :numberOfMonths="2"
                         />
                     </div>
                     <filter-table
                         :tableData="tableData"
                         :columns="tableColumns"
-                        labelgroup="videoconferences"
+                        labelgroup="assignments"
                         @fetchData="fetchData"
                         :total="totalPage"
-                        routeName="videoconferences"
-                    ></filter-table>
+                        routeName="assignments"
+                        :includeCrudActions="false"
+                    >
+                        <template #controls="{ data }">
+                            <a
+                                :href="route('assignments.testing', data.id)"
+                                v-if="data.assignment.is_active && !data.mark && !data.assignment.vc_id"
+                            >
+                                <Button icon="pi pi-play" text />
+                            </a>
+                            <a v-if="data.path">
+                                <Button icon="pi pi-file-check" text severity="info" size="large" />
+                            </a>
+                        </template>
+                    </filter-table>
                 </template>
             </div>
         </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Requests\ThemeRequest;
 use App\Models\Theme;
 use App\Policies\AdminPolicy;
+use App\Policies\TruePolicy;
 use Orion\Concerns\DisablePagination;
 use Orion\Http\Controllers\Controller;
 
@@ -14,7 +15,7 @@ class ThemeController extends Controller
     use DisablePagination;
 
     protected $model = Theme::class;
-    protected $policy = AdminPolicy::class;
+    protected $policy = TruePolicy::class;
     protected $request = ThemeRequest::class;
 
     public function filterableBy() : array
