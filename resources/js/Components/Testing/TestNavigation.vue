@@ -38,7 +38,6 @@ const previousQuestion = () => {
 };
 
 const nextQuestion = () => {
-    console.log(props.curQuestionIndex);
     if (props.curQuestionIndex < props.questions.length - 1) {
         emit("navigate", props.curQuestionIndex + 1);
     }

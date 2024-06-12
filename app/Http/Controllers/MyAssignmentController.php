@@ -116,7 +116,8 @@ class MyAssignmentController extends Controller
         return Inertia::render('Assignment/Testing', [
             'questions' => $questionsPublish,
             'settings' => $testSettings,
-            'answerlogs' => $answerlogs
+            'answerlogs' => $answerlogs,
+            'testlog_id' => $testlog->id,
         ]);
     }
 
@@ -125,23 +126,5 @@ class MyAssignmentController extends Controller
         return Inertia::render('Assignment/Testing', [
             'error' => $message,
         ]);
-    }
-
-    public function saveAnswer(Request $request)
-    {
-        try {
-            $this->validate($request, [
-                'testlog_id' => 'required|integer',
-                'answers' => 'required|array',
-            ]);
-
-            $this->testService->saveAnswers($request->testlog_id, $request->answers);
-
-            return response()->json(['message' => 'Ответы успешно сохранены']);
-        } catch (Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ], 422);
-        }
     }
 }

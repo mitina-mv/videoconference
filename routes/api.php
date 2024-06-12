@@ -70,5 +70,7 @@ Route::group(['as' => 'api.'], function() {
 
     // получение данных студента
     Orion::resource('my-assignments', MyAssignmentController::class)->except(['batchStore', 'batchUpdate', 'store', 'update', 'destroy', 'restore', 'batchRestore', 'batchDestroy']);
+    Route::post('/my-assignments/{testlog_id}/save', [MyAssignmentController::class, 'saveAnswer'])->name('my-assignments.saveAnswer');
+    
     Orion::resource('my-videoconferences', MyVideoconferenceController::class)->except(['batchStore', 'batchUpdate', 'store', 'update', 'destroy', 'restore', 'batchRestore', 'batchDestroy']);
 });

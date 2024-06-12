@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Testlog;
 use App\Policies\TruePolicy;
+use App\Http\Service\TestService;
 use Carbon\Carbon;
 use Orion\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
@@ -67,5 +68,25 @@ class MyAssignmentController extends Controller
         }
 
         return $query;
+    }
+
+    public function saveAnswer(Request $request)
+    {
+        try {
+            $this->validate($request, [
+                'testlog_id' => 'required|integer',
+                'answers' => 'required|array',
+            ]);
+
+            $testService = new TestService();
+
+            $testService->saveAnswers($request->testlog_id, $request->answers);
+
+            return response()->json(['message' => 'Ответы успешно сохранены']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 422);
+        }
     }
 }

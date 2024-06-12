@@ -53,12 +53,14 @@ import TestNavigation from "@/Components/Testing/TestNavigation.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import labels from "@/locales/ru.js";
 import Finish from "@/Components/Testing/Finish.vue";
+import toastService from "@/Services/toastService";
 
 const props = defineProps({
     error: [String, null],
     questions: [Array, null],
     settings: [Object, null],
     answerlogs: [Object, null],
+    testlog_id: Number,
 });
 
 const answers = ref({});
@@ -89,8 +91,29 @@ const cancelFinish = () => {
     finishFlag.value = false;
 };
 
-const sendAnswers = () => {
-    console.log("Test finished", answers.value);
+const sendAnswers = async () => {
+    console.log(props.testlog_id);
+    try {
+        await axios.post(
+            route("api.my-assignments.saveAnswer", {
+                testlog_id: props.testlog_id,
+            }),
+            {
+                testlog_id: props.testlog_id,
+                answers: answers.value,
+            }
+        );
+
+        toastService.showSuccessToast(
+            "Сохранение ответов",
+            "Ответы успешно сохранены"
+        );
+    } catch (error) {
+        toastService.showErrorToast(
+            "Сохранение ответов",
+            error.response.data.error
+        );
+    }
 };
 
 onMounted(() => {
