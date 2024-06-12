@@ -39,8 +39,8 @@ const send = () => {
 <template>
     <div class="finish-block">
         <h3 class="mb-3">Подтвердите Ваши ответы</h3>
-        <div class="question mb-1" v-for="question in questions" :key="question.id">
-            <h4 class="mb-2">{{ question.text }}</h4>
+        <div class="question mb-2" v-for="question in questions" :key="question.id">
+            <h4 class="mb-1">{{ question.text }}</h4>
             <ul>
                 <li
                     v-for="(ans, ind) in visibleAnswers(question)"
