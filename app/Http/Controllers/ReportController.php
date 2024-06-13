@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\Assignment;
 use App\Models\Testlog;
 use Inertia\Inertia;
 
@@ -8,10 +9,10 @@ class ReportController extends Controller
 {
     public function student(string $testlog_id)
     {
+        $user = request()->user();
         $testlog = Testlog::where('id', $testlog_id)
             ->with([
                 'assignment',
-                'assignment.videoconference',
                 'assignment.user', 
                 'answerlogs', 
                 'answerlogs.answers', 
@@ -25,6 +26,10 @@ class ReportController extends Controller
 
         if(!$testlog->mark) {
             return $this->renderError('Reports/Student', 'Вы еще не проходили этот тест');
+        }
+
+        if($testlog->user_id != $user->id) {
+            return $this->renderError('Reports/Student', 'Вы не можете просматривать этот отчет');
         }
 
         $questions = [];
@@ -55,10 +60,76 @@ class ReportController extends Controller
             'testlog' => $testlog,
             'user' => request()->user(),
             'questions' => $questions,
-            'vc' => $testlog->assignment->videoconference,
             'backLink' => 'assignments.my'
         ]);
     }
+
+    public function assignment(string $assignment_id)
+    {
+        $assignment = Assignment::where('id', $assignment_id)
+            ->with(['testlogs.user.studgroup', 'test'])
+            ->first();
+        $user = request()->user();
+
+        /* if (!$assignment) {
+            return $this->renderError('Reports/Assignment', 'Назначение не найдено');
+        }
+
+        if($assignment->user_id != $user->id) {
+            return $this->renderError('Reports/Assignment', 'Вы не можете просматривать этот отчет');
+        } */
+
+        $groupedData = [];
+        $marks = [];
+
+        foreach ($assignment->testlogs as $testlog)
+        {
+            $group = $testlog->user->studgroup->name ?? 'Без группы';
+
+            if (!isset($groupedData[$group])) {
+                $groupedData[$group] = [];
+            }
+
+            $groupedData[$group][] = [
+                'full_name' => $testlog->user->full_name,
+                'mark' => $testlog->mark == null ? 'Нет' : $testlog->mark
+            ];
+
+            if(!empty($testlog->mark)) {
+                $marks[] = $testlog->mark;
+            }
+        }
+
+        if(count($marks) == 0) {
+            return $this->renderError('Reports/Assignment', 'Студенты еще не прошли это текстирование.');
+        }
+
+        // метрики
+        $avgMark = round(array_sum($marks) / count($marks), 2);
+        $deviationMarks = array_map(fn($mark) => pow($mark - $avgMark, 2), $marks);
+        $deviation = round( sqrt( array_sum($deviationMarks) / count($marks) ), 2);
+
+        $theme = $assignment->test->theme()->with('discipline')->first();
+
+        return Inertia::render('Reports/Assignment', [
+            'test' => [
+                'name' => $assignment->test->name,
+                'discipline' => $theme->discipline->name,
+                'theme' => $theme->name
+            ],
+            'assignment' =>  $assignment,
+            'test_settings' => $assignment->test->settings,
+            'groups' => $groupedData,
+            'user' => request()->user(),
+            'vc' => $assignment->videoconference()->first(),
+            'metrics' => [
+                'avg_mark' => $avgMark,
+                'deviation_mark' => $deviation
+            ],
+            'backLink' => 'assignments.index'
+        ]);
+    }
+
 
     private function renderError(string $page, string $message)
     {
