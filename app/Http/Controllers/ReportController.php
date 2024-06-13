@@ -189,7 +189,8 @@ class ReportController extends Controller
                     'p' => 1,
                 ],
                 'group' => $group,
-                'mark' => '-'
+                'mark' => '-',
+                'count_check' => $student_actions['count_check']
             ];
         }
 
@@ -215,6 +216,7 @@ class ReportController extends Controller
                 }
 
                 $students[$testlog->user_id]['engagement']['p'] = $p;
+                $students[$testlog->user_id]['testlog_id'] = $testlog->id;
             }
 
             // метрики
@@ -261,11 +263,17 @@ class ReportController extends Controller
                 'count_check' => $metrics->count_check,
                 'studgroups' => array_column($vc->studgroups->toArray(), 'name'),
                 'date' => $vc->date,
-                'user' => $user->full_name
+                'user' => $user->full_name,
+                'flag_mes' => $vc->messages == null
             ],
             'groups' => $groupData,
         ]);
 
+    }
+
+    public function detail() {
+        return Inertia::render('Reports/StudentDetail', [
+        ]);
     }
 
 

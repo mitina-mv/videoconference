@@ -29,6 +29,8 @@ const props = defineProps({
                     :vc="vc"
                     :groups="groups"
                     :inctuleHeader="false"
+                    :includeComments="true"
+                    :includeHrefDetail="true"
                 ></Videoconference>
             </div>
         </div>
