@@ -161,7 +161,7 @@ class VideoconferenceController extends Controller
             $testMark = array_sum($answerlogMarks);
 
             $testlog->update([
-                'mark' => round(($testMark / $testAmount) * 100, 2),
+                'mark' => round(($testMark / $testAmount) * env('MAXIMUM_SCOPE'), 2),
             ]);
 
             return response()->json([

@@ -40,6 +40,7 @@ const testInfoFields = [
 <template>
     <h2 v-if="inctuleHeader">Результаты тестирования: {{ test.name }}</h2>
     <div class="test-info">
+        <h3>Основные данные</h3>
         <p v-for="(field, index) in testInfoFields" :key="index">
             <b>{{ field.label }}: </b>
             <span>{{ field.value }}</span>

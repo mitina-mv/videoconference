@@ -17,12 +17,12 @@ const props = defineProps({
 </script>
 
 <template>
-    <Head :title="`Результаты тестирования: ${test.name}`" />
+    <Head :title="`Результаты тестирования: ${test ? test.name : 'ошибка'}`" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Результаты тестирования: {{ test.name }}
+                Результаты тестирования: {{ test ? test.name : 'ошибка' }}
             </h2>
         </template>
 
