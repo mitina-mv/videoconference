@@ -17,19 +17,9 @@ class PDFService
         $this->client = new Client();
     }
 
-    public function make(string $url, string $filename = null)
+    public function make($html, string $filename = null)
     {
         try {
-            $response = $this->client->get(env('PDF_SELF_URL').$url);
-
-            dd($response);
-
-            if ($response->getStatusCode() !== 200) {
-                throw new Exception('Failed to load the page');
-            }
-
-            $html = $response->getBody()->getContents();
-
             $mpdf = new Mpdf();
 
             $mpdf->WriteHTML($html);

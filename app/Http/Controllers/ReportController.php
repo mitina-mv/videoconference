@@ -6,6 +6,7 @@ use App\Models\Assignment;
 use App\Models\Testlog;
 use App\Models\User;
 use App\Models\Videoconference;
+use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
 
 class ReportController extends Controller
@@ -189,7 +190,8 @@ class ReportController extends Controller
                 ],
                 'group' => $group,
                 'mark' => '-',
-                'count_check' => $student_actions['count_check']
+                'count_check' => $student_actions['count_check'],
+                'testlog_id' => null
             ];
         }
 
@@ -197,21 +199,20 @@ class ReportController extends Controller
             $marks = [];
             $test = $vc->assignment->test;
 
-            foreach($vc->assignment->testlogs as $testlog)
-            {
-                if(!isset($students[$testlog->user_id])) {
+            foreach ($vc->assignment->testlogs as $testlog) {
+                if (!isset($students[$testlog->user_id])) {
                     continue;
                 }
-                
+
                 $students[$testlog->user_id]['mark'] = $testlog->mark ? $testlog->mark : 'Нет';
                 $countAnswers = $testlog->answerlogs()->where('mark', '!=', null)->count();
-                if($countAnswers > 0) {
+                if ($countAnswers > 0) {
                     $p = $test->settings->count_questions / $countAnswers;
                 } else {
                     $p = 0;
                 }
 
-                if(!empty($testlog->mark)) {
+                if (!empty($testlog->mark)) {
                     $marks[] = $testlog->mark;
                     $p = 0;
                 }
@@ -223,58 +224,76 @@ class ReportController extends Controller
             // метрики
             $avgMark = null;
             $deviation = null;
-            if(count($marks) > 0) {
+            if (count($marks) > 0) {
                 $avgMark = round(array_sum($marks) / count($marks), 2);
                 $deviationMarks = array_map(fn ($mark) => pow($mark - $avgMark, 2), $marks);
                 $deviation = round(sqrt(array_sum($deviationMarks) / count($marks)), 2);
             }
         }
 
-        foreach($students as &$student)
-        {
+        foreach ($students as &$student) {
             $engagement = $student['engagement'];
-            $ai = $engagement['a'] * env('THRESHOLD_COUNT_CHECK'); 
-            $pi = $engagement['p'] * env('THRESHOLD_COUNT_QUESTION'); 
-            $ci = $engagement['c'] * env('THRESHOLD_COUNT_MESSAGE'); 
-            $hi = $engagement['h'] * env('THRESHOLD_COUNT_HAND'); 
+            $ai = $engagement['a'] * env('THRESHOLD_COUNT_CHECK');
+            $pi = $engagement['p'] * env('THRESHOLD_COUNT_QUESTION');
+            $ci = $engagement['c'] * env('THRESHOLD_COUNT_MESSAGE');
+            $hi = $engagement['h'] * env('THRESHOLD_COUNT_HAND');
             $student['engagement'] = round($ai + $pi + $ci + $hi, 2);
 
             $groupData[$student['group']][] = $student;
         }
 
 
+        $comments = [];
         $testResult = null;
-        if($vc->assignment) {
+        if ($vc->assignment) {
             $theme = $vc->assignment->test->theme()->with('discipline')->first();
 
             $testResult = [
-                'name' => $vc->assignment->test->name,
-                'discipline' => $theme->discipline->name,
-                'theme' => $theme->name,
-                'avg_mark' => $avgMark,
-                'deviation_mark' => $deviation
+                ['label' => 'Название теста', 'value' => $vc->assignment->test->name],
+                ['label' => 'Дисциплина', 'value' => $theme->discipline->name],
+                ['label' => 'Тема', 'value' =>  $theme->name],
+                ['label' => 'Средняя оценка', 'value' => $avgMark],
+                ['label' => 'Станндартное отклонение баллов', 'value' => $deviation],
             ];
+        } else {
+            $comments[] = "Вы не использовали интерактиные опросы, поэтому оценка вовлеченности не может в полной мере отражать реальные итоги занятия. При расчете баллы за тестирование проставлены на максимум для каждого студента. Интерактивные опросы позволяют сильнее вовлечь аудиторию в процесс обучения, попробуйте!";
         }
 
-        return Inertia::render('Reports/Videoconference', [
-            'test' => $testResult,
+        if ($vc->messages == null) {
+            $comments[] = "Вы не использовали чат, поэтому оценка вовлеченности не может в полной мере отражать реальные итоги занятия. При расчете баллы за участие в чате проставлены на максимум для каждого студента. Чат - инструмент для моментального взаимодействия с аудиторией. Может быть очень полезным!";
+        }
+
+        if ($metrics->count_check == 0) {
+            $comments[] = "Вы не использовали проверки присуствия, поэтому оценка вовлеченности не может в полной мере отражать реальные итоги занятия. При расчете баллы за проверки присутствия проставлены на максимум для каждого студента. Проверки присуствия помогают понять, не потеряна ли активная аудитория. Попробуйте в следующий раз!";
+        }
+
+        return View::make('reports.vc', [
+            'testInfoFields' => $testResult,
             'vc' => [
                 'name' => $vc->name,
-                'type' => $vc->settings->type == 'lecture' ? 'Лекция' : 'Практика',
                 'count_check' => $metrics->count_check,
-                'studgroups' => array_column($vc->studgroups->toArray(), 'name'),
-                'date' => $vc->date,
-                'user' => $user->full_name,
                 'flag_mes' => $vc->messages == null
             ],
             'groups' => $groupData,
-        ]);
-
+            'inctuleHeader' => true,
+            'includeComments' => true,
+            'includeHrefDetail' => false,
+            'vcInfoFields' => [
+                ['label' => 'Название', 'value' => $vc->name],
+                ['label' => 'Дата проведения', 'value' => $vc->date],
+                ['label' => 'Тип', 'value' => $vc->settings->type == 'lecture' ? 'Лекция' : 'Практика'],
+                ['label' => 'Преподаватель', 'value' => $user->full_name],
+                ['label' => 'Количество проверок присуствия', 'value' => $metrics->count_check],
+                ['label' => 'Группы', 'value' => implode(', ', array_column($vc->studgroups->toArray(), 'name'))],
+            ],
+            'comments' => $comments,
+            'error' => null
+        ])->render();
     }
 
-    public function detail() {
-        return Inertia::render('Reports/StudentDetail', [
-        ]);
+    public function detail()
+    {
+        return Inertia::render('Reports/StudentDetail', []);
     }
 
     private function renderError(string $page, string $message)

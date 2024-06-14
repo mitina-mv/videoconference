@@ -239,12 +239,12 @@ class VideoconferenceController extends Controller
         ]);
 
         // генерация pdf
-        $pdfservice = new PDFService();
+        /* $pdfservice = new PDFService();
         $path = $pdfservice->make('/report/videoconference/' . $vc->id);
 
         $vc->update([
             'path' => $path,
-        ]);
+        ]); */
 
         return response()->noContent();
     }
