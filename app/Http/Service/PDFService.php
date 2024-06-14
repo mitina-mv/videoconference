@@ -30,10 +30,10 @@ class PDFService
                 $filename = Str::slug($filename, '-') . '.pdf';
             }
 
-            $filePath = 'reports/' . $filename;
+            $filePath = 'public/reports/' . $filename;
 
-            if (!Storage::exists('reports')) {
-                Storage::makeDirectory('reports');
+            if (!Storage::exists('public/reports')) {
+                Storage::makeDirectory('public/reports');
             }
 
             Storage::put($filePath, $mpdf->Output('', 'S'));

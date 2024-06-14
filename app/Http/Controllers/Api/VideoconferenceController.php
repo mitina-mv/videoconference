@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\ReportController;
 use App\Http\Service\PDFService;
 use App\Http\Service\TestService;
 use App\Models\Answer;
@@ -232,19 +233,17 @@ class VideoconferenceController extends Controller
             ], 404);
         }
 
-        dump($vc);
-
         $vc->update([
             'is_completed' => true,
         ]);
 
         // генерация pdf
-        /* $pdfservice = new PDFService();
-        $path = $pdfservice->make('/report/videoconference/' . $vc->id);
+        $pdfservice = new PDFService();
+        $path = $pdfservice->make((new ReportController())->videoconference($vc->id));
 
         $vc->update([
             'path' => $path,
-        ]); */
+        ]);
 
         return response()->noContent();
     }

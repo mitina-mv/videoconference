@@ -3,14 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Service\OpenViduService;
-use App\Http\Service\PDFService;
 use App\Http\Service\TestlogService;
 use App\Models\Answerlog;
 use App\Models\Question;
 use App\Models\Testlog;
 use App\Models\Videoconference;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
@@ -26,8 +23,6 @@ class VideoconferenceController extends Controller
     
     public function index()
     {
-        $pdfservice = new PDFService();
-        $pdfservice->make((new ReportController())->videoconference(9));
         $user = auth()->user();
         // забираем года и количество назначенных вк
         $arYears = Videoconference::where([

@@ -9,13 +9,6 @@
             padding: 0;
             margin: 0;
         }
-
-        .d-grid.grid-col-2.mb-3.gap-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1em;
-        }
-
         p {
             margin: .2em 0;
         }
@@ -67,7 +60,7 @@
             </div>
 
             <h3>Сводная таблица</h3>
-            <table class="mt-3" style="width: fit-content">
+            <table class="mt-3" style="width: 100%">
                 <thead>
                     <tr>
                         <th>ФИО студента</th>

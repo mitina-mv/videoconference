@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Contracts\Cache\Store;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Videoconference extends Model
 {
@@ -23,7 +25,7 @@ class Videoconference extends Model
         'session', // uuid
         'messages',
         'metrics',
-        'metrics',
+        'path',
         'is_completed',
     ];
 
@@ -33,9 +35,11 @@ class Videoconference extends Model
         'messages' => AsArrayObject::class,
         'metrics' => AsArrayObject::class,
         'date' => 'datetime',
+        'path' => 'string'
     ];
 
-    protected $appends = ['is_old', 'is_active'];
+    protected $appends = ['is_old', 'is_active', 'path_full'];  
+    // protected $appends = ['is_old', 'is_active'];
 
     public function getIsOldAttribute()
     {
@@ -57,6 +61,11 @@ class Videoconference extends Model
     public function getDateAttribute($value)
     {
         return Carbon::parse($value)->timezone('Europe/Moscow')->format('d.m.Y H:i');
+    }
+
+    public function getPathFullAttribute()
+    {
+        return $this->path ? asset(Storage::url($this->path)) : null;
     }
 
     // relationships

@@ -22,6 +22,7 @@ class ReportController extends Controller
                 'answerlogs.answers',
                 'answerlogs.question'
             ])
+            ->withTrashed()
             ->first();
 
         if (!$testlog) {
@@ -62,7 +63,7 @@ class ReportController extends Controller
         return Inertia::render('Reports/Student', [
             'test' => $testlog->assignment->test()->select('name')->first(),
             'testlog' => $testlog,
-            'user' => request()->user(),
+            'user' => $user,
             'questions' => $questions,
             'backLink' => 'assignments.my'
         ]);
@@ -72,6 +73,7 @@ class ReportController extends Controller
     {
         $assignment = Assignment::where('id', $assignment_id)
             ->with(['testlogs.user.studgroup', 'test'])
+            ->withTrashed()
             ->first();
         $user = request()->user();
 
@@ -137,20 +139,9 @@ class ReportController extends Controller
     {
         $vc = Videoconference::where('id', $vc_id)
             ->with(['studgroups', 'assignment.test', 'assignment.testlogs'])
+            ->withTrashed()
             ->first();
         $user = request()->user();
-
-        // if (!$vc) {
-        //     return $this->renderError('Reports/Videoconference', 'Назначение не найдено');
-        // }
-
-        // if($vc->user_id != $user->id) {
-        //     return $this->renderError('Reports/Videoconference', 'Вы не можете просматривать этот отчет');
-        // }
-
-        // if(!$vc->is_completed) {
-        //     return $this->renderError('Reports/Videoconference', 'Эта видеоконференция не состоялась');
-        // }
 
         $metrics = $vc->metrics;
 
