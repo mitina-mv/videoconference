@@ -65,6 +65,7 @@ Route::group(['as' => 'api.'], function() {
     Route::post('/videoconferences/{session}/answer', [VideoconferenceController::class, 'saveAnswer'])->name('videoconferences.answer');
     Route::post('/videoconferences/{session}/checking', [VideoconferenceController::class, 'addCheckControl'])->name('videoconferences.checking');
     Route::post('/videoconferences/{session}/action', [VideoconferenceController::class, 'addStudentAction'])->name('videoconferences.action');
+    Route::post('/videoconferences/{session}/end', [VideoconferenceController::class, 'endCall'])->name('videoconferences.end');
     
     Orion::belongsToManyResource('videoconferences', 'studgroups', VideoconferenceStudgroupController::class);
 

@@ -316,7 +316,9 @@ svg.w-20.h-20.fill-current.text-gray-500.guest-logo {
 .guest-main.border-main {
     border: 1px solid #dee2e6;
 }
-
+.form-control__add-link {
+    color: var(--gray-400);
+}
 .moderator-lecture-room {
     .room {
         position: relative;

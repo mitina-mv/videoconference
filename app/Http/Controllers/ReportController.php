@@ -139,20 +139,19 @@ class ReportController extends Controller
             ->first();
         $user = request()->user();
 
-        // if (!$vc) {
-        //     return $this->renderError('Reports/Videoconference', 'Назначение не найдено');
-        // }
+        if (!$vc) {
+            return $this->renderError('Reports/Videoconference', 'Назначение не найдено');
+        }
 
-        // if($vc->user_id != $user->id) {
-        //     return $this->renderError('Reports/Videoconference', 'Вы не можете просматривать этот отчет');
-        // }
+        if($vc->user_id != $user->id) {
+            return $this->renderError('Reports/Videoconference', 'Вы не можете просматривать этот отчет');
+        }
 
-        // if(!$vc->is_completed) {
-        //     return $this->renderError('Reports/Videoconference', 'Эта видеоконференция не состоялась');
-        // }
+        if(!$vc->is_completed) {
+            return $this->renderError('Reports/Videoconference', 'Эта видеоконференция не состоялась');
+        }
 
         $metrics = $vc->metrics;
-        $test = $vc->assignment->test;
 
         // подготовка данных о студентах
         if (empty($metrics->students)) {
@@ -196,6 +195,8 @@ class ReportController extends Controller
 
         if ($vc->assignment && $vc->assignment->testlogs) {
             $marks = [];
+            $test = $vc->assignment->test;
+
             foreach($vc->assignment->testlogs as $testlog)
             {
                 if(!isset($students[$testlog->user_id])) {

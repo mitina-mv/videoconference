@@ -48,24 +48,24 @@ const vcInfoFields = [
 
 const testInfoFields = [
     {
-        label: "Название тесат",
-        value: props.test.name,
+        label: "Название теста",
+        value: props?.test?.name,
     },
     {
         label: "Дисциплина",
-        value: props.test.discipline,
+        value: props?.test?.discipline,
     },
     {
         label: "Тема",
-        value: props.test.theme,
+        value: props?.test?.theme,
     },
     {
         label: "Средняя оценка",
-        value: props.test.avg_mark,
+        value: props?.test?.avg_mark,
     },
     {
         label: "Станндартное отклонение баллов",
-        value: props.test.deviation_mark,
+        value: props?.test?.deviation_mark,
     },
 ];
 
@@ -139,7 +139,7 @@ const comments = computed(() => {
                 <tr v-for="(student, id) in group" :key="id">
                     <td width="300px">
                         <a
-                            v-if="includeHrefDetail"
+                            v-if="includeHrefDetail && student.testlog_id"
                             :href="
                                 route('report.detail', {
                                     testlog_id: student.testlog_id,

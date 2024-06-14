@@ -249,16 +249,6 @@ watch(
                         ></Button>
                     </div>
                 </template>
-                
-
-                <div v-if="(typeof row.data.is_active !== 'undefined' && row.data.is_active && labelgroup == 'videoconferences')">
-                    <a :href="route(routeName + '.room', row.data.session)">
-                        <Button
-                            icon="pi pi-video"
-                            text
-                        ></Button>
-                    </a>
-                </div>
 
                 <div v-if="typeof row.data.is_active !== 'undefined' && !row.data.is_active && typeof row.data.is_old !== 'undefined' && row.data.is_old">
                     отчет

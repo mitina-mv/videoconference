@@ -9,6 +9,7 @@ import toastService from "@/Services/toastService";
 import Calendar from "primevue/calendar";
 import Dropdown from "primevue/dropdown";
 import FilterTable from "@/Components/Tables/FilterTable.vue";
+import Button from "primevue/button";
 
 const props = defineProps({
     disciplines: [Array, null]
@@ -164,7 +165,18 @@ watch(
                         @fetchData="fetchData"
                         :total="totalPage"
                         routeName="videoconferences"
-                    ></filter-table>
+                    >
+                        <template #controls="{ data }">
+                            <div v-if="data.is_active && !data.is_completed">
+                                <a :href="route('videoconferences.room', data.session)">
+                                    <Button
+                                        icon="pi pi-video"
+                                        text
+                                    ></Button>
+                                </a>
+                            </div>
+                        </template>
+                    </filter-table>
                 </template>
             </div>
         </div>

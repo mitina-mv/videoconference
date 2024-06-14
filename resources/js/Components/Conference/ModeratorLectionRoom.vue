@@ -91,7 +91,7 @@
 
             <div v-show="displayQuestionPanel" class="question-list">
                 <h3>Вопросы</h3>
-                <ul>
+                <ul v-if="questions">
                     <li
                         v-for="question in questions"
                         :key="question.id"
@@ -106,6 +106,7 @@
                         ></Button>
                     </li>
                 </ul>
+                <p v-else>Вы не добавили теста к этой видеоконференции.</p>
             </div>
         </div>
 
@@ -328,8 +329,9 @@ const endCall = () => {
                 to: [],
                 type: "endCall",
             })
-            .then(() => {
+            .then(async () => {
                 console.log("End call signal sent");
+                await axios.post(route('api.videoconferences.end', {session: props.sessionId}))
                 session.value.disconnect();
                 sessionScreen.value.disconnect();
                 window.location.href = "/videoconferences";

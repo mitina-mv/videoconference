@@ -108,6 +108,7 @@ class VideoconferenceController extends Controller
             $messages = $vc->messages;
             $messages[] = $request->message;
             $vc->update(['messages' => $messages]);
+            return response()->noContent();
         } catch (Exception $e) {
             return response()->json([
                 'error' => $e->getMessage()
@@ -184,6 +185,7 @@ class VideoconferenceController extends Controller
             $metrics = $vc->metrics;
             $metrics['count_check'] += 1;
             $vc->update(['metrics' => $metrics]);
+            return response()->noContent();
         } catch (Exception $e) {
             return response()->json([
                 'error' => $e->getMessage()
@@ -210,11 +212,29 @@ class VideoconferenceController extends Controller
 
             $metrics['students'][$request->user_id]["count_{$request->action}"] += 1;
             $vc->update(['metrics' => $metrics]);
+            return response()->noContent();
         } catch (Exception $e) {
             return response()->json([
                 'error' => $e->getMessage()
             ],
             422);
         }
+    }
+
+    
+    public function endCall(string $session)
+    {
+        $vc = Videoconference::where('session', $session)->first();
+        if(!$vc) {
+            return response()->json([
+                'error' => 'Не найдена видеоконференция'
+            ], 404);
+        }
+
+        $vc->update([
+            'is_completed' => true,
+        ]);
+
+        return response()->noContent();
     }
 }

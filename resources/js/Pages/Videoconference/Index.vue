@@ -7,6 +7,7 @@ import labels from "@/locales/ru.js";
 import LoadingSpinner from "@/Components/Common/LoadingSpinner.vue";
 import toastService from "@/Services/toastService";
 import ReferenceFilter from "@/Components/Admin/ReferenceFilter.vue";
+import Button from "primevue/button";
 import FilterTable from "@/Components/Tables/FilterTable.vue";
 
 const props = defineProps({
@@ -76,8 +77,6 @@ onMounted(async () => {
         activeYear.value = years.value[0].year;
     }
     await fetchData();
-
-    console.log(props.studgroups);
 });
 
 const fetchData = async (filters = null, page = null, limit = null) => {
@@ -203,7 +202,18 @@ const toggleYear = (id) => {
                         @fetchData="fetchData"
                         :total="totalPage"
                         routeName="videoconferences"
-                    ></filter-table>
+                    >
+                        <template #controls="{ data }">
+                            <div v-if="data.is_active && !data.is_completed">
+                                <a :href="route('videoconferences.room', data.session)">
+                                    <Button
+                                        icon="pi pi-video"
+                                        text
+                                    ></Button>
+                                </a>
+                            </div>
+                        </template>
+                    </filter-table>
                 </template>
             </div>
         </div>

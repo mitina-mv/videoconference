@@ -8,6 +8,7 @@ use App\Models\Answerlog;
 use App\Models\Question;
 use App\Models\Testlog;
 use App\Models\Videoconference;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
@@ -174,9 +175,11 @@ class VideoconferenceController extends Controller
                 ]);
             }
 
-            $testlog = Testlog::where('user_id', $user->id)
-                ->where('assignment_id', $vc->assignment->id)
-                ->first();
+            if($vc->assignment) {
+                $testlog = Testlog::where('user_id', $user->id)
+                    ->where('assignment_id', $vc->assignment->id)
+                    ->first();
+            }
     
             return Inertia::render('Videoconference/Conference', [
                 'sessionId' => $vc->session,
@@ -189,10 +192,11 @@ class VideoconferenceController extends Controller
                 'messages' => $vc->messages,
                 'questions' => $questions,
                 'backLink' => 'videoconferences.index',
-                'testlog' => $testlog == null ? null : $testlog->id
+                'testlog' => empty($testlog) ? null : $testlog->id
             ]);
     
         } catch (\Exception $e) {
+            dd($e);
             return $this->renderError('Не удалось подключиться к видеоконференции');
         }
     }
