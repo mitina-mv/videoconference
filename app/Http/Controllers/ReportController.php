@@ -139,17 +139,17 @@ class ReportController extends Controller
             ->first();
         $user = request()->user();
 
-        if (!$vc) {
-            return $this->renderError('Reports/Videoconference', 'Назначение не найдено');
-        }
+        // if (!$vc) {
+        //     return $this->renderError('Reports/Videoconference', 'Назначение не найдено');
+        // }
 
-        if($vc->user_id != $user->id) {
-            return $this->renderError('Reports/Videoconference', 'Вы не можете просматривать этот отчет');
-        }
+        // if($vc->user_id != $user->id) {
+        //     return $this->renderError('Reports/Videoconference', 'Вы не можете просматривать этот отчет');
+        // }
 
-        if(!$vc->is_completed) {
-            return $this->renderError('Reports/Videoconference', 'Эта видеоконференция не состоялась');
-        }
+        // if(!$vc->is_completed) {
+        //     return $this->renderError('Reports/Videoconference', 'Эта видеоконференция не состоялась');
+        // }
 
         $metrics = $vc->metrics;
 
@@ -174,7 +174,7 @@ class ReportController extends Controller
                 $groupData[$group] = [];
             }
 
-            // рассчет вовлеченности
+            // расчет вовлеченности
             $a = $metrics->count_check == 0 ? 1 : $student_actions['count_check'] / $metrics->count_check;
             $c = $vc->messages == null ? 1 : $student_actions['count_message'] / env('COUNT_MESSAGES_PERFECT');
             $h = $student_actions['count_hand'] / env('COUNT_HAND_PERFECT');
@@ -276,7 +276,6 @@ class ReportController extends Controller
         return Inertia::render('Reports/StudentDetail', [
         ]);
     }
-
 
     private function renderError(string $page, string $message)
     {

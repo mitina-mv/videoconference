@@ -212,6 +212,14 @@ const toggleYear = (id) => {
                                     ></Button>
                                 </a>
                             </div>
+                            <div v-if="data.is_old && data.is_completed">
+                                <a :href="route('report.videoconference', data.id)">
+                                    <Button
+                                        icon="pi pi-video"
+                                        text
+                                    ></Button>
+                                </a>
+                            </div>
                         </template>
                     </filter-table>
                 </template>
