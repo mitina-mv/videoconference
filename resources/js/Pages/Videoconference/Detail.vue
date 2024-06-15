@@ -13,38 +13,38 @@ const props = defineProps({
 const vcInfoFields = [
     {
         label: "Название",
-        value: props.vc.name,
+        value: props?.vc?.name,
     },
     {
         label: "Дата проведения",
-        value: props.vc.date,
+        value: props?.vc?.date,
     },
     {
         label: "Тип",
-        value: props.vc.type,
+        value: props?.vc?.type,
     },
     {
         label: "Преподаватель",
-        value: props.vc.user,
+        value: props?.vc?.user,
     },
     {
         label: "Количество проверок присуствия",
-        value: props.vc.count_check,
+        value: props?.vc?.count_check,
     },
     {
         label: "Группы",
-        value: props.vc.studgroups.join(", "),
+        value: props?.vc?.studgroups?.join(", "),
     },
 ];
 </script>
 
 <template>
-    <Head :title="'Конференция «' + (vc.name || 'ошибка') + '»'" />
+    <Head :title="'Конференция «' + (vc?.name || 'ошибка') + '»'" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ "Конференция «" + (vc.name || "ошибка") + "»" }}
+                {{ "Конференция «" + (vc?.name || "ошибка") + "»" }}
             </h2>
         </template>
 

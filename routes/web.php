@@ -90,12 +90,7 @@ Route::group(['prefix' => 'videoconferences', 'middleware' => ['auth']], functio
 Route::group(['prefix' => 'report', 'middleware' => ['auth']], function () {
     Route::get('/student/{testlog_id}', [ReportController::class, 'student'])->name('report.student');
     Route::get('/assignment/{assignment_id}', [ReportController::class, 'assignment'])->name('report.assignment');
-    Route::get('/videoconference/{vc_id}', [ReportController::class, 'videoconference'])->name('report.videoconference');
     Route::get('/detail/{testlog_id}', [ReportController::class, 'detail'])->name('report.detail');
-
-    // Route::group(['prefix' => 'pdf', 'middleware' => ['auth']], function () {
-    //     Route::get('/videoconference/{vc_id}', [ReportController::class, 'pdf_videoconference'])->name('pdf.report.videoconference');
-    // })
 });
 
 Route::middleware('auth')->group(function () {

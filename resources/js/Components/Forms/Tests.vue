@@ -94,8 +94,14 @@ const sendData = async () => {
         return;
     }
 
+    let stData = JSON.parse(JSON.stringify(settingsData.value));
+
+    if(stData.time_limit.value == 0 || stData.time_limit.value == '' || stData.time_limit.value == null) {
+        delete stData.time_limit;
+    }
+
     const settings = Object.fromEntries(
-        Object.entries(settingsData.value).map(([code, item]) => [
+        Object.entries(stData).map(([code, item]) => [
             code,
             item.value,
         ])
@@ -108,7 +114,7 @@ const sendData = async () => {
 
     if (
         (theme.questions_count < settings.count_questions &&
-            !settingsData.value.fixed_questions.value) ||
+            !stData.fixed_questions.value) ||
         theme.questions_count == 0
     ) {
         toastService.showWarnToast(
@@ -118,7 +124,7 @@ const sendData = async () => {
         return;
     }
 
-    if (settingsData.value.fixed_questions.value) {
+    if (stData.fixed_questions.value) {
         if (questionSelected.value.length == 0) {
             toastService.showWarnToast(
                 `Сохранение данных`,
