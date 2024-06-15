@@ -36,6 +36,24 @@ const vcInfoFields = [
         value: props?.vc?.studgroups?.join(", "),
     },
 ];
+const testInfoFields = [
+    {
+        label: "Название теста",
+        value: props?.test?.name,
+    },
+    {
+        label: "Дисциплина",
+        value: props?.test?.discipline,
+    },
+    {
+        label: "Тема",
+        value: props?.test?.theme,
+    },
+    {
+        label: "Оценка",
+        value: props?.test?.mark,
+    },
+];
 </script>
 
 <template>
@@ -64,12 +82,22 @@ const vcInfoFields = [
                                         <b>{{ field.label }}: </b>
                                         <span>{{ field.value }}</span>
                                     </p>
-                                    <p v-if="vc.path_full">
-                                        <b>Файл отчета: </b>
-                                        <a :href="vc.path_full" class="text-success">
-                                            Скачать
-                                        </a>
-                                    </p>
+                                    <div class="test-settings mt-3">
+                                        <h3>Настройки тестирования</h3>
+                                        <div v-if="test">
+                                            <p v-for="(field, index) in testInfoFields" :key="index">
+                                                <b>{{ field.label }}: </b>
+                                                <span>{{ field.value }}</span>
+                                            </p>
+                                            <p v-if="test.mark">
+                                                <b>Отчет о тестировании: </b>
+                                                <a :href="route('report.student', {testlog_id: test.testlog_id})" class="text-success">
+                                                    Подробности
+                                                </a>
+                                            </p>
+                                        </div>
+                                        <div v-else>Тестирование не проводилось</div>
+                                    </div>
                                 </div>
                                 <div class="vc-files">
                                     <h3>Файлы</h3>
@@ -77,18 +105,6 @@ const vcInfoFields = [
                                     <p v-else>Файлы не прикреплены</p>
                                 </div>
                             </div>
-
-                            <template v-if="$page.props.auth.user.role_id == 2">
-                                <h2>Отчет</h2>
-                                <Videoconference
-                                    :test="test"
-                                    :vc="vc"
-                                    :groups="groups"
-                                    :inctuleHeader="false"
-                                    :includeComments="true"
-                                    :includeHrefDetail="true"
-                                ></Videoconference>
-                            </template>
                         </div>
 
                         <div class="vc-messages">

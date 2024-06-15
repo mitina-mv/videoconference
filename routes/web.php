@@ -85,6 +85,7 @@ Route::group(['prefix' => 'videoconferences', 'middleware' => ['auth']], functio
     
     Route::get('/my', [MyVideoconferenceController::class, 'index'])->name('videoconferences.my');
     Route::get('/detail/{vc_id}', [VideoconferenceController::class, 'detail'])->name('videoconferences.detail');
+    Route::get('/my/detail/{vc_id}', [ReportController::class, 'detailStudent'])->name('videoconferences.my.detail');
 });
 
 Route::group(['prefix' => 'report', 'middleware' => ['auth']], function () {

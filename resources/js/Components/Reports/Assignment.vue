@@ -1,5 +1,5 @@
 <script setup>
-import {computed} from 'vue'
+import { computed } from "vue";
 import labels from "@/locales/ru.js";
 
 const props = defineProps({
@@ -11,7 +11,7 @@ const props = defineProps({
     metrics: [Object, null],
     inctuleHeader: {
         type: Boolean,
-        default: true
+        default: true,
     },
 });
 const testInfoFields = [
@@ -47,22 +47,21 @@ const testInfoFields = [
 
 const settingsFields = computed(() => {
     let res = [];
-    labels.test_fields.settings.values.forEach(element => {
-
-        if(props.test_settings.hasOwnProperty(element.id)) {
-            let value = props.test_settings[element.id]
-            if(element.type == 'bool') {
-                value = value ? 'Да' : 'Нет'
+    labels.test_fields.settings.values.forEach((element) => {
+        if (props.test_settings.hasOwnProperty(element.id)) {
+            let value = props.test_settings[element.id];
+            if (element.type == "bool") {
+                value = value ? "Да" : "Нет";
             }
             res.push({
                 label: element.name,
-                value: value
-            })
+                value: value,
+            });
         }
     });
 
-    return res
-})
+    return res;
+});
 </script>
 
 <template>
@@ -84,7 +83,7 @@ const settingsFields = computed(() => {
         </div>
     </div>
     <h3>Сводная таблица</h3>
-    <table class="mt-3" style="width: fit-content;">
+    <table class="mt-3" style="width: fit-content">
         <thead>
             <tr>
                 <th>ФИО студента</th>
@@ -102,7 +101,18 @@ const settingsFields = computed(() => {
                     </th>
                 </tr>
                 <tr v-for="(student, ind) in group" :key="ind">
-                    <td width="300px">{{ student.full_name }}</td>
+                    <td width="300px">
+                        <a
+                            :href="
+                                route('report.detail', {
+                                    testlog_id: student.testlog_id,
+                                })
+                            "
+                            style="text-decoration: underline;"
+                        >
+                            {{ student.full_name }}
+                        </a>
+                    </td>
                     <td width="100">{{ student.mark }}</td>
                 </tr>
             </template>

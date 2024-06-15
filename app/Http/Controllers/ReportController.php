@@ -96,7 +96,8 @@ class ReportController extends Controller
 
             $groupedData[$group][] = [
                 'full_name' => $testlog->user->full_name,
-                'mark' => $testlog->mark == null ? 'Нет' : $testlog->mark
+                'mark' => $testlog->mark == null ? 'Нет' : $testlog->mark,
+                'testlog_id' => $testlog->id
             ];
 
             if (!empty($testlog->mark)) {
@@ -395,6 +396,64 @@ class ReportController extends Controller
             'user' => $testlog->user()->first(),
             'questions' => $questions,
             'backLink' => back()->getTargetUrl()
+        ]);
+    }
+
+    public function detailStudent(string $vc_id)
+    {
+        $vc = Videoconference::where('id', $vc_id)
+            ->with([
+                'studgroups',
+                'files', 
+                'assignment.test',
+                'user'
+            ])
+            ->first();
+            
+        if(!$vc){
+            return $this->renderError('Videoconference/DetailStudent', 'Видеоконференция не найдена');
+        }
+        $user = request()->user();
+
+        $userGroupIds = [$user->studgroup_id];
+        $hasAccess = false;
+        if($userGroupIds) {
+            $hasAccess = $vc->studgroups()->whereIn('studgroup_id', $userGroupIds)->exists();
+        }
+        if(!$hasAccess){
+            return $this->renderError('Videoconference/DetailStudent', 'Вы не можете просматривать этот отчет');
+        }
+
+        $testResult = null;
+        if($vc->assignment) {
+            $theme = $vc->assignment->test->theme()->with('discipline')->first();
+            $testlog = Testlog::where([
+                'user_id' => $user->id,
+                'assignment_id' => $vc->assignment->id,
+            ])
+            ->first();
+
+            $testResult = [
+                'name' => $vc->assignment->test->name,
+                'discipline' => $theme->discipline->name,
+                'theme' => $theme->name,
+                'testlog_id' => $testlog->id,
+                'mark' => $testlog->mark
+            ];
+        }
+
+        return Inertia::render('Videoconference/DetailStudent', [
+            'test' => $testResult,
+            'vc' => [
+                'name' => $vc->name,
+                'type' => $vc->settings->type == 'lecture' ? 'Лекция' : 'Практика',
+                'count_check' => $vc->metrics->count_check,
+                'studgroups' => array_column($vc->studgroups->toArray(), 'name'),
+                'date' => $vc->date,
+                'user' => $vc->user->full_name,
+                'messages' => $vc->messages,
+                'files' => $vc->files,
+            ],
         ]);
     }
 
