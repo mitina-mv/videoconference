@@ -127,8 +127,13 @@ const filteredLinks = computed(() => {
 
         <div class="main-content">
             <header class="header" v-if="$slots.header">
-                <div v-if="$page.props.backLink">
+                <div v-if="$page.props.backLink && !$page.props.backLink.includes('http')">
                     <a class="back-button" :href="route($page.props.backLink)"
+                        ><i class="pi pi-arrow-left"></i
+                    ></a>
+                </div>
+                <div v-if="$page.props.backLink && $page.props.backLink.includes('http')">
+                    <a class="back-button" :href="$page.props.backLink"
                         ><i class="pi pi-arrow-left"></i
                     ></a>
                 </div>

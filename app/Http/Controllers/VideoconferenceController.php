@@ -174,9 +174,11 @@ class VideoconferenceController extends Controller
                 ]);
             }
 
-            $testlog = Testlog::where('user_id', $user->id)
-                ->where('assignment_id', $vc->assignment->id)
-                ->first();
+            if($vc->assignment) {
+                $testlog = Testlog::where('user_id', $user->id)
+                    ->where('assignment_id', $vc->assignment->id)
+                    ->first();
+            }
     
             return Inertia::render('Videoconference/Conference', [
                 'sessionId' => $vc->session,
@@ -189,7 +191,7 @@ class VideoconferenceController extends Controller
                 'messages' => $vc->messages,
                 'questions' => $questions,
                 'backLink' => 'videoconferences.index',
-                'testlog' => $testlog == null ? null : $testlog->id
+                'testlog' => empty($testlog) ? null : $testlog->id
             ]);
     
         } catch (\Exception $e) {
@@ -246,5 +248,17 @@ class VideoconferenceController extends Controller
                 ]);
             }
         }
+    }
+
+    public function detail(string $vc_id)
+    {
+        try {
+            $dataVC = (new ReportController())->videoconferenceData($vc_id);
+        } catch (\Exception $e) {
+            return Inertia::render('Videoconference/Detail', [
+                'error' => $e->getMessage(),
+            ]);
+        }
+        return Inertia::render('Videoconference/Detail', $dataVC);
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\MyAssignmentController;
 use App\Http\Controllers\MyVideoconferenceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\VideoconferenceController;
 use Illuminate\Foundation\Application;
@@ -83,6 +84,14 @@ Route::group(['prefix' => 'videoconferences', 'middleware' => ['auth']], functio
     Route::get('/room/{session}', [VideoconferenceController::class, 'room'])->name('videoconferences.room');
     
     Route::get('/my', [MyVideoconferenceController::class, 'index'])->name('videoconferences.my');
+    Route::get('/detail/{vc_id}', [VideoconferenceController::class, 'detail'])->name('videoconferences.detail');
+    Route::get('/my/detail/{vc_id}', [ReportController::class, 'detailStudent'])->name('videoconferences.my.detail');
+});
+
+Route::group(['prefix' => 'report', 'middleware' => ['auth']], function () {
+    Route::get('/student/{testlog_id}', [ReportController::class, 'student'])->name('report.student');
+    Route::get('/assignment/{assignment_id}', [ReportController::class, 'assignment'])->name('report.assignment');
+    Route::get('/detail/{testlog_id}', [ReportController::class, 'detail'])->name('report.detail');
 });
 
 Route::middleware('auth')->group(function () {

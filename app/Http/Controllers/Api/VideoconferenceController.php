@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\ReportController;
+use App\Http\Service\PDFService;
 use App\Http\Service\TestService;
 use App\Models\Answer;
 use App\Models\Answerlog;
@@ -108,6 +110,7 @@ class VideoconferenceController extends Controller
             $messages = $vc->messages;
             $messages[] = $request->message;
             $vc->update(['messages' => $messages]);
+            return response()->noContent();
         } catch (Exception $e) {
             return response()->json([
                 'error' => $e->getMessage()
@@ -161,7 +164,7 @@ class VideoconferenceController extends Controller
             $testMark = array_sum($answerlogMarks);
 
             $testlog->update([
-                'mark' => round(($testMark / $testAmount) * 100, 2),
+                'mark' => round(($testMark / $testAmount) * env('MAXIMUM_SCOPE'), 2),
             ]);
 
             return response()->json([
@@ -184,6 +187,7 @@ class VideoconferenceController extends Controller
             $metrics = $vc->metrics;
             $metrics['count_check'] += 1;
             $vc->update(['metrics' => $metrics]);
+            return response()->noContent();
         } catch (Exception $e) {
             return response()->json([
                 'error' => $e->getMessage()
@@ -210,11 +214,37 @@ class VideoconferenceController extends Controller
 
             $metrics['students'][$request->user_id]["count_{$request->action}"] += 1;
             $vc->update(['metrics' => $metrics]);
+            return response()->noContent();
         } catch (Exception $e) {
             return response()->json([
                 'error' => $e->getMessage()
             ],
             422);
         }
+    }
+
+    
+    public function endCall(string $session)
+    {
+        $vc = Videoconference::where('session', $session)->first();
+        if(!$vc) {
+            return response()->json([
+                'error' => 'Не найдена видеоконференция'
+            ], 404);
+        }
+
+        $vc->update([
+            'is_completed' => true,
+        ]);
+
+        // генерация pdf
+        $pdfservice = new PDFService();
+        $path = $pdfservice->make((new ReportController())->videoconference($vc->id));
+
+        $vc->update([
+            'path' => $path,
+        ]);
+
+        return response()->noContent();
     }
 }

@@ -9,9 +9,10 @@ import toastService from "@/Services/toastService";
 import Calendar from "primevue/calendar";
 import Dropdown from "primevue/dropdown";
 import FilterTable from "@/Components/Tables/FilterTable.vue";
+import Button from "primevue/button";
 
 const props = defineProps({
-    disciplines: [Array, null]
+    disciplines: [Array, null],
 });
 
 const tableColumns = ref({
@@ -45,20 +46,17 @@ const tableData = ref(null);
 const totalPage = ref(null);
 const years = ref(props?.years || null);
 const loadData = ref(false);
-const dateFilter = ref(new Date())
-const disciplineFilter = ref(null)
+const dateFilter = ref(new Date());
+const disciplineFilter = ref(null);
 
 onMounted(async () => {
-    disciplineFilter.value = props.disciplines[0].id
+    disciplineFilter.value = props.disciplines[0].id;
     await fetchData();
 });
 
 const fetchData = async (filters = null, page = null, limit = null) => {
     let params = {
-        includes: [
-            { relation: "user" },
-            { relation: "assignment.test.theme" },
-        ],
+        includes: [{ relation: "user" }, { relation: "assignment.test.theme" }],
         sort: [
             { field: "date", direction: "asc" },
             { field: "name", direction: "asc" },
@@ -77,14 +75,14 @@ const fetchData = async (filters = null, page = null, limit = null) => {
     let url = "/api/my-videoconferences/search";
 
     if (dateFilter.value) {
-        url += `?date=${dateFilter.value.toISOString()}`
+        url += `?date=${dateFilter.value.toISOString()}`;
     }
 
     if (disciplineFilter.value !== null) {
         if (!dateFilter.value) url += "?";
         else url += "&";
 
-        url += `discipline=${disciplineFilter.value}`
+        url += `discipline=${disciplineFilter.value}`;
     }
 
     try {
@@ -103,27 +101,27 @@ const fetchData = async (filters = null, page = null, limit = null) => {
 const processTableData = (data) => {
     data.forEach((element, index) => {
         let sessionString = `${labels.videoconferences_fields.session.title}: ${element.session}`;
-        let testString = `,<br />Тестирование: ${element.assignment ? 'да' : "нет"}`;
+        let testString = `,<br />Тестирование: ${
+            element.assignment ? "да" : "нет"
+        }`;
         let speakerString = `,<br />Проводит: ${element.user.full_name}`;
-        let themeString = `,<br />Тема: ${element.assignment ? element.assignment.test.theme.name : "нет"}`;
+        let themeString = `,<br />Тема: ${
+            element.assignment ? element.assignment.test.theme.name : "нет"
+        }`;
 
-        data[index].settings = `${sessionString}${testString}${speakerString}${themeString}`
+        data[
+            index
+        ].settings = `${sessionString}${testString}${speakerString}${themeString}`;
     });
 };
 
-watch(
-    dateFilter,
-    () => {
-        fetchData();
-    },
-);
+watch(dateFilter, () => {
+    fetchData();
+});
 
-watch(
-    disciplineFilter,
-    () => {
-        fetchData();
-    },
-);
+watch(disciplineFilter, () => {
+    fetchData();
+});
 </script>
 
 <template>
@@ -164,7 +162,37 @@ watch(
                         @fetchData="fetchData"
                         :total="totalPage"
                         routeName="videoconferences"
-                    ></filter-table>
+                    >
+                        <template #controls="{ data }">
+                            <div v-if="data.is_active && !data.is_completed">
+                                <a
+                                    :href="
+                                        route(
+                                            'videoconferences.room',
+                                            data.session
+                                        )
+                                    "
+                                >
+                                    <Button icon="pi pi-video" text></Button>
+                                </a>
+                            </div>
+                            <a
+                                v-if="data.is_old && data.is_completed"
+                                :href="
+                                    route('videoconferences.my.detail', {
+                                        vc_id: data.id,
+                                    })
+                                "
+                            >
+                                <Button
+                                    icon="pi pi-info-circle"
+                                    text
+                                    severity="info"
+                                    size="large"
+                                ></Button>
+                            </a>
+                        </template>
+                    </filter-table>
                 </template>
             </div>
         </div>

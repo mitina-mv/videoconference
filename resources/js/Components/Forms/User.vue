@@ -26,13 +26,13 @@ const role = ref(props?.data?.role_id || props?.role);
 const id = ref(props?.data?.id || null);
 const textFields = [
     {
-        code: 'name',
-        title: labels.user_fields.name.title,
+        code: 'lastname',
+        title: labels.user_fields.lastname.title,
         req: true,
     },
     {
-        code: 'lastname',
-        title: labels.user_fields.lastname.title,
+        code: 'name',
+        title: labels.user_fields.name.title,
         req: true,
     },
     {

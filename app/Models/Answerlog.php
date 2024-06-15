@@ -31,6 +31,8 @@ class Answerlog extends Model
 
     public function answers()
     {
-        return $this->belongsToMany(Answer::class, 'answers_answerlogs');
+        return $this->belongsToMany(Answer::class, 'answers_answerlogs')
+            ->as('history')
+            ->withPivot('is_correct', 'text');
     }
 }

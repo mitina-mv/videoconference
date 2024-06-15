@@ -63,7 +63,7 @@ class Assignment extends Model
 
     public function videoconference()
     {
-        return $this->belongsTo(Videoconference::class);
+        return $this->belongsTo(Videoconference::class, 'vc_id', 'id');
     }
 
     public function testlogs()

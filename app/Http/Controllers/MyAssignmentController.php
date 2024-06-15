@@ -41,13 +41,13 @@ class MyAssignmentController extends Controller
             ->with(['assignment', 'assignment.test', 'assignment.user'])
             ->first();
 
-        /* if(!$testlog) {
+        if(!$testlog) {
             return $this->renderError('Это тестирование назначено не вам.');
         }
 
         if(!$testlog->is_active || $testlog->mark) {
             return $this->renderError('Этот тест недоступен для прохождения');
-        } */
+        }
 
         $test = $testlog->assignment->test;
         $testSettings = $test->settings;

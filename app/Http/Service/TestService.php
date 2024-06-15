@@ -53,7 +53,7 @@ class TestService
             }
 
             $testlog->update([
-                'mark' => round(($testMark / $testAmount) * 100, 2),
+                'mark' => round(($testMark / $testAmount) * env('MAXIMUM_SCOPE'), 2),
             ]);
 
             DB::commit();

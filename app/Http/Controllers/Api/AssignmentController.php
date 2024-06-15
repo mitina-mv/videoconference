@@ -38,6 +38,11 @@ class AssignmentController extends Controller
     {
         return ['test.theme_id', 'test_id', 'testlogs.user.studgroup_id', 'date'];
     }
+    
+    public function sortableBy() : array
+    {
+        return ['date', ];
+    }
 
     protected function buildIndexFetchQuery(Request $request, array $requestedRelations): Builder
     {

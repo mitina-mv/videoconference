@@ -108,7 +108,7 @@ const processTableData = (data) => {
     data.forEach((element, index) => {
         data[index].name = element.assignment.test.theme.name;
         data[index].date = element.assignment.date;
-        data[index].mark_value = element.assignment.mark || 'Нет';
+        data[index].mark_value = element.mark == null ? 'Нет' :element.mark;
 
         let speakerString = `Проводит: ${element.assignment.user.full_name}`;
         data[index].settings = `${speakerString}`;
@@ -140,6 +140,9 @@ watch(dateFilter, () => {
 watch(disciplineFilter, () => {
     fetchData();
 });
+function isFloat(n) {
+    return Number(n) === Number(n) && n % 1 !== 0;
+}
 </script>
 
 <template>
@@ -186,13 +189,21 @@ watch(disciplineFilter, () => {
                         <template #controls="{ data }">
                             <a
                                 :href="route('assignments.testing', data.id)"
-                                v-if="data.assignment.is_active && !data.mark && !data.assignment.vc_id"
+                                v-if="data.assignment.is_active && data.mark==null"
                             >
                                 <Button icon="pi pi-play" text />
                             </a>
-                            <a v-if="data.path">
-                                <Button icon="pi pi-file-check" text severity="info" size="large" />
-                            </a>
+                            <div v-if="(data.assignment.is_old && !data.assignment.is_active && isFloat(data.mark)) || isFloat(data.mark)" >
+                                <a :href="route('report.student', {testlog_id: data.id})">
+                                    <Button
+                                        icon="pi pi-info-circle"
+                                        text
+                                        severity="info"
+                                        size="large"
+                                    ></Button>
+                                </a>
+                            </div>
+                            <p class="text-danger" v-if="data.assignment.is_old && !data.assignment.is_active && !isFloat(data.mark)">Нет данных</p>
                         </template>
                     </filter-table>
                 </template>

@@ -8,6 +8,7 @@ import LoadingSpinner from "@/Components/Common/LoadingSpinner.vue";
 import toastService from "@/Services/toastService";
 import ReferenceFilter from "@/Components/Admin/ReferenceFilter.vue";
 import FilterTable from "@/Components/Tables/FilterTable.vue";
+import Button from "primevue/button";
 
 const props = defineProps({
     years: [Array, Object],
@@ -95,6 +96,10 @@ onMounted(async () => {
 const fetchData = async (filters = null, page = null, limit = null) => {
     let params = {
         includes: [{ relation: "test" }, { relation: "test.theme" }],
+        
+        sort: [
+            { field: "date", direction: "desc" },
+        ],
     };
 
     if (filters) {
@@ -174,7 +179,20 @@ const toggleYear = (id) => {
                         @fetchData="fetchData"
                         :total="totalPage"
                         routeName="assignments"
-                    ></filter-table>
+                    >
+                        <template #controls="{ data }">
+                            <div v-if="data.is_old && !data.is_active">
+                                <a :href="route('report.assignment', {assignment_id: data.id})">
+                                    <Button
+                                        icon="pi pi-info-circle"
+                                        text
+                                        severity="info"
+                                        size="large"
+                                    ></Button>
+                                </a>
+                            </div>
+                        </template>
+                    </filter-table>
                 </template>
             </div>
         </div>
