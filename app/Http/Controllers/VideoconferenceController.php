@@ -249,4 +249,16 @@ class VideoconferenceController extends Controller
             }
         }
     }
+
+    public function detail(string $vc_id)
+    {
+        try {
+            $dataVC = (new ReportController())->videoconferenceData($vc_id);
+        } catch (\Exception $e) {
+            return Inertia::render('Videoconference/Detail', [
+                'error' => $e->getMessage(),
+            ]);
+        }
+        return Inertia::render('Videoconference/Detail', $dataVC);
+    }
 }

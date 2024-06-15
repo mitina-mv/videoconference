@@ -25,7 +25,7 @@ const props = defineProps({
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ labels.page_titles.videoconferences }} {{ dd }}
+                {{ labels.page_titles.videoconferences }}
             </h2>
         </template>
 

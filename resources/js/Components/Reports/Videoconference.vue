@@ -19,33 +19,6 @@ const props = defineProps({
     },
 });
 
-const vcInfoFields = [
-    {
-        label: "Название",
-        value: props.vc.name,
-    },
-    {
-        label: "Дата проведения",
-        value: props.vc.date,
-    },
-    {
-        label: "Тип",
-        value: props.vc.type,
-    },
-    {
-        label: "Преподаватель",
-        value: props.vc.user,
-    },
-    {
-        label: "Количество проверок присуствия",
-        value: props.vc.count_check,
-    },
-    {
-        label: "Группы",
-        value: props.vc.studgroups.join(", "),
-    },
-];
-
 const testInfoFields = [
     {
         label: "Название теста",
@@ -98,13 +71,6 @@ const comments = computed(() => {
         Результаты конференции: {{ vc ? vc.name : "ошибка" }}
     </h2>
     <div class="d-grid grid-col-2 mb-3 gap-2">
-        <div class="assignment-info">
-            <h3>Основные данные</h3>
-            <p v-for="(field, index) in vcInfoFields" :key="index">
-                <b>{{ field.label }}: </b>
-                <span>{{ field.value }}</span>
-            </p>
-        </div>
         <div class="test-settings">
             <h3>Настройки тестирования</h3>
             <div v-if="test">
@@ -160,7 +126,7 @@ const comments = computed(() => {
             </template>
         </tbody>
     </table>
-    <div v-if="comments && includeComments">
+    <div v-if="comments.length > 0 && includeComments">
         <h3 class="mt-3 mb-2">Комментарии</h3>
         <p v-for="(comment, ind) in comments" :key="ind">
             {{ comment }}

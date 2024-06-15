@@ -87,7 +87,7 @@ const fetchData = async (filters = null, page = null, limit = null) => {
             { relation: "assignment.test" },
         ],
         sort: [
-            { field: "date", direction: "asc" },
+            { field: "date", direction: "desc" },
             { field: "name", direction: "asc" },
         ],
     };
@@ -213,12 +213,25 @@ const toggleYear = (id) => {
                                 </a>
                             </div>
                             <div v-if="data.is_old && data.is_completed">
-                                <a :href="route('report.videoconference', data.id)">
+                                <a v-if="data.path_full" :href="data.path_full">
                                     <Button
-                                        icon="pi pi-video"
+                                        icon="pi pi-file-pdf"
                                         text
+                                        severity="danger"
+                                        size="large"
                                     ></Button>
                                 </a>
+                                <a :href="route('videoconferences.detail', {vc_id: data.id})">
+                                    <Button
+                                        icon="pi pi-info-circle"
+                                        text
+                                        severity="info"
+                                        size="large"
+                                    ></Button>
+                                </a>
+                            </div>
+                            <div v-if="data.is_old && !data.is_completed && !data.is_active">
+                                <span class="text-danger">Не проведена</span>
                             </div>
                         </template>
                     </filter-table>

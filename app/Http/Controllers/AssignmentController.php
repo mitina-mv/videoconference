@@ -21,6 +21,7 @@ class AssignmentController extends Controller
         // забираем года и количество назначенных тестов
         $yearsTestlog = Assignment::where([
             'user_id' => auth()->id(),
+            'vc_id' => null,
             ])
             ->select(
                 DB::raw("to_char(date, 'YYYY') as year"),

@@ -95,6 +95,10 @@ onMounted(async () => {
 const fetchData = async (filters = null, page = null, limit = null) => {
     let params = {
         includes: [{ relation: "test" }, { relation: "test.theme" }],
+        
+        sort: [
+            { field: "date", direction: "desc" },
+        ],
     };
 
     if (filters) {

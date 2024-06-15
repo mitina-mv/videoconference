@@ -135,19 +135,30 @@ class ReportController extends Controller
         ]);
     }
 
-    public function videoconference(string $vc_id)
+    public function videoconferenceData(string $vc_id)
     {
         $vc = Videoconference::where('id', $vc_id)
             ->with(['studgroups', 'assignment.test', 'assignment.testlogs'])
-            ->withTrashed()
             ->first();
         $user = request()->user();
+
+        if (!$vc) {
+            throw new \Exception('Назначение не найдено');
+        }
+
+        if($vc->user_id != $user->id) {
+            throw new \Exception('Вы не можете просматривать этот отчет');
+        }
+
+        if(!$vc->is_completed) {
+            throw new \Exception('Эта видеоконференция не состоялась');
+        }
 
         $metrics = $vc->metrics;
 
         // подготовка данных о студентах
         if (empty($metrics->students)) {
-            return $this->renderError('Reports/Videoconference', 'В этой конференции не участвовал ни один студент, нет данных для отчета.');
+            throw new \Exception('В этой конференции не участвовал ни один студент, нет данных для отчета.');
         }
 
         $groupData = [];
@@ -166,7 +177,7 @@ class ReportController extends Controller
                 $groupData[$group] = [];
             }
 
-            // расчет вовлеченности
+            // рассчет вовлеченности
             $a = $metrics->count_check == 0 ? 1 : $student_actions['count_check'] / $metrics->count_check;
             $c = $vc->messages == null ? 1 : $student_actions['count_message'] / env('COUNT_MESSAGES_PERFECT');
             $h = $student_actions['count_hand'] / env('COUNT_HAND_PERFECT');
@@ -181,8 +192,7 @@ class ReportController extends Controller
                 ],
                 'group' => $group,
                 'mark' => '-',
-                'count_check' => $student_actions['count_check'],
-                'testlog_id' => null
+                'count_check' => $student_actions['count_check']
             ];
         }
 
@@ -190,20 +200,21 @@ class ReportController extends Controller
             $marks = [];
             $test = $vc->assignment->test;
 
-            foreach ($vc->assignment->testlogs as $testlog) {
-                if (!isset($students[$testlog->user_id])) {
+            foreach($vc->assignment->testlogs as $testlog)
+            {
+                if(!isset($students[$testlog->user_id])) {
                     continue;
                 }
-
+                
                 $students[$testlog->user_id]['mark'] = $testlog->mark ? $testlog->mark : 'Нет';
                 $countAnswers = $testlog->answerlogs()->where('mark', '!=', null)->count();
-                if ($countAnswers > 0) {
+                if($countAnswers > 0) {
                     $p = $test->settings->count_questions / $countAnswers;
                 } else {
                     $p = 0;
                 }
 
-                if (!empty($testlog->mark)) {
+                if(!empty($testlog->mark)) {
                     $marks[] = $testlog->mark;
                     $p = 0;
                 }
@@ -215,67 +226,115 @@ class ReportController extends Controller
             // метрики
             $avgMark = null;
             $deviation = null;
-            if (count($marks) > 0) {
+            if(count($marks) > 0) {
                 $avgMark = round(array_sum($marks) / count($marks), 2);
                 $deviationMarks = array_map(fn ($mark) => pow($mark - $avgMark, 2), $marks);
                 $deviation = round(sqrt(array_sum($deviationMarks) / count($marks)), 2);
             }
         }
 
-        foreach ($students as &$student) {
+        foreach($students as &$student)
+        {
             $engagement = $student['engagement'];
-            $ai = $engagement['a'] * env('THRESHOLD_COUNT_CHECK');
-            $pi = $engagement['p'] * env('THRESHOLD_COUNT_QUESTION');
-            $ci = $engagement['c'] * env('THRESHOLD_COUNT_MESSAGE');
-            $hi = $engagement['h'] * env('THRESHOLD_COUNT_HAND');
+            $ai = $engagement['a'] * env('THRESHOLD_COUNT_CHECK'); 
+            $pi = $engagement['p'] * env('THRESHOLD_COUNT_QUESTION'); 
+            $ci = $engagement['c'] * env('THRESHOLD_COUNT_MESSAGE'); 
+            $hi = $engagement['h'] * env('THRESHOLD_COUNT_HAND'); 
             $student['engagement'] = round($ai + $pi + $ci + $hi, 2);
 
             $groupData[$student['group']][] = $student;
         }
 
 
-        $comments = [];
         $testResult = null;
-        if ($vc->assignment) {
+        if($vc->assignment) {
             $theme = $vc->assignment->test->theme()->with('discipline')->first();
 
             $testResult = [
-                ['label' => 'Название теста', 'value' => $vc->assignment->test->name],
-                ['label' => 'Дисциплина', 'value' => $theme->discipline->name],
-                ['label' => 'Тема', 'value' =>  $theme->name],
-                ['label' => 'Средняя оценка', 'value' => $avgMark],
-                ['label' => 'Станндартное отклонение баллов', 'value' => $deviation],
+                'name' => $vc->assignment->test->name,
+                'discipline' => $theme->discipline->name,
+                'theme' => $theme->name,
+                'avg_mark' => $avgMark,
+                'deviation_mark' => $deviation
+            ];
+        }
+
+        return [
+            'test' => $testResult,
+            'vc' => [
+                'name' => $vc->name,
+                'type' => $vc->settings->type == 'lecture' ? 'Лекция' : 'Практика',
+                'count_check' => $metrics->count_check,
+                'studgroups' => array_column($vc->studgroups->toArray(), 'name'),
+                'date' => $vc->date,
+                'user' => $user->full_name,
+                'flag_mes' => $vc->messages == null,
+                'messages' => $vc->messages,
+                'files' => $vc->files,
+                'path_full' => $vc->path_full,
+            ],
+            'groups' => $groupData,
+        ];
+    }
+
+    public function videoconference(string $vc_id)
+    {
+        try {
+            $data = $this->videoconferenceData($vc_id);
+        } catch (\Exception $e) {
+            return View::make('reports.vc', [
+                'testInfoFields' => null,
+                'vc' => null,
+                'groups' => null,
+                'inctuleHeader' => null,
+                'includeComments' => null,
+                'includeHrefDetail' => null,
+                'vcInfoFields' => null,
+                'comments' => null,
+                'error' => $e->getMessage()
+            ])->render();
+        }
+
+        $comments = [];
+        $testResult = null;
+        if ($data['test']) {
+            $testResult = [
+                ['label' => 'Название теста', 'value' => $data['test']['name']],
+                ['label' => 'Дисциплина', 'value' => $data['test']['discipline']],
+                ['label' => 'Тема', 'value' =>  $data['test']['theme']],
+                ['label' => 'Средняя оценка', 'value' => $data['test']['avg_mark']],
+                ['label' => 'Станндартное отклонение баллов', 'value' => $data['test']['deviation_mark']],
             ];
         } else {
             $comments[] = "Вы не использовали интерактиные опросы, поэтому оценка вовлеченности не может в полной мере отражать реальные итоги занятия. При расчете баллы за тестирование проставлены на максимум для каждого студента. Интерактивные опросы позволяют сильнее вовлечь аудиторию в процесс обучения, попробуйте!";
         }
 
-        if ($vc->messages == null) {
+        if ($data['vc']['flag_mes']) {
             $comments[] = "Вы не использовали чат, поэтому оценка вовлеченности не может в полной мере отражать реальные итоги занятия. При расчете баллы за участие в чате проставлены на максимум для каждого студента. Чат - инструмент для моментального взаимодействия с аудиторией. Может быть очень полезным!";
         }
 
-        if ($metrics->count_check == 0) {
+        if ($data['vc']['count_check'] == 0) {
             $comments[] = "Вы не использовали проверки присуствия, поэтому оценка вовлеченности не может в полной мере отражать реальные итоги занятия. При расчете баллы за проверки присутствия проставлены на максимум для каждого студента. Проверки присуствия помогают понять, не потеряна ли активная аудитория. Попробуйте в следующий раз!";
         }
 
         return View::make('reports.vc', [
             'testInfoFields' => $testResult,
             'vc' => [
-                'name' => $vc->name,
-                'count_check' => $metrics->count_check,
-                'flag_mes' => $vc->messages == null
+                'name' => $data['vc']['name'],
+                'count_check' => $data['vc']['count_check'],
+                'flag_mes' => $data['vc']['flag_mes']
             ],
-            'groups' => $groupData,
+            'groups' => $data['groups'],
             'inctuleHeader' => true,
             'includeComments' => true,
             'includeHrefDetail' => false,
             'vcInfoFields' => [
-                ['label' => 'Название', 'value' => $vc->name],
-                ['label' => 'Дата проведения', 'value' => $vc->date],
-                ['label' => 'Тип', 'value' => $vc->settings->type == 'lecture' ? 'Лекция' : 'Практика'],
-                ['label' => 'Преподаватель', 'value' => $user->full_name],
-                ['label' => 'Количество проверок присуствия', 'value' => $metrics->count_check],
-                ['label' => 'Группы', 'value' => implode(', ', array_column($vc->studgroups->toArray(), 'name'))],
+                ['label' => 'Название', 'value' => $data['vc']['name']],
+                ['label' => 'Дата проведения', 'value' => $data['vc']['date']],
+                ['label' => 'Тип', 'value' => $data['vc']['type']],
+                ['label' => 'Преподаватель', 'value' => $data['vc']['user']],
+                ['label' => 'Количество проверок присуствия', 'value' => $data['vc']['count_check']],
+                ['label' => 'Группы', 'value' => implode(', ', array_column($data['groups'], 'name'))],
             ],
             'comments' => $comments,
             'error' => null

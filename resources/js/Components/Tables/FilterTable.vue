@@ -249,10 +249,6 @@ watch(
                         ></Button>
                     </div>
                 </template>
-
-                <div v-if="typeof row.data.is_active !== 'undefined' && !row.data.is_active && typeof row.data.is_old !== 'undefined' && row.data.is_old">
-                    отчет
-                </div>
                 <slot name="controls" :data="row.data"></slot>
             </template>
         </Column>
