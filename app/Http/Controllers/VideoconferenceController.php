@@ -168,7 +168,7 @@ class VideoconferenceController extends Controller
             $connection = $this->getConnection($vc, $user, $questions);
 
             $conScreen = null;
-            if($vc->user_id == $user->id) {
+            if($vc->user_id == $user->id || $vc->settings->type == 'practice') {
                 $conScreen = $this->openViduService->connectToSession($vc->session, [
                     'data' => json_encode(['user_id' => $user->id, 'username' => 'screen'])
                 ]);
@@ -191,6 +191,7 @@ class VideoconferenceController extends Controller
                 'messages' => $vc->messages,
                 'questions' => $questions,
                 'backLink' => 'videoconferences.index',
+                'settings' => $vc->settings,
                 'testlog' => empty($testlog) ? null : $testlog->id
             ]);
     
@@ -259,6 +260,9 @@ class VideoconferenceController extends Controller
                 'error' => $e->getMessage(),
             ]);
         }
-        return Inertia::render('Videoconference/Detail', $dataVC);
+        return Inertia::render('Videoconference/Detail', [
+            ...$dataVC,
+            'backLink' => 'videoconferences.index',
+        ]);
     }
 }
