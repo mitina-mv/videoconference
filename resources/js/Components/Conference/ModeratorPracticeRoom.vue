@@ -1,6 +1,16 @@
 <template>
     <div class="room" ref="roomContainer">
-        <div class="video-container" ref="videoContainer"></div>
+        <div class="d-grid grid-col-3 gap-2">
+            <div class="video-container" ref="videoContainer"></div>
+            <div v-for="user in users" :key="user.id" class="user-block" :ref="el => userRefs[user.id] = el">
+                <div class="user-info">
+                    <span class="username">{{ user.username }}</span>
+                    <span class="user-status" :style="{ backgroundColor: user.color }"></span>
+                </div>
+                <div class="11" :ref="videoContainerEl => user.videoContainer = videoContainerEl"></div>
+            </div>            
+        </div> 
+
         <div class="controls">
             <div class="d-flex gap-3">
                 <Button
@@ -178,7 +188,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, warn } from "vue";
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from "vue";
 import { OpenVidu } from "openvidu-browser";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
@@ -201,6 +211,8 @@ const fullScreen = ref(false);
 const students = ref([]);
 const screenPublisher = ref(null);
 const subscribers = ref([]);
+const userRefs = reactive({});
+const users = reactive([]);
 
 const videoContainer = ref(null);
 const roomContainer = ref(null);
@@ -225,12 +237,32 @@ const toggleHandAction = () => {
 
 const joinSession = async () => {
     try {
-        session.value.on("connectionDestroyed", (event) => {
-            updateUserList();
+        session.value.on("connectionCreated", (event) => {
+            const connection = event.connection;
+            const data = JSON.parse(connection.data);
+            addUser(connection.connectionId, data.username, 'red');
         });
 
-        session.value.on("connectionCreated", (event) => {
-            updateUserList();
+        session.value.on("connectionDestroyed", (event) => {
+            const connection = event.connection;
+            removeUser(connection.connectionId);
+        });
+
+        session.value.on("streamCreated", ({ stream }) => {
+            const connectionId = stream.connection.connectionId;
+            const user = users.find(u => u.id === connectionId);
+            if (user && user.videoContainer) {
+                const subscriber = session.value.subscribe(stream, user.videoContainer, { insertMode: "APPEND" });
+                subscribers.value.push(subscriber);
+            }
+        });
+
+        session.value.on("streamDestroyed", ({ stream }) => {
+            const subscriber = subscribers.value.find(s => s.stream === stream);
+            if (subscriber) {
+                session.value.unsubscribe(subscriber);
+                subscribers.value = subscribers.value.filter(s => s !== subscriber);
+            }
         });
 
         session.value.on("signal:chat", (event) => {
@@ -244,15 +276,15 @@ const joinSession = async () => {
             hands.value = [...new Set(hands.value)]
         });
 
-        session.value.on("streamCreated", ({stream}) => {
-            const subscriber = session.value.subscribe(
-                stream,
-                videoContainer.value,
-                { insertMode: "APPEND" }
-            );
-            subscribers.value.push(subscriber);
-            console.log('студенты',subscribers.value);
-        });
+        // session.value.on("streamCreated", ({stream}) => {
+        //     const subscriber = session.value.subscribe(
+        //         stream,
+        //         videoContainer.value,
+        //         { insertMode: "APPEND" }
+        //     );
+        //     subscribers.value.push(subscriber);
+        //     console.log('студенты',subscribers.value);
+        // });
 
         await session.value.connect(props.token);
 
@@ -276,6 +308,16 @@ const joinSession = async () => {
     }
 };
 
+const addUser = (id, username, color) => {
+    users.push({ id, username, color });
+};
+
+const removeUser = (id) => {
+    const index = users.findIndex(user => user.id === id);
+    if (index !== -1) {
+        users.splice(index, 1);
+    }
+};
 const updateUserList = () => {
     students.value = {};
     if (session.value.remoteConnections) {
@@ -516,4 +558,45 @@ onMounted(() => {
     sessionScreen.value = OVScreen.initSession();
     joinSession();
 });
+
+onBeforeUnmount(() => {
+  if (session.value) {
+    session.value.disconnect();
+  }
+});
 </script>
+
+<style scoped>
+.conference-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+.video-container{
+    width: 300px;
+}
+
+.user-block {
+  width: 300px;
+  margin: 10px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.user-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.username {
+  font-weight: bold;
+}
+
+.user-status {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+}
+</style>
