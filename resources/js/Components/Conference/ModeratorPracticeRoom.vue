@@ -266,7 +266,7 @@ const chatMessage = ref("");
 const hands = ref([]);
 
 const currentPage = ref(1);
-const usersPerPage = 9;
+const usersPerPage = 12;
 
 const paginatedUsers = computed(() => {
     const start = (currentPage.value - 1) * usersPerPage;
@@ -297,7 +297,9 @@ const joinSession = async () => {
         session.value.on("connectionCreated", (event) => {
             const connection = event.connection;
             const data = JSON.parse(connection.data);
+
             if(data.user_id == props.user.id) return;
+
             addUser(
                 connection.connectionId,
                 data.username,
@@ -323,7 +325,6 @@ const joinSession = async () => {
                         user.videoBlock,
                         { insertMode: "APPEND" }
                     );
-                    console.warn(subscriber);
                     subscribers.value.push(subscriber);
                 }
              }, 1000);
@@ -376,10 +377,10 @@ const joinSession = async () => {
 const addUser = (id, username, color, user_id) => {
     const existingUser = users.find((user) => user.user_id === user_id);
     if (existingUser) {
-        console.warn(existingUser.videoBlock);
         if (username === "screen") {
             existingUser.screenShareId = id;
         } else {
+            existingUser.screenShareId = existingUser.id;
             existingUser.id = id
             existingUser.username = username
         }
@@ -586,6 +587,8 @@ const startScreenSharing = () => {
     videoEnabled.value = false;
 
     screenPublisher.value.once("accessAllowed", () => {
+        session.value.unpublish(publisher.value);
+
         sessionScreen.value.publish(screenPublisher.value);
         screenPublisher.value.stream
             .getMediaStream()
@@ -605,7 +608,6 @@ const startScreenSharing = () => {
         stopScreenSharing();
     });
 
-    session.value.unpublish(publisher.value);
 };
 
 // Остановка публикации экрана
