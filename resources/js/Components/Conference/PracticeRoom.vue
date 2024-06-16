@@ -1,5 +1,5 @@
 <template>
-    <div class="room" ref="roomConteiner">
+    <div class="room" ref="roomContainer">
         <div class="d-grid grid-col-4 gap-2 users-videos">
             <div class="user-block my-block">
                 <div
@@ -26,7 +26,9 @@
                 
                 <div class="user-info">
                     <span class="username">{{ user.username }}</span>
-                    <div class="user-buttons"></div>
+                    <div class="user-buttons">
+                        <Button icon='pi pi-window-maximize' @click="toggleFullScreen(userRefs[user.id])" severity="secondary" rounded ></Button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -71,7 +73,7 @@
                     v-if="settings.permission_audio"
                 />
                 <Button
-                    @click="toggleFullScreen"
+                    @click="toggleFullScreen(roomContainer)"
                     class="btn_screen"
                     rounded
                     :icon="
@@ -195,7 +197,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from "vue";
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from "vue";
 import axios from "axios";
 import { OpenVidu } from "openvidu-browser";
 import Button from "primevue/button";
@@ -217,7 +219,7 @@ const props = defineProps({
 const OVScreen = new OpenVidu();
 const OV = new OpenVidu();
 const videoContainer = ref(null);
-const roomConteiner = ref(null);
+const roomContainer = ref(null);
 const subscribers = ref([]);
 const session = ref(null);
 const sessionScreen = ref(null);
@@ -251,7 +253,7 @@ const chatMessage = ref("");
 const displayChatPanel = ref(false);
 
 const currentPage = ref(1);
-const usersPerPage = 12;
+const usersPerPage = 11;
 
 const paginatedUsers = computed(() => {
     const start = (currentPage.value - 1) * usersPerPage;
@@ -422,37 +424,52 @@ const toggleAudio = () => {
         screenPublisher.value.publishAudio(audioEnabled.value);
     }
 };
-const toggleFullScreen = () => {
-    const container = roomConteiner.value;
-    if (!fullScreen.value) {
-        if (container.requestFullscreen) {
-            container.requestFullscreen();
-        } else if (container.mozRequestFullScreen) {
-            /* Firefox */
-            container.mozRequestFullScreen();
-        } else if (container.webkitRequestFullscreen) {
-            /* Chrome, Safari & Opera */
-            container.webkitRequestFullscreen();
-        } else if (container.msRequestFullscreen) {
-            /* IE/Edge */
-            container.msRequestFullscreen();
-        }
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-            /* Firefox */
-            document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) {
-            /* Chrome, Safari & Opera */
-            document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
-            /* IE/Edge */
-            document.msExitFullscreen();
+const toggleFullScreen = (element) => {
+    if(element != roomContainer.value)
+    {
+        if(!document.fullscreenElement) {
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            }
+        } else {
+            CancelFullScreen()
+        } 
+    } else if(!fullScreen.value) {
+        if (element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+        } else if (element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen();
+        } else if (element.msRequestFullscreen) {
+            element.msRequestFullscreen();
         }
     }
-    fullScreen.value = !fullScreen.value;
+    else {
+        CancelFullScreen()
+    } 
+
+    if(element == roomContainer.value)
+        fullScreen.value = !fullScreen.value;
 };
+
+const CancelFullScreen = () => {
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+    } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+    }
+}
 
 const leaveConference = () => {
     if (session.value) {
@@ -529,8 +546,8 @@ const toggleChatPanel = () => {
 };
 
 const movePresencePrompt = () => {
-    const roomWidth = roomConteiner.value.clientWidth;
-    const roomHeight = roomConteiner.value.clientHeight;
+    const roomWidth = roomContainer.value.clientWidth;
+    const roomHeight = roomContainer.value.clientHeight;
     const newTop = Math.random() * (roomHeight - 100) + "px";
     const newLeft = Math.random() * (roomWidth - 200) + "px";
 
@@ -620,6 +637,13 @@ onMounted(() => {
     sessionScreen.value = OVScreen.initSession();
 
     joinSession();
+});
+
+onBeforeUnmount(() => {
+    if (session.value) {
+        session.value.disconnect();
+        sessionScreen.value.disconnect();
+    }
 });
 </script>
 

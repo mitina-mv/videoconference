@@ -272,7 +272,7 @@ const chatMessage = ref("");
 const hands = ref([]);
 
 const currentPage = ref(1);
-const usersPerPage = ref(12);
+const usersPerPage = ref(11);
 
 const paginatedUsers = computed(() => {
     const start = (currentPage.value - 1) * usersPerPage.value;
@@ -701,6 +701,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
     if (session.value) {
         session.value.disconnect();
+        sessionScreen.value.disconnect();
     }
 });
 </script>
