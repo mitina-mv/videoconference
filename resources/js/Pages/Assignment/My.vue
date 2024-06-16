@@ -203,7 +203,7 @@ function isFloat(n) {
                                     ></Button>
                                 </a>
                             </div>
-                            <p class="text-danger" v-if="data.assignment.is_old && !data.assignment.is_active && !isFloat(data.mark)">Нет данных</p>
+                            <p class="text-danger" v-if="data.assignment.is_old && !data.assignment.is_active && (!isFloat(data.mark) || data.mark == 0)">Нет данных</p>
                         </template>
                     </filter-table>
                 </template>

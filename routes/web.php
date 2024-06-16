@@ -69,10 +69,12 @@ Route::group(['prefix' => 'tests', 'middleware' => ['auth', 'teacher']], functio
     Route::get('/new', [TestController::class, 'create'])->name('tests.new');
 });
 
-Route::group(['prefix' => 'assignments', 'middleware' => ['auth', 'teacher']], function () {
-    Route::get('/', [AssignmentController::class, 'index'])->name('assignments.index');
-    Route::get('/edit/{id}', [AssignmentController::class, 'edit'])->name('assignments.edit');
-    Route::get('/new', [AssignmentController::class, 'create'])->name('assignments.new');
+Route::group(['prefix' => 'assignments', 'middleware' => ['auth']], function () {
+    Route::group(['middleware' => ['teacher']], function () {
+        Route::get('/', [AssignmentController::class, 'index'])->name('assignments.index');
+        Route::get('/edit/{id}', [AssignmentController::class, 'edit'])->name('assignments.edit');
+        Route::get('/new', [AssignmentController::class, 'create'])->name('assignments.new');
+    });
 
     Route::get('/my', [MyAssignmentController::class, 'index'])->name('assignments.my');
     Route::get('/testing/{testlog_id}', [MyAssignmentController::class, 'testing'])->name('assignments.testing');

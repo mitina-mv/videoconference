@@ -10,8 +10,12 @@
 
         <div class="d-grid gap-4 content">
             <div class="content__container">
+                <div v-if="timeLimit" class="timer">
+                    Время до конца: {{ formattedTime }}
+                </div>
                 <div v-if="error">{{ error }}</div>
                 <div class="test" v-else-if="curQuestion && !finishFlag">
+                    
                     <div class="test-main">
                         <Question :question="curQuestion" :answers="answers" />
                         <TestNavigation
@@ -45,7 +49,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { Head, usePage } from "@inertiajs/vue3";
 import Question from "@/Components/Testing/Question.vue";
 import QuestionList from "@/Components/Testing/QuestionList.vue";
@@ -66,7 +70,7 @@ const props = defineProps({
 const answers = ref({});
 const curQuestion = ref(null);
 const curQuestionIndex = ref(0);
-const permissionSwitchQuestions = props.settings.permission_switch_questions;
+const permissionSwitchQuestions = props.settings?.permission_switch_questions || true;
 const questions = ref(props.questions);
 const finishFlag = ref(false);
 
@@ -92,7 +96,6 @@ const cancelFinish = () => {
 };
 
 const sendAnswers = async () => {
-    console.log(props.testlog_id);
     try {
         await axios.post(
             route("api.my-assignments.saveAnswer", {
@@ -115,6 +118,35 @@ const sendAnswers = async () => {
         );
     }
 };
+// Таймер
+const timeLimit = props.settings && props.settings.time_limit ? props.settings.time_limit * 60 : null;
+const remainingTime = ref(timeLimit);
+const intervalId = ref(null);
+
+const formattedTime = computed(() => {
+    const minutes = Math.floor(remainingTime.value / 60);
+    const seconds = remainingTime.value % 60;
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+});
+
+const startTimer = () => {
+    intervalId.value = setInterval(() => {
+        if (remainingTime.value > 0) {
+            remainingTime.value -= 1;
+        } else {
+            clearInterval(intervalId.value);
+            finishTest();
+            sendAnswers();
+        }
+    }, 1000);
+};
+
+const stopTimer = () => {
+    if (intervalId.value) {
+        clearInterval(intervalId.value);
+        intervalId.value = null;
+    }
+};
 
 onMounted(() => {
     if (props.answerlogs) {
@@ -127,5 +159,12 @@ onMounted(() => {
 
         curQuestion.value = props.questions[0];
     }
+    if (timeLimit) {
+        startTimer();
+    }
+});
+
+onUnmounted(() => {
+    stopTimer();
 });
 </script>
