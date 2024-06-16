@@ -359,7 +359,7 @@ class ReportController extends Controller
         }
 
         if (!$testlog->mark) {
-            return $this->renderError('Reports/StudentDetail', 'Вы еще не проходили этот тест');
+            return $this->renderError('Reports/StudentDetail', 'Студент не проходит этот тест');
         }
 
         if ($testlog->assignment->user_id != $user->id) {
@@ -461,6 +461,7 @@ class ReportController extends Controller
     {
         return Inertia::render($page, [
             'error' => $message,
+            'backLink' => back()->getTargetUrl()
         ]);
     }
 }
