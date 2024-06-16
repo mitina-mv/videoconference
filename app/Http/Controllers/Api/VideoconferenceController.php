@@ -10,6 +10,7 @@ use App\Models\Answerlog;
 use App\Models\Question;
 use App\Models\Testlog;
 use App\Models\Videoconference;
+use App\Policies\TeacherPolicy;
 use App\Policies\TruePolicy;
 use Carbon\Carbon;
 use Exception;
@@ -23,7 +24,7 @@ class VideoconferenceController extends Controller
     // use DisableAuthorization;
 
     protected $model = Videoconference::class;
-    protected $policy = TruePolicy::class;
+    protected $policy = TeacherPolicy::class;
 
     public function limit(): int
     {

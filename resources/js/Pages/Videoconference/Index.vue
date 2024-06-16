@@ -115,8 +115,7 @@ const fetchData = async (filters = null, page = null, limit = null) => {
 
         loadData.value = true;
     } catch (error) {
-        console.error(error);
-        toastService.showErrorToast("Заголовок", "Текст");
+        toastService.showErrorToast("Получение данных", "Не удалось получить данные");
     }
 };
 
@@ -226,6 +225,15 @@ const toggleYear = (id) => {
                                         icon="pi pi-info-circle"
                                         text
                                         severity="info"
+                                        size="large"
+                                    ></Button>
+                                </a>
+                                
+                                <a v-if="data.assignment && data.assignment.moodle_code" :href="route('get_csv', {assignment_id: data.assignment})">
+                                    <Button
+                                        icon="pi pi-file-excel"
+                                        text
+                                        severity="success"
                                         size="large"
                                     ></Button>
                                 </a>

@@ -38,12 +38,20 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // проверка на существование других админов
+        $adminFirstExists = User::where([
+            'role_id' => Role::ROLE_ADMIN,
+            'is_verify' => true
+        ])
+        ->exists();
+
         $user = User::create([
             'name' => $request->name,
             'lastname' => $request->lastname,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role_id' => Role::ROLE_ADMIN
+            'role_id' => Role::ROLE_ADMIN,
+            'is_verify' => !$adminFirstExists
         ]);
 
         $user->createToken($request->name);

@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('testlogs', function (Blueprint $table) {
-            $table->string('path', 512)->nullable();
+        Schema::table('assignments', function (Blueprint $table) {
+            $table->string('moodle_code')->nullable();
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('testlogs', function (Blueprint $table) {
-            $table->dropColumn('path');
+        Schema::table('assignments', function (Blueprint $table) {
+            $table->dropColumn('moodle_code');
         });
     }
 };

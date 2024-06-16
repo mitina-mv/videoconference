@@ -44,8 +44,8 @@ class MyAssignmentController extends Controller
         if(!$testlog) {
             return $this->renderError('Это тестирование назначено не вам.');
         }
-
-        if(!$testlog->is_active || $testlog->mark) {
+        
+        if(!$testlog->assignment->is_active || $testlog->mark) {
             return $this->renderError('Этот тест недоступен для прохождения');
         }
 

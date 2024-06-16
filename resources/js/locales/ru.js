@@ -222,6 +222,9 @@ export default {
         settings:  {
             title: "Настройки",
         },
+        moodle_code: {
+            title: "Код мероприятия в Moodle",
+        },
     },
     videoconferences_fields:  {
         session: {

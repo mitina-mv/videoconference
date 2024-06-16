@@ -6,6 +6,7 @@ use App\Models\Assignment;
 use App\Models\Role;
 use App\Models\Test;
 use App\Models\Testlog;
+use App\Policies\TeacherPolicy;
 use App\Policies\TruePolicy;
 use Carbon\Carbon;
 use Orion\Http\Controllers\Controller;
@@ -17,7 +18,7 @@ class AssignmentController extends Controller
     // use DisableAuthorization;
 
     protected $model = Assignment::class;
-    protected $policy = TruePolicy::class;
+    protected $policy = TeacherPolicy::class;
 
     public function limit(): int
     {

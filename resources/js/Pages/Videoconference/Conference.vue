@@ -5,6 +5,8 @@ import { Head, usePage } from "@inertiajs/vue3";
 import Room from "@/Components/Conference/Room.vue";
 import labels from "@/locales/ru.js";
 import ModeratorLectionRoom from "@/Components/Conference/ModeratorLectionRoom.vue";
+import PracticeRoom from "@/Components/Conference/PracticeRoom.vue";
+import ModeratorPracticeRoom from "@/Components/Conference/ModeratorPracticeRoom.vue";
 
 const props = defineProps({
     sessionId: [String, null],
@@ -16,6 +18,7 @@ const props = defineProps({
     questions: [Array, null],
     messages: [Array, null],
     testlog: [Number, null],
+    settings: [Object, null],
 });
 </script>
 
@@ -35,28 +38,55 @@ const props = defineProps({
                     {{ error }}
                 </div>
                 <template v-else>
-                    <div
-                        class="moderator-lecture-room"
-                        v-if="role == 'MODERATOR'"
-                    >
-                        <ModeratorLectionRoom
-                            :sessionId="sessionId"
-                            :token="token"
-                            :questions="questions"
-                            :tokenScreen="tokenScreen"
-                            :messages="messages"
-                            :user="$page.props.auth.user"
-                        ></ModeratorLectionRoom>
+                    <div v-if="type == 'lecture'">
+                        <div
+                            class="moderator-lecture-room"
+                            v-if="role == 'MODERATOR'"
+                        >
+                            <ModeratorLectionRoom
+                                :sessionId="sessionId"
+                                :token="token"
+                                :questions="questions"
+                                :tokenScreen="tokenScreen"
+                                :messages="messages"
+                                :user="$page.props.auth.user"
+                            ></ModeratorLectionRoom>
+                        </div>
+                        <div v-else class="lecture-room">
+                            <Room
+                                :sessionId="sessionId"
+                                :messages="messages"
+                                :token="token"
+                                :user="$page.props.auth.user"
+                                :testlog="testlog"
+                            ></Room>
+                        </div>                        
                     </div>
-                    <div v-else class="lecture-room">
-                        <Room
-                            :sessionId="sessionId"
-                            :messages="messages"
-                            :token="token"
-                            :user="$page.props.auth.user"
-                            :testlog="testlog"
-                        ></Room>
+                    <div v-if="type == 'practice'" class="moderator-lecture-room">
+                        <div v-if="role == 'MODERATOR'">
+                            <ModeratorPracticeRoom
+                                :sessionId="sessionId"
+                                :token="token"
+                                :questions="questions"
+                                :tokenScreen="tokenScreen"
+                                :messages="messages"
+                                :user="$page.props.auth.user"
+                                :settings="settings"
+                            ></ModeratorPracticeRoom>                            
+                        </div>
+                        <div v-else>
+                            <PracticeRoom class="lecture-room"
+                                :sessionId="sessionId"
+                                :token="token"
+                                :tokenScreen="tokenScreen"
+                                :messages="messages"
+                                :user="$page.props.auth.user"
+                                :testlog="testlog"
+                                :settings="settings"
+                            ></PracticeRoom>
+                        </div>
                     </div>
+
                 </template>
             </div>
         </div>

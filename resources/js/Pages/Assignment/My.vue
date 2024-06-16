@@ -193,7 +193,7 @@ function isFloat(n) {
                             >
                                 <Button icon="pi pi-play" text />
                             </a>
-                            <div v-if="(data.assignment.is_old && !data.assignment.is_active && isFloat(data.mark)) || isFloat(data.mark)" >
+                            <div v-if="(data.assignment.is_old && !data.assignment.is_active && data.mark !== null) || data.mark !== null" >
                                 <a :href="route('report.student', {testlog_id: data.id})">
                                     <Button
                                         icon="pi pi-info-circle"
@@ -203,7 +203,7 @@ function isFloat(n) {
                                     ></Button>
                                 </a>
                             </div>
-                            <p class="text-danger" v-if="data.assignment.is_old && !data.assignment.is_active && !isFloat(data.mark)">Нет данных</p>
+                            <p class="text-danger" v-if="data.assignment.is_old && !data.assignment.is_active && data.mark == null">Нет данных</p>
                         </template>
                     </filter-table>
                 </template>

@@ -16,6 +16,7 @@ class Assignment extends Model
         'user_id',
         'test_id',
         'date',
+        'moodle_code',
         'vc_id'
     ];
     protected $table = 'assignments';
@@ -34,10 +35,10 @@ class Assignment extends Model
         return Carbon::parse($value)->timezone('Europe/Moscow')->format('d.m.Y H:i');
     }
 
-    public function getIsOldAttribute()
+    public function getIsOldAttribute($value)
     {
-        $now = Carbon::now()->timezone('Europe/Moscow');
-        $date = Carbon::parse($this->date)->timezone('Europe/Moscow');
+        $now = Carbon::parse(Carbon::now()->timezone('Europe/Moscow')->format('d.m.Y H:i'));
+        $date = Carbon::parse($this->date)->subMinutes(5);
         return $date && $date->lt($now);
     }
 
@@ -47,7 +48,7 @@ class Assignment extends Model
         $date = Carbon::parse($this->date, 3);
         $start = $date->copy()->subMinutes(5);
         $end = $date->copy()->addMinutes(30);
-
+        
         return $now->between($date, $end);
     }
 

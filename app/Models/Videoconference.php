@@ -43,7 +43,7 @@ class Videoconference extends Model
 
     public function getIsOldAttribute()
     {
-        $now = Carbon::now()->timezone('Europe/Moscow')->addMinutes(6);
+        $now = Carbon::now()->timezone('Europe/Moscow')->addMinutes(5);
         $date = Carbon::parse($this->date, 3);
         return $date && $date->lt($now);
     }

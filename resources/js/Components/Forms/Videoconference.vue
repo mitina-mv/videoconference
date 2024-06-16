@@ -193,6 +193,7 @@ const syncAssignmentTest = async () => {
         test_id: fieldData.value.test_id.value,
         date: fieldData.value.date.value,
         vc_id: id.value,
+        vc_name: fieldData.value.name.value,
     };
 
     try {

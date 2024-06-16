@@ -168,7 +168,7 @@ class VideoconferenceController extends Controller
             $connection = $this->getConnection($vc, $user, $questions);
 
             $conScreen = null;
-            if($vc->user_id == $user->id) {
+            if($vc->user_id == $user->id || $vc->settings->type == 'practice') {
                 $conScreen = $this->openViduService->connectToSession($vc->session, [
                     'data' => json_encode(['user_id' => $user->id, 'username' => 'screen'])
                 ]);
@@ -179,6 +179,8 @@ class VideoconferenceController extends Controller
                     ->where('assignment_id', $vc->assignment->id)
                     ->first();
             }
+
+            // dd($connection['token'], $conScreen['token']);
     
             return Inertia::render('Videoconference/Conference', [
                 'sessionId' => $vc->session,
@@ -191,6 +193,7 @@ class VideoconferenceController extends Controller
                 'messages' => $vc->messages,
                 'questions' => $questions,
                 'backLink' => 'videoconferences.index',
+                'settings' => $vc->settings,
                 'testlog' => empty($testlog) ? null : $testlog->id
             ]);
     
@@ -204,7 +207,7 @@ class VideoconferenceController extends Controller
         if ($vc->user_id == $user->id) {
             return $this->openViduService->connectToSession($vc->session, [
                 'role' => 'MODERATOR',
-                'data' => json_encode(['user_id' => $user->id, 'username' => $user->full_name])
+                'data' => json_encode(['user_id' => $user->id, 'username' => $user->full_name, 'role' => 'MODERATOR'])
             ]);
         } else {
             $this->createTestLogAndAnswerLogs($vc, $user, $questions);
@@ -219,7 +222,8 @@ class VideoconferenceController extends Controller
                 'data' => json_encode([
                     'user_id' => $user->id,
                     'username' => $user->full_name,
-                    'sg_name' => $user->sg_name
+                    'sg_name' => $user->sg_name,
+                    'role' => $role
                 ])
             ]);
         }
@@ -259,6 +263,9 @@ class VideoconferenceController extends Controller
                 'error' => $e->getMessage(),
             ]);
         }
-        return Inertia::render('Videoconference/Detail', $dataVC);
+        return Inertia::render('Videoconference/Detail', [
+            ...$dataVC,
+            'backLink' => 'videoconferences.index',
+        ]);
     }
 }

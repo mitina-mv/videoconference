@@ -297,6 +297,9 @@ h3, .h3 {
     border-bottom: 1px solid #dee2e6;
     padding: 1em 1.5em;
     gap: .5em;
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
 
 .back-button {
@@ -308,6 +311,7 @@ h3, .h3 {
 main {
     padding: 1.5em;
     width: 78vw;
+    position: relative;
 }
 
 .content__container h2 {
@@ -327,11 +331,20 @@ svg.w-20.h-20.fill-current.text-gray-500.guest-logo {
 .form-control__add-link {
     color: var(--gray-400);
 }
+.admin-card {
+    background: #fff;
+    border: 1px solid var(--surface-300);
+    border-radius: 6px;
+    padding: 1em;
+    display: grid;
+    gap: .5em;
+}
 .moderator-lecture-room {
     .room {
         position: relative;
         width: 100%;
         height: calc(100vh - 6.75em);
+        background: #000;
     }
     video {
         height: 100%;
@@ -376,6 +389,10 @@ svg.w-20.h-20.fill-current.text-gray-500.guest-logo {
         padding: 1em;
         bottom: 5em;
         min-width: 300px;
+    }
+
+    .question-list {
+        border: none;
     }
     
     .question-list ul {
@@ -679,7 +696,7 @@ svg.w-20.h-20.fill-current.text-gray-500.guest-logo {
     border: 1px solid var(--surface-300);
     border-radius: 6px;
     padding: .5em;
-    height: 80vh;
+    height: 85vh;
     overflow: hidden;
     overflow-y: auto;
     position: sticky;

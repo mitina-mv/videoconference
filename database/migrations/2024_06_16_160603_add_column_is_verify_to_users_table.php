@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('assignments', function (Blueprint $table) {
-            $table->string('path', 512)->nullable();
+        Schema::table('users', function (Blueprint $table) {
+            $table->boolean('is_verify')->default(false);
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('assignments', function (Blueprint $table) {
-            $table->dropColumn('path');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('is_verify');
         });
     }
 };
