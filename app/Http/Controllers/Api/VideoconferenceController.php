@@ -114,8 +114,8 @@ class VideoconferenceController extends Controller
     {
         $studgroupIds = $request->input('studgroups', []);
         $totalStudents = Studgroup::whereIn('id', $studgroupIds)->withCount('students')->get()->sum('students_count');
-        
-        if ($totalStudents > 2) {
+
+        if ($totalStudents > 100) {
             throw ValidationException::withMessages([
                 'studgroups' => "Общее количество студентов во всех группах не может превышать 100. Текущее количество: {$totalStudents}.",
             ]);
