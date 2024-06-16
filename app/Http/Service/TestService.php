@@ -121,14 +121,23 @@ class TestService
         $correctAnswersGet = $answerlog->answers()->where('is_correct', true)->count();
         $totalMark = $question->mark;
         $correctAnswers = $question->correct_answers()->count();
+        $totalAnswers = $question->answers()->count();
         $type = $question->type;
 
         $score = $totalMark;
         if ($type == 'multiple') {
             $score = round($totalMark / $correctAnswers, 2);
-        }
+            $selectedAnswers = $answerlog->answers()->count();
 
-        $mark = $correctAnswersGet * $score;
+            // если выбраны все ответы, но не все они правильные
+            if ($selectedAnswers == $totalAnswers && $correctAnswers != $totalAnswers) {
+                $mark = 0;
+            } else {
+                $mark = $correctAnswersGet * $score;
+            }
+        } else {
+            $mark = $correctAnswersGet * $score;
+        }
 
         $answerlog->update(['mark' => $mark]);
     }
