@@ -503,7 +503,7 @@ const endCall = () => {
             })
             .then(async () => {
                 console.log("End call signal sent");
-                // await axios.post(route('api.videoconferences.end', {session: props.sessionId}))
+                await axios.post(route('api.videoconferences.end', {session: props.sessionId}))
                 session.value.disconnect();
                 sessionScreen.value.disconnect();
                 window.location.href = "/videoconferences";
