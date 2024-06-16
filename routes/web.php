@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\ConferenceController;
+use App\Http\Controllers\CsvController;
 use App\Http\Controllers\MyAssignmentController;
 use App\Http\Controllers\MyVideoconferenceController;
 use App\Http\Controllers\ProfileController;
@@ -96,6 +97,8 @@ Route::group(['prefix' => 'report', 'middleware' => ['auth']], function () {
     Route::get('/assignment/{assignment_id}', [ReportController::class, 'assignment'])->name('report.assignment');
     Route::get('/detail/{testlog_id}', [ReportController::class, 'detail'])->name('report.detail');
 });
+
+Route::get('/get_csv/{assignment_id}', [CsvController::class, 'get_csv'])->middleware(['auth', 'teacher'])->name('get_csv');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

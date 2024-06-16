@@ -16,6 +16,7 @@ class Assignment extends Model
         'user_id',
         'test_id',
         'date',
+        'moodle_code',
         'vc_id'
     ];
     protected $table = 'assignments';

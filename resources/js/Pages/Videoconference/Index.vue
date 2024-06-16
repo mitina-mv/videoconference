@@ -228,6 +228,15 @@ const toggleYear = (id) => {
                                         size="large"
                                     ></Button>
                                 </a>
+                                
+                                <a v-if="data.assignment && data.assignment.moodle_code" :href="route('get_csv', {assignment_id: data.assignment})">
+                                    <Button
+                                        icon="pi pi-file-excel"
+                                        text
+                                        severity="success"
+                                        size="large"
+                                    ></Button>
+                                </a>
                             </div>
                             <div v-if="data.is_old && !data.is_completed && !data.is_active">
                                 <span class="text-danger">Не проведена</span>

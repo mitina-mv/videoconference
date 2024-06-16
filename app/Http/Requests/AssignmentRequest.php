@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Orion\Http\Requests\Request;
+use Illuminate\Support\Str;
 
 class AssignmentRequest extends Request
 {
@@ -24,14 +25,22 @@ class AssignmentRequest extends Request
             'test_id' => ['required', 'exists:tests,id', 'bail'],
             'vc_id' => ['nullable', 'exists:videoconferences,id', 'bail'],
             'user_id' => ['required', 'exists:users,id', 'bail'],
+            'moodle_code' => ['nullable', 'string', 'max:255'],
         ];
     }
 
     public function prepareForValidation()
     {
+        $VCname = request()->vc_name;
+        $moodle_code = request()->moodle_code;
+
+        if($VCname && !$moodle_code) {
+            $moodle_code = Str::slug($VCname, '-');
+        }
         return $this->merge([
             'id' => request()->assignment,
             'user_id' => auth()->id(),
+            'moodle_code' => $moodle_code,
         ]);
     }
 }

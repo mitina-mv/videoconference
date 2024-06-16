@@ -190,6 +190,14 @@ const toggleYear = (id) => {
                                         size="large"
                                     ></Button>
                                 </a>
+                                <a v-if="data.moodle_code" :href="route('get_csv', {assignment_id: data.id})">
+                                    <Button
+                                        icon="pi pi-file-excel"
+                                        text
+                                        severity="success"
+                                        size="large"
+                                    ></Button>
+                                </a>
                             </div>
                         </template>
                     </filter-table>

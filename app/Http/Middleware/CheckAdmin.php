@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Role;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +18,7 @@ class CheckAdmin
     {
         $user = $request->user(); // Получаем текущего пользователя
 
-        if ($user && $user->name === 'admin' && $user->id == 1) {
+        if ($user && $user->role_id == Role::ROLE_ADMIN) {
             return $next($request);
         }
 

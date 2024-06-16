@@ -27,6 +27,12 @@ const fieldData = ref({
         label: labels.assignments_fields.date.title,
         req: true,
     },
+    moodle_code: {
+        value: props?.data?.moodle_code || null,
+        type: "string",
+        label: labels.assignments_fields.moodle_code.title,
+        req: false,
+    },
     test_id: {
         value: props?.data?.test_id || null,
         type: "dropdown",
