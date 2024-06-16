@@ -32,6 +32,7 @@ class User extends Authenticatable
         'patronymic',
         'role_id',
         'studgroup_id',
+        'is_verify',
     ];
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Test;
+use App\Policies\TeacherPolicy;
 use App\Policies\TruePolicy;
 use Orion\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,7 +14,7 @@ class TestController extends Controller
     // use DisableAuthorization;
 
     protected $model = Test::class;
-    protected $policy = TruePolicy::class;
+    protected $policy = TeacherPolicy::class;
 
     public function limit() : int
     {

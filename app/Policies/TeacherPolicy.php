@@ -5,14 +5,14 @@ namespace App\Policies;
 use App\Models\Role;
 use App\Models\User;
 
-class AdminPolicy
+class TeacherPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return $user->is_verify;
+        return $user->role_id === Role::ROLE_TEACHER;
     }
 
     /**
@@ -20,7 +20,7 @@ class AdminPolicy
      */
     public function view(User $user, $model): bool
     {
-        return $user->is_verify;
+        return $user->role_id === Role::ROLE_TEACHER;
     }
 
     /**
@@ -28,7 +28,7 @@ class AdminPolicy
      */
     public function create(User $user): bool
     {
-        return $user->role_id === Role::ROLE_ADMIN && $user->is_verify;
+        return $user->role_id === Role::ROLE_TEACHER;
     }
 
     /**
@@ -36,8 +36,7 @@ class AdminPolicy
      */
     public function update(User $user, $model): bool
     {
-        return ($user->role_id === Role::ROLE_ADMIN && $user->is_verify)
-            || $model->user_id === $user->id;
+        return $user->role_id === Role::ROLE_TEACHER && $model->user_id === $user->id;
     }
 
     /**
@@ -45,7 +44,7 @@ class AdminPolicy
      */
     public function delete(User $user, $model): bool
     {
-        return $user->role_id === Role::ROLE_ADMIN && $user->is_verify;
+        return $user->role_id === Role::ROLE_TEACHER && $model->user_id === $user->id;
     }
 
     /**
@@ -53,7 +52,7 @@ class AdminPolicy
      */
     public function restore(User $user, $model): bool
     {
-        return $user->role_id === Role::ROLE_ADMIN && $user->is_verify;
+        return $user->role_id === Role::ROLE_TEACHER && $model->user_id === $user->id;
     }
 
     /**
@@ -61,6 +60,6 @@ class AdminPolicy
      */
     public function forceDelete(User $user, $model): bool
     {
-        return $user->role_id === Role::ROLE_ADMIN && $user->is_verify;
+        return $user->role_id === Role::ROLE_TEACHER && $model->user_id === $user->id;
     }
 }

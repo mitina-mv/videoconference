@@ -29,7 +29,7 @@ class UserController extends Controller
 
     public function filterableBy() : array
     {
-        return ['role_id', 'studgroup_id', ];
+        return ['role_id', 'studgroup_id', 'is_verify',];
     }
 
     public function searchableBy() : array

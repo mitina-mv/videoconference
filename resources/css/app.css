@@ -331,6 +331,14 @@ svg.w-20.h-20.fill-current.text-gray-500.guest-logo {
 .form-control__add-link {
     color: var(--gray-400);
 }
+.admin-card {
+    background: #fff;
+    border: 1px solid var(--surface-300);
+    border-radius: 6px;
+    padding: 1em;
+    display: grid;
+    gap: .5em;
+}
 .moderator-lecture-room {
     .room {
         position: relative;
@@ -381,6 +389,10 @@ svg.w-20.h-20.fill-current.text-gray-500.guest-logo {
         padding: 1em;
         bottom: 5em;
         min-width: 300px;
+    }
+
+    .question-list {
+        border: none;
     }
     
     .question-list ul {

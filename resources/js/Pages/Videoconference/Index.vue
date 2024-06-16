@@ -115,8 +115,7 @@ const fetchData = async (filters = null, page = null, limit = null) => {
 
         loadData.value = true;
     } catch (error) {
-        console.error(error);
-        toastService.showErrorToast("Заголовок", "Текст");
+        toastService.showErrorToast("Получение данных", "Не удалось получить данные");
     }
 };
 
