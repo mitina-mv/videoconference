@@ -1,15 +1,43 @@
 <template>
     <div class="room" ref="roomContainer">
         <div class="d-grid grid-col-3 gap-2">
-            <div class="video-container" ref="videoContainer"></div>
-            <div v-for="user in users" :key="user.id" class="user-block" :ref="el => userRefs[user.id] = el">
+            <div class="user-block" >
+                <div
+                    class="video"
+                    ref="videoContainer"
+                ></div>
+            </div>
+            <div
+                v-for="user in paginatedUsers"
+                :key="user.id"
+                class="user-block"
+                :ref="(el) => (userRefs[user.id] = el)"
+            >
                 <div class="user-info">
                     <span class="username">{{ user.username }}</span>
-                    <span class="user-status" :style="{ backgroundColor: user.color }"></span>
+                    <span
+                        class="user-status"
+                        :style="{ backgroundColor: user.color }"
+                    ></span>
                 </div>
-                <div class="11" :ref="videoContainerEl => user.videoContainer = videoContainerEl"></div>
-            </div>            
-        </div> 
+                <div
+                    class="video"
+                    :ref="
+                        (videoContainerEl) =>
+                            (user.videoContainer = videoContainerEl)
+                    "
+                ></div>
+            </div>
+        </div>
+        <div class="pagination-controls">
+            <button @click="prevPage" :disabled="currentPage === 1">
+                Назад
+            </button>
+            <span>{{ currentPage }} / {{ totalPages }}</span>
+            <button @click="nextPage" :disabled="currentPage === totalPages">
+                Вперед
+            </button>
+        </div>
 
         <div class="controls">
             <div class="d-flex gap-3">
@@ -67,11 +95,7 @@
                 />
             </div>
             <div class="d-flex gap-3">
-                <Button
-                    icon="pi pi-megaphone"
-                    rounded
-                    severity="warn"
-                ></Button>
+                <Button icon="pi pi-megaphone" rounded severity="warn"></Button>
                 <Button
                     @click="toggleUserPanel"
                     icon="pi pi-users"
@@ -96,9 +120,18 @@
                 <div v-for="(group, index) in students" :key="index">
                     <u>{{ index }}</u>
                     <ul>
-                        <li v-for="student in group" :key="student.connectionId" class="d-flex flex-between">
-                            <p style="flex:1 auto;">{{ student.username }}</p>
-                            <Button icon="pi pi-sign-out" severity="danger" @click="destroyConnection(student.connection)" text></Button>
+                        <li
+                            v-for="student in group"
+                            :key="student.connectionId"
+                            class="d-flex flex-between"
+                        >
+                            <p style="flex: 1 auto">{{ student.username }}</p>
+                            <Button
+                                icon="pi pi-sign-out"
+                                severity="danger"
+                                @click="destroyConnection(student.connection)"
+                                text
+                            ></Button>
                         </li>
                     </ul>
                 </div>
@@ -174,7 +207,7 @@
             </header>
             <div class="hand-body">
                 <p>
-                    Студент(ы) <b>{{ hands.join(', ') }}</b> поднял(и) руку.
+                    Студент(ы) <b>{{ hands.join(", ") }}</b> поднял(и) руку.
                 </p>
                 <Button
                     icon="pi pi-check"
@@ -199,7 +232,7 @@ const props = defineProps({
     tokenScreen: String,
     messages: [Array, null],
     questions: [Array, null],
-    user: Object
+    user: Object,
 });
 
 const OV = new OpenVidu();
@@ -217,7 +250,7 @@ const users = reactive([]);
 const videoContainer = ref(null);
 const roomContainer = ref(null);
 const session = ref(null);
-const sessionScreen  = ref(null);
+const sessionScreen = ref(null);
 
 const displayUserPanel = ref(false);
 const displayQuestionPanel = ref(false);
@@ -229,18 +262,47 @@ const messages = ref(props.messages || []);
 const chatMessage = ref("");
 
 // поднятие руки
-const hands = ref([]) 
+const hands = ref([]);
+
+const currentPage = ref(1);
+const usersPerPage = 9;
+
+const paginatedUsers = computed(() => {
+    const start = (currentPage.value - 1) * usersPerPage;
+    const end = start + usersPerPage;
+    return users.slice(start, end);
+});
+
+const totalPages = computed(() => Math.ceil(users.length / usersPerPage));
+
+const nextPage = () => {
+    if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+    }
+};
+
+const prevPage = () => {
+    if (currentPage.value > 1) {
+        currentPage.value--;
+    }
+};
 
 const toggleHandAction = () => {
     hands.value = [];
-}
+};
 
 const joinSession = async () => {
     try {
         session.value.on("connectionCreated", (event) => {
             const connection = event.connection;
             const data = JSON.parse(connection.data);
-            addUser(connection.connectionId, data.username, 'red');
+            if(data.user_id == props.user.id) return;
+            addUser(
+                connection.connectionId,
+                data.username,
+                "red",
+                data.user_id
+            );
         });
 
         session.value.on("connectionDestroyed", (event) => {
@@ -250,18 +312,28 @@ const joinSession = async () => {
 
         session.value.on("streamCreated", ({ stream }) => {
             const connectionId = stream.connection.connectionId;
-            const user = users.find(u => u.id === connectionId);
+            const user = users.find(
+                (u) => u.id === connectionId || u.screenShareId === connectionId
+            );
             if (user && user.videoContainer) {
-                const subscriber = session.value.subscribe(stream, user.videoContainer, { insertMode: "APPEND" });
+                const subscriber = session.value.subscribe(
+                    stream,
+                    user.videoContainer,
+                    { insertMode: "APPEND" }
+                );
                 subscribers.value.push(subscriber);
             }
         });
 
         session.value.on("streamDestroyed", ({ stream }) => {
-            const subscriber = subscribers.value.find(s => s.stream === stream);
+            const subscriber = subscribers.value.find(
+                (s) => s.stream === stream
+            );
             if (subscriber) {
                 session.value.unsubscribe(subscriber);
-                subscribers.value = subscribers.value.filter(s => s !== subscriber);
+                subscribers.value = subscribers.value.filter(
+                    (s) => s !== subscriber
+                );
             }
         });
 
@@ -273,18 +345,8 @@ const joinSession = async () => {
         session.value.on("signal:hand", (event) => {
             const user = JSON.parse(event.data);
             hands.value.push(user.username);
-            hands.value = [...new Set(hands.value)]
+            hands.value = [...new Set(hands.value)];
         });
-
-        // session.value.on("streamCreated", ({stream}) => {
-        //     const subscriber = session.value.subscribe(
-        //         stream,
-        //         videoContainer.value,
-        //         { insertMode: "APPEND" }
-        //     );
-        //     subscribers.value.push(subscriber);
-        //     console.log('студенты',subscribers.value);
-        // });
 
         await session.value.connect(props.token);
 
@@ -301,19 +363,25 @@ const joinSession = async () => {
         session.value.publish(publisher.value);
         updateUserList();
 
-        // Подключение к sessionScreen
         await sessionScreen.value.connect(props.tokenScreen);
     } catch (error) {
         console.error("Connection error:", error);
     }
 };
 
-const addUser = (id, username, color) => {
-    users.push({ id, username, color });
+const addUser = (id, username, color, user_id) => {
+    if (username === "screen") {
+        const existingUser = users.find((user) => user.user_id === user_id);
+        if (existingUser) {
+            existingUser.screenShareId = id;
+            return;
+        }
+    }
+    users.push({ id, username, color, user_id });
 };
 
 const removeUser = (id) => {
-    const index = users.findIndex(user => user.id === id);
+    const index = users.findIndex((user) => user.id === id);
     if (index !== -1) {
         users.splice(index, 1);
     }
@@ -324,10 +392,9 @@ const updateUserList = () => {
         session.value.remoteConnections.forEach((connection) => {
             const data = JSON.parse(connection.data);
 
-
-            if(data.username != 'screen') {
-                if(!students.value.hasOwnProperty(data.sg_name)) {
-                    students.value[data.sg_name] = []
+            if (data.username != "screen") {
+                if (!students.value.hasOwnProperty(data.sg_name)) {
+                    students.value[data.sg_name] = [];
                 }
                 students.value[data.sg_name].push({
                     connectionId: connection.connectionId,
@@ -448,7 +515,11 @@ const checkActive = () => {
             })
             .then(() => {
                 checkActiveCount.value += 1;
-                axios.post(route('api.videoconferences.checking', {session: props.sessionId}))
+                axios.post(
+                    route("api.videoconferences.checking", {
+                        session: props.sessionId,
+                    })
+                );
             })
             .catch((error) => {
                 console.error(error);
@@ -462,7 +533,7 @@ const sendMessage = () => {
             username: props.user.full_name,
             text: chatMessage.value,
             timestamp: Date.now(),
-            class: 'moderator',
+            class: "moderator",
         };
 
         session.value
@@ -473,9 +544,11 @@ const sendMessage = () => {
             })
             .then(() => {
                 axios.post(
-                    route('api.videoconferences.chat', {session: props.sessionId}),
-                    {message: message}
-                )
+                    route("api.videoconferences.chat", {
+                        session: props.sessionId,
+                    }),
+                    { message: message }
+                );
             })
             .catch((error) => {
                 console.error("Error sending chat message:", error);
@@ -489,7 +562,7 @@ const destroyConnection = (connetcion) => {
     if (session.value) {
         session.value.forceDisconnect(connetcion);
     }
-}
+};
 
 const startScreenSharing = () => {
     if (screenPublisher.value) return;
@@ -506,18 +579,21 @@ const startScreenSharing = () => {
 
     screenPublisher.value.once("accessAllowed", () => {
         sessionScreen.value.publish(screenPublisher.value);
-        screenPublisher.value.stream.getMediaStream().getVideoTracks()[0].addEventListener("ended", () => {
-            stopScreenSharing();
-        });
+        screenPublisher.value.stream
+            .getMediaStream()
+            .getVideoTracks()[0]
+            .addEventListener("ended", () => {
+                stopScreenSharing();
+            });
     });
 
     sessionScreen.value.on("signal:hand", (event) => {
         const user = JSON.parse(event.data);
         hands.value.push(user.username);
-        hands.value = [...new Set(hands.value)]
+        hands.value = [...new Set(hands.value)];
     });
 
-    screenPublisher.value.once('accessDenied', () => {
+    screenPublisher.value.once("accessDenied", () => {
         stopScreenSharing();
     });
 
@@ -546,57 +622,67 @@ const stopScreenSharing = () => {
 
 const toggleScreenShare = () => {
     if (!screenPublisher.value) {
-        startScreenSharing()
+        startScreenSharing();
     } else {
-        stopScreenSharing()
+        stopScreenSharing();
     }
-}
+};
 
 onMounted(() => {
-    console.warn('PRACTICE');
+    console.warn("PRACTICE");
     session.value = OV.initSession();
     sessionScreen.value = OVScreen.initSession();
     joinSession();
 });
 
 onBeforeUnmount(() => {
-  if (session.value) {
-    session.value.disconnect();
-  }
+    if (session.value) {
+        session.value.disconnect();
+    }
 });
 </script>
 
 <style scoped>
 .conference-container {
-  display: flex;
-  flex-wrap: wrap;
+    display: flex;
+    flex-wrap: wrap;
 }
-.video-container{
+.video-container {
     width: 300px;
+    height: 300px;
 }
 
 .user-block {
-  width: 300px;
-  margin: 10px;
-  border: 1px solid #ccc;
-  padding: 10px;
-  border-radius: 5px;
+    width: 300px;
+    margin: 10px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
 }
 
 .user-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
 .username {
-  font-weight: bold;
+    font-weight: bold;
 }
 
 .user-status {
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+}
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.pagination-controls button {
+    margin: 0 5px;
 }
 </style>

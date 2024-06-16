@@ -336,6 +336,7 @@ svg.w-20.h-20.fill-current.text-gray-500.guest-logo {
         position: relative;
         width: 100%;
         height: calc(100vh - 6.75em);
+        background: #000;
     }
     video {
         height: 100%;
