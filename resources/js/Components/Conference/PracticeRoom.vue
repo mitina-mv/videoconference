@@ -1,11 +1,14 @@
 <template>
     <div class="room" ref="roomConteiner">
-        <div class="d-grid grid-col-3 gap-2">
+        <div class="d-grid grid-col-4 gap-2 users-videos">
             <div class="user-block my-block">
                 <div
                     class="video"
                     ref="videoContainer"
                 ></div>
+                <div class="user-info">
+                    <span class="username">Мое подключение</span>
+                </div>
             </div>
             <div
                 v-for="user in paginatedUsers"
@@ -23,10 +26,7 @@
                 
                 <div class="user-info">
                     <span class="username">{{ user.username }}</span>
-                    <span
-                        class="user-status"
-                        :style="{ backgroundColor: user.color }"
-                    ></span>
+                    <div class="user-buttons"></div>
                 </div>
             </div>
         </div>
@@ -296,16 +296,17 @@ const joinSession = async () => {
             const user = users.find(
                 (u) => u.id === connectionId || u.screenShareId === connectionId
             );
-            console.warn(user, userRefs[connectionId]);
-            if (user && user.videoBlock) {
-                const subscriber = session.value.subscribe(
-                    stream,
-                    user.videoBlock,
-                    { insertMode: "APPEND" }
-                );
-                console.warn(subscriber);
-                subscribers.value.push(subscriber);
-            }
+            setTimeout(() => { 
+                if (user && user.videoBlock) {
+                    const subscriber = session.value.subscribe(
+                        stream,
+                        user.videoBlock,
+                        { insertMode: "APPEND" }
+                    );
+                    console.warn(subscriber);
+                    subscribers.value.push(subscriber);
+                }
+             }, 1000);
         });
 
         session.value.on("streamDestroyed", ({ stream }) => {
@@ -367,12 +368,16 @@ const joinSession = async () => {
     }
 };
 const addUser = (id, username, color, user_id) => {
-    if (username === "screen") {
-        const existingUser = users.find((user) => user.user_id === user_id);
-        if (existingUser) {
+    const existingUser = users.find((user) => user.user_id === user_id);
+    if (existingUser) {
+        console.warn(existingUser.videoBlock);
+        if (username === "screen") {
             existingUser.screenShareId = id;
-            return;
+        } else {
+            existingUser.id = id
+            existingUser.username = username
         }
+        return;
     }
     users.push({ id, username, color, user_id });
 };
@@ -609,24 +614,41 @@ onMounted(() => {
     display: flex;
     flex-wrap: wrap;
 }
+.users-videos{
+    grid-auto-rows: calc(78vh / 3);
+    height: calc(100% - 6.5em);
+    padding: 1em;
+}
 .video-container {
     width: 300px;
     height: 300px;
 }
 
 .user-block {
-    width: 300px;
-    margin: 10px;
-    border: 1px solid #ccc;
-    padding: 10px;
+    width: 100%;
+    border: 1px solid #606060;
+    position: relative;
+    
+    overflow: hidden;
     border-radius: 5px;
+}
+.user-block .video {
+    widows: 100%;
+    height: 100%;;
 }
 
 .user-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    padding: 10px;
+    min-height: 50px;
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    background: linear-gradient(to top, #000, #3636366e,#0f0f0f05);
+    margin: 0;
+    color: #fff;
 }
 
 .username {
