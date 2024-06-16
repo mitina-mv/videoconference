@@ -13,13 +13,6 @@
                 class="user-block"
                 :ref="(el) => (userRefs[user.id] = el)"
             >
-                <div class="user-info">
-                    <span class="username">{{ user.username }}</span>
-                    <span
-                        class="user-status"
-                        :style="{ backgroundColor: user.color }"
-                    ></span>
-                </div>
                 <div
                     class="video"
                     :ref="
@@ -27,6 +20,14 @@
                             (user.videoContainer = videoContainerEl)
                     "
                 ></div>
+                
+                <div class="user-info">
+                    <span class="username">{{ user.username }}</span>
+                    <span
+                        class="user-status"
+                        :style="{ backgroundColor: user.color }"
+                    ></span>
+                </div>
             </div>
         </div>
         <div class="pagination-controls">

@@ -1,6 +1,45 @@
 <template>
     <div class="room" ref="roomConteiner">
-        <div class="video-container" ref="videoContainer"></div>
+        <div class="d-grid grid-col-3 gap-2">
+            <div class="user-block my-block">
+                <div
+                    class="video"
+                    ref="videoContainer"
+                ></div>
+            </div>
+            <div
+                v-for="user in paginatedUsers"
+                :key="user.id"
+                class="user-block"
+                :ref="(el) => (userRefs[user.id] = el)"
+            >
+                <div
+                    class="video"
+                    :ref="
+                        (videoContainerEl) =>
+                            (user.videoBlock = videoContainerEl)
+                    "
+                ></div>
+                
+                <div class="user-info">
+                    <span class="username">{{ user.username }}</span>
+                    <span
+                        class="user-status"
+                        :style="{ backgroundColor: user.color }"
+                    ></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="pagination-controls">
+            <button @click="prevPage" :disabled="currentPage === 1">
+                Назад
+            </button>
+            <span>{{ currentPage }} / {{ totalPages }}</span>
+            <button @click="nextPage" :disabled="currentPage === totalPages">
+                Вперед
+            </button>
+        </div>
         <div class="controls">
             <div class="d-flex gap-3">
                 <Button
@@ -50,6 +89,13 @@
                     rounded
                     icon="pi pi-phone"
                     severity="danger"
+                />
+                <Button
+                    @click="toggleScreenShare"
+                    rounded
+                    icon="pi pi-desktop"
+                    :class="screenPublisher ? 'btn_off' : 'btn_on'"
+                    v-if="settings.permission_video"
                 />
             </div>
             <div></div>
@@ -149,7 +195,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import axios from "axios";
 import { OpenVidu } from "openvidu-browser";
 import Button from "primevue/button";
@@ -168,14 +214,20 @@ const props = defineProps({
     settings: [Object, null],
 });
 
+const OVScreen = new OpenVidu();
 const OV = new OpenVidu();
 const videoContainer = ref(null);
 const roomConteiner = ref(null);
 const subscribers = ref([]);
 const session = ref(null);
+const sessionScreen = ref(null);
 const fullScreen = ref(false);
 const teacher = ref(null)
 const publisher = ref(null);
+const screenPublisher = ref(null);
+
+const userRefs = reactive({});
+const users = reactive([]);
 
 const videoEnabled = ref(props.settings.permission_video);
 const audioEnabled = ref(props.settings.permission_audio);
@@ -198,17 +250,74 @@ const messages = ref(props.messages || []);
 const chatMessage = ref("");
 const displayChatPanel = ref(false);
 
+const currentPage = ref(1);
+const usersPerPage = 9;
+
+const paginatedUsers = computed(() => {
+    const start = (currentPage.value - 1) * usersPerPage;
+    const end = start + usersPerPage;
+    return users.slice(start, end);
+});
+
+const totalPages = computed(() => Math.ceil(users.length / usersPerPage));
+
+const nextPage = () => {
+    if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+    }
+};
+
+const prevPage = () => {
+    if (currentPage.value > 1) {
+        currentPage.value--;
+    }
+};
+
 const joinSession = async () => {
     console.log(props.token);
     try {
-        session.value.on("streamCreated", ({stream}) => {
-            const subscriber = session.value.subscribe(
-                stream,
-                videoContainer.value,
-                { insertMode: "APPEND" }
+        session.value.on("connectionCreated", (event) => {
+            const connection = event.connection;
+            const data = JSON.parse(connection.data);
+            if(data.user_id == props.user.id) return;
+            addUser(
+                connection.connectionId,
+                data.username,
+                "blue",
+                data.user_id
             );
-            subscribers.value.push(subscriber);
-            teacher.value = stream.connection
+        });
+        session.value.on("connectionDestroyed", (event) => {
+            const connection = event.connection;
+            removeUser(connection.connectionId);
+        });
+        session.value.on("streamCreated", ({ stream }) => {
+            const connectionId = stream.connection.connectionId;
+            const user = users.find(
+                (u) => u.id === connectionId || u.screenShareId === connectionId
+            );
+            console.warn(user, userRefs[connectionId]);
+            if (user && user.videoBlock) {
+                const subscriber = session.value.subscribe(
+                    stream,
+                    user.videoBlock,
+                    { insertMode: "APPEND" }
+                );
+                console.warn(subscriber);
+                subscribers.value.push(subscriber);
+            }
+        });
+
+        session.value.on("streamDestroyed", ({ stream }) => {
+            const subscriber = subscribers.value.find(
+                (s) => s.stream === stream
+            );
+            if (subscriber) {
+                session.value.unsubscribe(subscriber);
+                subscribers.value = subscribers.value.filter(
+                    (s) => s !== subscriber
+                );
+            }
         });
 
         session.value.on("sessionDisconnected", (event) => {
@@ -252,8 +361,26 @@ const joinSession = async () => {
         });
         session.value.publish(publisher.value);
         console.log("Connected to session");
+        await sessionScreen.value.connect(props.tokenScreen);
     } catch (error) {
         console.error("Connection error:", error);
+    }
+};
+const addUser = (id, username, color, user_id) => {
+    if (username === "screen") {
+        const existingUser = users.find((user) => user.user_id === user_id);
+        if (existingUser) {
+            existingUser.screenShareId = id;
+            return;
+        }
+    }
+    users.push({ id, username, color, user_id });
+};
+
+const removeUser = (id) => {
+    const index = users.findIndex((user) => user.id === id);
+    if (index !== -1) {
+        users.splice(index, 1);
     }
 };
 const toggleVideo = () => {
@@ -407,9 +534,117 @@ const handAction = () => {
             });
     }
 }
+const toggleScreenShare = () => {
+    if (!screenPublisher.value) {
+        startScreenSharing();
+    } else {
+        stopScreenSharing();
+    }
+};
+const startScreenSharing = () => {
+    if (screenPublisher.value) return;
 
+    screenPublisher.value = OVScreen.initPublisher(videoContainer.value, {
+        videoSource: "screen",
+        publishAudio: audioEnabled.value,
+        publishVideo: true,
+        resolution: "1200x980",
+        mirror: false,
+    });
+
+    videoEnabled.value = false;
+
+    screenPublisher.value.once("accessAllowed", () => {
+        sessionScreen.value.publish(screenPublisher.value);
+        screenPublisher.value.stream
+            .getMediaStream()
+            .getVideoTracks()[0]
+            .addEventListener("ended", () => {
+                stopScreenSharing();
+            });
+    });
+
+    sessionScreen.value.on("signal:hand", (event) => {
+        const user = JSON.parse(event.data);
+        hands.value.push(user.username);
+        hands.value = [...new Set(hands.value)];
+    });
+
+    screenPublisher.value.once("accessDenied", () => {
+        stopScreenSharing();
+    });
+
+    session.value.unpublish(publisher.value);
+};
+
+// Остановка публикации экрана
+const stopScreenSharing = () => {
+    if (!screenPublisher.value) return;
+    sessionScreen.value.unpublish(screenPublisher.value);
+    screenPublisher.value = null;
+
+    videoEnabled.value = true;
+    publisher.value = OV.initPublisher(videoContainer.value, {
+        videoSource: undefined,
+        audioSource: undefined,
+        publishAudio: audioEnabled.value,
+        publishVideo: videoEnabled.value,
+        resolution: "1200x980",
+        insertMode: "APPEND",
+        mirror: true,
+    });
+
+    session.value.publish(publisher.value);
+};
 onMounted(() => {
     session.value = OV.initSession();
+    sessionScreen.value = OVScreen.initSession();
+
     joinSession();
 });
 </script>
+
+<style scoped>
+.conference-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+.video-container {
+    width: 300px;
+    height: 300px;
+}
+
+.user-block {
+    width: 300px;
+    margin: 10px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.user-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.username {
+    font-weight: bold;
+}
+
+.user-status {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+}
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.pagination-controls button {
+    margin: 0 5px;
+}
+</style>

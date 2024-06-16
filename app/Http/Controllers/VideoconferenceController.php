@@ -179,6 +179,8 @@ class VideoconferenceController extends Controller
                     ->where('assignment_id', $vc->assignment->id)
                     ->first();
             }
+
+            // dd($connection['token'], $conScreen['token']);
     
             return Inertia::render('Videoconference/Conference', [
                 'sessionId' => $vc->session,
