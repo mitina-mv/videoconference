@@ -18,15 +18,14 @@
             >
                 <div
                     class="video"
-                    :ref="
-                        (videoContainerEl) =>
-                            (user.videoBlock = videoContainerEl)
-                    "
+                    :ref="(videoContainerEl) => (user.videoBlock = videoContainerEl)"
                 ></div>
                 
                 <div class="user-info">
                     <span class="username">{{ user.username }}</span>
-                    <div class="user-buttons"></div>
+                    <div class="user-buttons">
+                        <Button icon='pi pi-window-maximize' @click="toggleFullScreen(userRefs[user.id])" severity="secondary" rounded ></Button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -69,7 +68,7 @@
                     icon="pi pi-microphone"
                 />
                 <Button
-                    @click="toggleFullScreen"
+                    @click="toggleFullScreen(roomContainer)"
                     class="btn_screen"
                     rounded
                     :icon="
@@ -249,7 +248,7 @@ const publisher = ref(null);
 const videoEnabled = ref(true);
 const audioEnabled = ref(true);
 const fullScreen = ref(false);
-const students = ref([]);
+const students = ref({});
 const screenPublisher = ref(null);
 const subscribers = ref([]);
 const userRefs = reactive({});
@@ -273,15 +272,15 @@ const chatMessage = ref("");
 const hands = ref([]);
 
 const currentPage = ref(1);
-const usersPerPage = 12;
+const usersPerPage = ref(12);
 
 const paginatedUsers = computed(() => {
-    const start = (currentPage.value - 1) * usersPerPage;
-    const end = start + usersPerPage;
+    const start = (currentPage.value - 1) * usersPerPage.value;
+    const end = start + usersPerPage.value;
     return users.slice(start, end);
 });
 
-const totalPages = computed(() => Math.ceil(users.length / usersPerPage));
+const totalPages = computed(() => Math.ceil(users.length / usersPerPage.value));
 
 const nextPage = () => {
     if (currentPage.value < totalPages.value) {
@@ -313,11 +312,15 @@ const joinSession = async () => {
                 "red",
                 data.user_id
             );
+            updateUserList(data, connection)
         });
 
         session.value.on("connectionDestroyed", (event) => {
             const connection = event.connection;
+            const data = JSON.parse(connection.data);
+
             removeUser(connection.connectionId);
+            updateUserList(data, connection, true);
         });
 
         session.value.on("streamCreated", ({ stream }) => {
@@ -402,23 +405,26 @@ const removeUser = (id) => {
         users.splice(index, 1);
     }
 };
-const updateUserList = () => {
-    students.value = {};
-    if (session.value.remoteConnections) {
-        session.value.remoteConnections.forEach((connection) => {
-            const data = JSON.parse(connection.data);
-
-            if (data.username != "screen") {
-                if (!students.value.hasOwnProperty(data.sg_name)) {
-                    students.value[data.sg_name] = [];
-                }
-                students.value[data.sg_name].push({
-                    connectionId: connection.connectionId,
-                    username: `${data.username}` || "Unknown User",
-                    connection: connection,
-                });
+const updateUserList = (data, connection, isRemoved = false) => {
+    if (data.username != "screen") {
+        if (!students.value.hasOwnProperty(data.sg_name)) {
+            students.value[data.sg_name] = [];
+        }
+        
+        if (isRemoved) {
+            students.value[data.sg_name] = students.value[data.sg_name].filter(
+                student => student.connectionId !== connection.connectionId
+            );
+            if (students.value[data.sg_name].length === 0) {
+                delete students.value[data.sg_name];
             }
-        });
+        } else {
+            students.value[data.sg_name].push({
+                connectionId: connection.connectionId,
+                username: `${data.username}` || "Unknown User",
+                connection: connection,
+            });
+        }
     }
 };
 const toggleVideo = () => {
@@ -440,31 +446,52 @@ const toggleAudio = () => {
         screenPublisher.value.publishAudio(audioEnabled.value);
     }
 };
-const toggleFullScreen = () => {
-    const container = roomContainer.value;
-    if (!fullScreen.value) {
-        if (container.requestFullscreen) {
-            container.requestFullscreen();
-        } else if (container.mozRequestFullScreen) {
-            container.mozRequestFullScreen();
-        } else if (container.webkitRequestFullscreen) {
-            container.webkitRequestFullscreen();
-        } else if (container.msRequestFullscreen) {
-            container.msRequestFullscreen();
-        }
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-            document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
+const toggleFullScreen = (element) => {
+    if(element != roomContainer.value)
+    {
+        if(!document.fullscreenElement) {
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            }
+        } else {
+            CancelFullScreen()
+        } 
+    } else if(!fullScreen.value) {
+        if (element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+        } else if (element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen();
+        } else if (element.msRequestFullscreen) {
+            element.msRequestFullscreen();
         }
     }
-    fullScreen.value = !fullScreen.value;
+    else {
+        CancelFullScreen()
+    } 
+
+    if(element == roomContainer.value)
+        fullScreen.value = !fullScreen.value;
 };
+
+const CancelFullScreen = () => {
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+    } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+    }
+}
 
 const endCall = () => {
     if (session.value) {
