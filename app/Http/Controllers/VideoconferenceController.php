@@ -207,7 +207,7 @@ class VideoconferenceController extends Controller
         if ($vc->user_id == $user->id) {
             return $this->openViduService->connectToSession($vc->session, [
                 'role' => 'MODERATOR',
-                'data' => json_encode(['user_id' => $user->id, 'username' => $user->full_name])
+                'data' => json_encode(['user_id' => $user->id, 'username' => $user->full_name, 'role' => 'MODERATOR'])
             ]);
         } else {
             $this->createTestLogAndAnswerLogs($vc, $user, $questions);
@@ -222,7 +222,8 @@ class VideoconferenceController extends Controller
                 'data' => json_encode([
                     'user_id' => $user->id,
                     'username' => $user->full_name,
-                    'sg_name' => $user->sg_name
+                    'sg_name' => $user->sg_name,
+                    'role' => $role
                 ])
             ]);
         }

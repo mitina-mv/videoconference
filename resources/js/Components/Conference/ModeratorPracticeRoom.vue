@@ -96,7 +96,13 @@
                 />
             </div>
             <div class="d-flex gap-3">
-                <Button icon="pi pi-megaphone" rounded severity="warn"></Button>
+                <Button
+                    @click="muteAll"
+                    icon="pi pi-megaphone"
+                    rounded
+                    severity="warn"
+                    v-if="settings.permission_mute"
+                ></Button>
                 <Button
                     @click="toggleUserPanel"
                     icon="pi pi-users"
@@ -233,6 +239,7 @@ const props = defineProps({
     tokenScreen: String,
     messages: [Array, null],
     questions: [Array, null],
+    settings: [Object, null],
     user: Object,
 });
 
@@ -325,7 +332,7 @@ const joinSession = async () => {
                         user.videoBlock,
                         { insertMode: "APPEND" }
                     );
-                    subscribers.value.push(subscriber);
+                    subscribers.value.push(stream.connection);
                 }
              }, 1000);
         });
@@ -414,8 +421,9 @@ const updateUserList = () => {
         });
     }
 };
-
 const toggleVideo = () => {
+    if(screenPublisher.value) return;
+
     videoEnabled.value = !videoEnabled.value;
     if (publisher.value) {
         publisher.value.publishVideo(videoEnabled.value);
@@ -427,8 +435,11 @@ const toggleAudio = () => {
     if (publisher.value) {
         publisher.value.publishAudio(audioEnabled.value);
     }
+    
+    if (screenPublisher.value) {
+        screenPublisher.value.publishAudio(audioEnabled.value);
+    }
 };
-
 const toggleFullScreen = () => {
     const container = roomContainer.value;
     if (!fullScreen.value) {
@@ -637,6 +648,21 @@ const toggleScreenShare = () => {
         stopScreenSharing();
     }
 };
+
+const muteAll = () => {
+    session.value
+        .signal({
+            data: '',
+            to: subscribers,
+            type: "mute",
+        })
+        .then(() => {
+            console.log("Mute All users");
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+}
 
 onMounted(() => {
     console.warn("PRACTICE");

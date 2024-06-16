@@ -71,6 +71,7 @@ const props = defineProps({
                                 :tokenScreen="tokenScreen"
                                 :messages="messages"
                                 :user="$page.props.auth.user"
+                                :settings="settings"
                             ></ModeratorPracticeRoom>                            
                         </div>
                         <div v-else>

@@ -278,8 +278,14 @@ const joinSession = async () => {
     try {
         session.value.on("connectionCreated", (event) => {
             const connection = event.connection;
+            console.log('connection', connection);
             const data = JSON.parse(connection.data);
             if(data.user_id == props.user.id) return;
+
+            if(data.role == 'MODERATOR') {
+                teacher.value = connection
+            }
+
             addUser(
                 connection.connectionId,
                 data.username,
@@ -339,6 +345,16 @@ const joinSession = async () => {
             movePresencePrompt();
         });
 
+        session.value.on("signal:mute", (event) => {
+            audioEnabled.value = false
+            if (publisher.value) {
+                publisher.value.publishAudio(false);
+            }
+            if (screenPublisher.value) {
+                screenPublisher.value.publishAudio(false);
+            }
+        });
+
         session.value.on("signal:chat", (event) => {
             const message = JSON.parse(event.data);
             messages.value.push(message);
@@ -388,6 +404,8 @@ const removeUser = (id) => {
     }
 };
 const toggleVideo = () => {
+    if(screenPublisher.value) return;
+
     videoEnabled.value = !videoEnabled.value;
     if (publisher.value) {
         publisher.value.publishVideo(videoEnabled.value);
@@ -398,6 +416,10 @@ const toggleAudio = () => {
     audioEnabled.value = !audioEnabled.value;
     if (publisher.value) {
         publisher.value.publishAudio(audioEnabled.value);
+    }
+    
+    if (screenPublisher.value) {
+        screenPublisher.value.publishAudio(audioEnabled.value);
     }
 };
 const toggleFullScreen = () => {
