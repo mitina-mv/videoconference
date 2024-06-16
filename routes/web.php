@@ -43,48 +43,51 @@ Route::get('/dashboard', function () {
 })->middleware(['auth'])->name('dashboard');
 
 
-Route::group(['prefix' => 'admin'], function () {
+Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin.index');
     Route::get('/edit/{id}', [AdminController::class, 'edit'])->name('admin.edit');
     Route::get('/new/{role}', [AdminController::class, 'create'])->name('admin.new');
-})->middleware(['auth']);
+});
 
 
-Route::group(['prefix' => 'reference'], function () {
+Route::group(['prefix' => 'reference', 'middleware' => ['auth']], function () {
     Route::get('/studgroups', [AdminController::class, 'studgroups'])->name('admin.reference.studgroups');
     Route::get('/disciplines', [AdminController::class, 'disciplines'])->name('admin.reference.disciplines');
     Route::get('/themes', [AdminController::class, 'themes'])->name('admin.reference.themes');
-})->middleware(['auth']);
+});
 
-Route::group(['prefix' => 'questions'], function () {
+Route::group(['prefix' => 'questions', 'middleware' => ['auth', 'teacher']], function () {
     Route::get('/', [QuestionController::class, 'index'])->name('questions.index');
     Route::get('/edit/{id}', [QuestionController::class, 'edit'])->name('questions.edit');
     Route::get('/new', [QuestionController::class, 'create'])->name('questions.new');
-})->middleware(['auth']);
+});
 
-Route::group(['prefix' => 'tests'], function () {
+Route::group(['prefix' => 'tests', 'middleware' => ['auth', 'teacher']], function () {
     Route::get('/', [TestController::class, 'index'])->name('tests.index');
     Route::get('/edit/{id}', [TestController::class, 'edit'])->name('tests.edit');
     Route::get('/new', [TestController::class, 'create'])->name('tests.new');
-})->middleware(['auth']);
+});
 
-Route::group(['prefix' => 'assignments'], function () {
+Route::group(['prefix' => 'assignments', 'middleware' => ['auth', 'teacher']], function () {
     Route::get('/', [AssignmentController::class, 'index'])->name('assignments.index');
     Route::get('/edit/{id}', [AssignmentController::class, 'edit'])->name('assignments.edit');
     Route::get('/new', [AssignmentController::class, 'create'])->name('assignments.new');
 
     Route::get('/my', [MyAssignmentController::class, 'index'])->name('assignments.my');
     Route::get('/testing/{testlog_id}', [MyAssignmentController::class, 'testing'])->name('assignments.testing');
-})->middleware(['auth']);
+});
 
 Route::group(['prefix' => 'videoconferences', 'middleware' => ['auth']], function () {
-    Route::get('/', [VideoconferenceController::class, 'index'])->name('videoconferences.index');
-    Route::get('/edit/{id}', [VideoconferenceController::class, 'edit'])->name('videoconferences.edit');
-    Route::get('/new', [VideoconferenceController::class, 'create'])->name('videoconferences.new');
+    Route::group(['middleware' => ['teacher']], function () {
+        Route::get('/', [VideoconferenceController::class, 'index'])->name('videoconferences.index');
+        Route::get('/edit/{id}', [VideoconferenceController::class, 'edit'])->name('videoconferences.edit');
+        Route::get('/new', [VideoconferenceController::class, 'create'])->name('videoconferences.new');
+        Route::get('/detail/{vc_id}', [VideoconferenceController::class, 'detail'])->name('videoconferences.detail');
+    });
+
     Route::get('/room/{session}', [VideoconferenceController::class, 'room'])->name('videoconferences.room');
     
     Route::get('/my', [MyVideoconferenceController::class, 'index'])->name('videoconferences.my');
-    Route::get('/detail/{vc_id}', [VideoconferenceController::class, 'detail'])->name('videoconferences.detail');
     Route::get('/my/detail/{vc_id}', [ReportController::class, 'detailStudent'])->name('videoconferences.my.detail');
 });
 
@@ -102,7 +105,6 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/tokens/create', function (Request $request) {
     $token = $request->user()->createToken($request->token_name);
-
     return ['token' => $token->plainTextToken];
 });
 

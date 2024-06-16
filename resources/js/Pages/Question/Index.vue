@@ -17,7 +17,7 @@ const tableColumns = [
     {
         code: "text",
         style: {
-            width: "35%",
+            width: "20%",
         },
         sort: true,
         title: labels.questions_fields.text.title,
@@ -28,7 +28,7 @@ const tableColumns = [
         type: "html",
         sort: false,
         style: {
-            width: "25%",
+            width: "40%",
         },
     },
     {

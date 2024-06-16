@@ -210,7 +210,7 @@ watch(
             :exportable="false"
             v-if="includeCrudActions"
             header="Управление"
-            :style="{ width: '5%' }"
+            :style="{ width: '3%' }"
         >
             <template #body="row">
                 <a :href="route(routeNameEdit, row.data.id)">
