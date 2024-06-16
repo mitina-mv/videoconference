@@ -102,8 +102,7 @@ const hideDeleteDialog = () => {
 const deleteItem = () => {
     if (deleteRow.value == null) return;
 
-    axios
-        .delete(
+    axios.delete(
             route("api." + props.routeName + ".destroy", {
                 id: deleteRow.value.id,
             })

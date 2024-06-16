@@ -51,7 +51,6 @@ const updateVisible = (value) => {
 
 const confirmDelete = () => {
     emit('delete');
-    hideDeleteDialog();
 };
 
 const handleVisibleUpdate = (newValue) => {

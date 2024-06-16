@@ -8,6 +8,7 @@ use App\Http\Service\TestService;
 use App\Models\Answer;
 use App\Models\Answerlog;
 use App\Models\Question;
+use App\Models\Studgroup;
 use App\Models\Testlog;
 use App\Models\Videoconference;
 use App\Policies\TeacherPolicy;
@@ -18,6 +19,7 @@ use Orion\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Date;
 use Orion\Http\Requests\Request as Request;
+use Illuminate\Validation\ValidationException;
 
 class VideoconferenceController extends Controller
 {
@@ -99,6 +101,24 @@ class VideoconferenceController extends Controller
             if ($curDate < $nowDate) {
                 abort(422, 'Нельзя редактировать уже прошедшее назначение.');
             }
+        }
+
+        $this->validateStudgroups($request);
+    }
+    protected function beforeStore(Request $request, $assignment)
+    {
+        $this->validateStudgroups($request);
+    }
+
+    private function validateStudgroups(Request $request)
+    {
+        $studgroupIds = $request->input('studgroups', []);
+        $totalStudents = Studgroup::whereIn('id', $studgroupIds)->withCount('students')->get()->sum('students_count');
+        
+        if ($totalStudents > 2) {
+            throw ValidationException::withMessages([
+                'studgroups' => "Общее количество студентов во всех группах не может превышать 100. Текущее количество: {$totalStudents}.",
+            ]);
         }
     }
 
