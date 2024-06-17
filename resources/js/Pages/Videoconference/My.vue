@@ -162,6 +162,7 @@ watch(disciplineFilter, () => {
                         @fetchData="fetchData"
                         :total="totalPage"
                         routeName="videoconferences"
+                        :includeCrudActions="false"
                     >
                         <template #controls="{ data }">
                             <div v-if="data.is_active && !data.is_completed">

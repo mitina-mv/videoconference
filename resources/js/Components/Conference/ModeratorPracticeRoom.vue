@@ -312,7 +312,7 @@ const joinSession = async () => {
                 "red",
                 data.user_id
             );
-            updateUserList(data, connection)
+            // updateUserList(data, connection)
         });
 
         session.value.on("connectionDestroyed", (event) => {
@@ -320,7 +320,7 @@ const joinSession = async () => {
             const data = JSON.parse(connection.data);
 
             removeUser(connection.connectionId);
-            updateUserList(data, connection, true);
+            // updateUserList(data, connection, true);
         });
 
         session.value.on("streamCreated", ({ stream }) => {
@@ -328,6 +328,7 @@ const joinSession = async () => {
             const user = users.find(
                 (u) => u.id === connectionId || u.screenShareId === connectionId
             );
+            console.warn(users, user);
             setTimeout(() => { 
                 if (user && user.videoBlock) {
                     const subscriber = session.value.subscribe(
@@ -335,7 +336,7 @@ const joinSession = async () => {
                         user.videoBlock,
                         { insertMode: "APPEND" }
                     );
-                    subscribers.value.push(stream.connection);
+                    subscribers.value.push(subscriber);
                 }
              }, 1000);
         });
@@ -353,6 +354,7 @@ const joinSession = async () => {
         });
 
         session.value.on("signal:chat", (event) => {
+            console.warn(users);
             const message = JSON.parse(event.data);
             messages.value.push(message);
         });
@@ -376,7 +378,7 @@ const joinSession = async () => {
         });
 
         session.value.publish(publisher.value);
-        updateUserList();
+        // updateUserList();
 
         await sessionScreen.value.connect(props.tokenScreen);
     } catch (error) {
@@ -624,29 +626,59 @@ const startScreenSharing = () => {
 
     videoEnabled.value = false;
 
-    screenPublisher.value.once("accessAllowed", () => {
+    screenPublisher.value.on("accessAllowed", () => {
         session.value.unpublish(publisher.value);
-
-        sessionScreen.value.publish(screenPublisher.value);
         screenPublisher.value.stream
             .getMediaStream()
             .getVideoTracks()[0]
             .addEventListener("ended", () => {
                 stopScreenSharing();
             });
+        sessionScreen.value.publish(screenPublisher.value);
     });
 
-    sessionScreen.value.on("signal:hand", (event) => {
-        const user = JSON.parse(event.data);
-        hands.value.push(user.username);
-        hands.value = [...new Set(hands.value)];
-    });
-
-    screenPublisher.value.once("accessDenied", () => {
+    screenPublisher.value.on("accessDenied", () => {
         stopScreenSharing();
     });
-
 };
+
+// const startScreenSharing = () => {
+//     if (screenPublisher.value) return;
+
+//     screenPublisher.value = OVScreen.initPublisher(videoContainer.value, {
+//         videoSource: "screen",
+//         publishAudio: audioEnabled.value,
+//         publishVideo: true,
+//         resolution: "1200x980",
+//         mirror: false,
+//     });
+
+//     videoEnabled.value = false;
+
+//     screenPublisher.value.once("accessAllowed", () => {
+//         session.value.unpublish(publisher.value);
+//         publisher.value = null
+
+//         sessionScreen.value.publish(screenPublisher.value);
+//         screenPublisher.value.stream
+//             .getMediaStream()
+//             .getVideoTracks()[0]
+//             .addEventListener("ended", () => {
+//                 stopScreenSharing();
+//             });
+//     });
+
+//     sessionScreen.value.on("signal:hand", (event) => {
+//         const user = JSON.parse(event.data);
+//         hands.value.push(user.username);
+//         hands.value = [...new Set(hands.value)];
+//     });
+
+//     screenPublisher.value.once("accessDenied", () => {
+//         stopScreenSharing();
+//     });
+
+// };
 
 // Остановка публикации экрана
 const stopScreenSharing = () => {
@@ -680,7 +712,7 @@ const muteAll = () => {
     session.value
         .signal({
             data: '',
-            to: subscribers,
+            to: [],
             type: "mute",
         })
         .then(() => {
@@ -692,7 +724,6 @@ const muteAll = () => {
 }
 
 onMounted(() => {
-    console.warn("PRACTICE");
     session.value = OV.initSession();
     sessionScreen.value = OVScreen.initSession();
     joinSession();

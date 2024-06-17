@@ -597,18 +597,18 @@ const startScreenSharing = () => {
 
     videoEnabled.value = false;
 
-    screenPublisher.value.once("accessAllowed", () => {
+    screenPublisher.value.on("accessAllowed", () => {
         session.value.unpublish(publisher.value);
-        sessionScreen.value.publish(screenPublisher.value);
         screenPublisher.value.stream
             .getMediaStream()
             .getVideoTracks()[0]
             .addEventListener("ended", () => {
                 stopScreenSharing();
             });
+        sessionScreen.value.publish(screenPublisher.value);
     });
 
-    screenPublisher.value.once("accessDenied", () => {
+    screenPublisher.value.on("accessDenied", () => {
         stopScreenSharing();
     });
 };
