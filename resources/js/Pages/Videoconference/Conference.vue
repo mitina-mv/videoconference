@@ -7,6 +7,7 @@ import labels from "@/locales/ru.js";
 import ModeratorLectionRoom from "@/Components/Conference/ModeratorLectionRoom.vue";
 import PracticeRoom from "@/Components/Conference/PracticeRoom.vue";
 import ModeratorPracticeRoom from "@/Components/Conference/ModeratorPracticeRoom.vue";
+import Message from 'primevue/message';
 
 const props = defineProps({
     sessionId: [String, null],
@@ -15,6 +16,7 @@ const props = defineProps({
     error: [String, null],
     type: [String, null],
     role: [String, null],
+    themeWarning: [String, null],
     questions: [Array, null],
     messages: [Array, null],
     testlog: [Number, null],
@@ -38,6 +40,7 @@ const props = defineProps({
                     {{ error }}
                 </div>
                 <template v-else>
+                    <Message closable v-if="themeWarning" severity="warn">{{ themeWarning }}</Message>
                     <div v-if="type == 'lecture'">
                         <div
                             class="moderator-lecture-room"

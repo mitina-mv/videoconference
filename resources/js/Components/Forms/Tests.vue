@@ -327,8 +327,10 @@ watch(() => fieldData.value.theme_id.value, watchFixQuestions);
                                 ? 'text-danger'
                                 : ''
                         "
-                        >{{ question.text }}</label
                     >
+                            {{ question.text }}
+                            <span class="text-gray"> (Сложность {{ question.complexity_percent }})</span>
+                    </label>
                 </div>
             </div>
         </div>

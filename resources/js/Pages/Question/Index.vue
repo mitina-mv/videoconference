@@ -137,6 +137,7 @@ const processTableData = (data) => {
                 : namesString;
 
         data[index].theme = element?.theme?.name || "Не указано";
+        data[index].text = element?.text + ` (Сложность ${element?.complexity_percent})`
     });
 };
 

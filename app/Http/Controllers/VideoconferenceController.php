@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Service\ComplexityCalculatorService;
 use App\Http\Service\OpenViduService;
 use App\Http\Service\TestlogService;
 use App\Models\Answerlog;
@@ -83,11 +84,6 @@ class VideoconferenceController extends Controller
 
         if (!$this->userCanAccessRoom($vc, $user)) {
             return $this->renderError('У вас нет доступа к этой видеоконференции');
-        }
-
-        // расчет сложности темы 
-        if($vc->user_id == $user->id) {
-
         }
 
         $questions = $this->getQuestions($vc, $user);
@@ -189,7 +185,26 @@ class VideoconferenceController extends Controller
                     ->first();
             }
 
-            // dd($connection['token'], $conScreen['token']);
+            // вывод предупреждения
+            $themeWarning = null;
+            if($vc->user_id == $user->id && $vc->assignment) {
+                $calculator = new ComplexityCalculatorService();
+
+                // Расчет сложности темы
+                $themeId = $vc->assignment()->test()->theme_id;
+                try {
+                    $P_correct = $calculator->calculateThemeComplexity($themeId);
+                } catch (\Exception $e) {
+                    $themeWarning = 'Не удалось расчитать сложность';
+                }
+                
+                $threshold = env('THRESHOLD_COMPLEX_THEME', 70);
+            
+                if ($P_correct < $threshold && empty($themeWarning)) {
+                    $themeName = $vc->assignment()->test()->theme->name;
+                    $themeWarning = "Тема «{$themeName}» является сложной для студентов. Доля правильных ответов по теме составляет {$P_correct}%.";
+                }
+            }
     
             return Inertia::render('Videoconference/Conference', [
                 'sessionId' => $vc->session,
@@ -203,6 +218,7 @@ class VideoconferenceController extends Controller
                 'questions' => $questions,
                 'backLink' => 'videoconferences.index',
                 'settings' => $vc->settings,
+                'themeWarning' => $themeWarning,
                 'testlog' => empty($testlog) ? null : $testlog->id
             ]);
     

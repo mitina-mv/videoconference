@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Service\ComplexityCalculatorService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -24,11 +25,23 @@ class Question extends Model
     protected $table = 'questions';
     protected $primaryKey = 'id';
 
-    protected $appends = ['correct_answers'];
+    protected $appends = ['correct_answers', 'complexity_percent'];
 
     public function getCorrectAnswersAttribute()
     {
         return $this->answers()->where('status', true)->get();
+    }
+
+    public function getComplexityPercentAttribute()
+    {
+        $calculator = new ComplexityCalculatorService();
+        $p = null;
+        try {
+            $p = (100 - $calculator->calculateQuestionComplexity($this->id)) . '%';
+        } catch (\Exception $e) {
+            $p = '-';
+        }
+        return $p;
     }
         
     public function user()
