@@ -77,8 +77,17 @@ class VideoconferenceController extends Controller
             return $this->renderError('Эта видеоконференция не существует');
         }
 
+        if ($vc->is_completed) {
+            return $this->renderError('Эта видеоконференция уже закончилась');
+        }
+
         if (!$this->userCanAccessRoom($vc, $user)) {
             return $this->renderError('У вас нет доступа к этой видеоконференции');
+        }
+
+        // расчет сложности темы 
+        if($vc->user_id == $user->id) {
+
         }
 
         $questions = $this->getQuestions($vc, $user);
