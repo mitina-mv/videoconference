@@ -259,12 +259,14 @@ class VideoconferenceController extends Controller
         ]);
 
         // генерация pdf
-        $pdfservice = new PDFService();
-        $path = $pdfservice->make((new ReportController())->videoconference($vc->id));
-
-        $vc->update([
-            'path' => $path,
-        ]);
+        try {
+            $pdfservice = new PDFService();
+            $path = $pdfservice->make((new ReportController())->videoconference($vc->id));
+    
+            $vc->update([
+                'path' => $path,
+            ]);
+        } catch (\Exception $e) {}
 
         return response()->noContent();
     }

@@ -165,6 +165,7 @@ const toggleDiscipline = (id) => {
                         :active="activeDiscipline"
                         @toggleItem="toggleDiscipline"
                         addRoute="admin.reference.disciplines"
+                        labelgroup="disciplines"
                     ></reference-filter>
                     <user-table
                         :tableData="tableData"
