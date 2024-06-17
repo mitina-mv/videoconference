@@ -135,7 +135,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import axios from "axios";
 import { OpenVidu } from "openvidu-browser";
 import Button from "primevue/button";
@@ -182,6 +182,7 @@ const joinSession = async () => {
     console.log(props.token);
     try {
         session.value.on("streamCreated", ({stream}) => {
+            videoContainer.value.innerHTML = ''
             const subscriber = session.value.subscribe(
                 stream,
                 videoContainer.value,
@@ -368,5 +369,10 @@ const handAction = () => {
 onMounted(() => {
     session.value = OV.initSession();
     joinSession();
+});
+onBeforeUnmount(() => {
+    if (session.value) {
+        session.value.disconnect();
+    }
 });
 </script>

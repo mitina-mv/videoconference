@@ -312,7 +312,7 @@ const joinSession = async () => {
                 "red",
                 data.user_id
             );
-            // updateUserList(data, connection)
+            updateUserList(data, connection)
         });
 
         session.value.on("connectionDestroyed", (event) => {
@@ -320,7 +320,7 @@ const joinSession = async () => {
             const data = JSON.parse(connection.data);
 
             removeUser(connection.connectionId);
-            // updateUserList(data, connection, true);
+            updateUserList(data, connection, true);
         });
 
         session.value.on("streamCreated", ({ stream }) => {
@@ -328,9 +328,9 @@ const joinSession = async () => {
             const user = users.find(
                 (u) => u.id === connectionId || u.screenShareId === connectionId
             );
-            console.warn(users, user);
             setTimeout(() => { 
                 if (user && user.videoBlock) {
+                    user.videoBlock.innerHTML = ''
                     const subscriber = session.value.subscribe(
                         stream,
                         user.videoBlock,
@@ -615,6 +615,7 @@ const destroyConnection = (connetcion) => {
 
 const startScreenSharing = () => {
     if (screenPublisher.value) return;
+    videoContainer.value.innerHTML = ''
 
     screenPublisher.value = OVScreen.initPublisher(videoContainer.value, {
         videoSource: "screen",
@@ -641,44 +642,6 @@ const startScreenSharing = () => {
         stopScreenSharing();
     });
 };
-
-// const startScreenSharing = () => {
-//     if (screenPublisher.value) return;
-
-//     screenPublisher.value = OVScreen.initPublisher(videoContainer.value, {
-//         videoSource: "screen",
-//         publishAudio: audioEnabled.value,
-//         publishVideo: true,
-//         resolution: "1200x980",
-//         mirror: false,
-//     });
-
-//     videoEnabled.value = false;
-
-//     screenPublisher.value.once("accessAllowed", () => {
-//         session.value.unpublish(publisher.value);
-//         publisher.value = null
-
-//         sessionScreen.value.publish(screenPublisher.value);
-//         screenPublisher.value.stream
-//             .getMediaStream()
-//             .getVideoTracks()[0]
-//             .addEventListener("ended", () => {
-//                 stopScreenSharing();
-//             });
-//     });
-
-//     sessionScreen.value.on("signal:hand", (event) => {
-//         const user = JSON.parse(event.data);
-//         hands.value.push(user.username);
-//         hands.value = [...new Set(hands.value)];
-//     });
-
-//     screenPublisher.value.once("accessDenied", () => {
-//         stopScreenSharing();
-//     });
-
-// };
 
 // Остановка публикации экрана
 const stopScreenSharing = () => {

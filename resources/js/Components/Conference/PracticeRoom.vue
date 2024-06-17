@@ -306,6 +306,8 @@ const joinSession = async () => {
             );
             setTimeout(() => { 
                 if (user && user.videoBlock) {
+                    user.videoBlock.innerHTML = ''
+
                     const subscriber = session.value.subscribe(
                         stream,
                         user.videoBlock,
@@ -586,6 +588,8 @@ const toggleScreenShare = () => {
 };
 const startScreenSharing = () => {
     if (screenPublisher.value) return;
+
+    videoContainer.value.innerHTML = ''
 
     screenPublisher.value = OVScreen.initPublisher(videoContainer.value, {
         videoSource: "screen",

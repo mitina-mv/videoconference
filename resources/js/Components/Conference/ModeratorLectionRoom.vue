@@ -173,7 +173,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, warn } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { OpenVidu } from "openvidu-browser";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
@@ -233,6 +233,16 @@ const joinSession = async () => {
         });
 
         session.value.on("signal:hand", (event) => {
+            if(!publisher.value) return;
+
+            const user = JSON.parse(event.data);
+            hands.value.push(user.username);
+            hands.value = [...new Set(hands.value)]
+        });
+
+        sessionScreen.value.on("signal:hand", (event) => {
+            if(!screenPublisher.value) return;
+
             const user = JSON.parse(event.data);
             hands.value.push(user.username);
             hands.value = [...new Set(hands.value)]
@@ -436,6 +446,8 @@ const destroyConnection = (connetcion) => {
 const startScreenSharing = () => {
     if (screenPublisher.value) return;
 
+    videoContainer.value.innerHTML = ''
+
     screenPublisher.value = OVScreen.initPublisher(videoContainer.value, {
         videoSource: "screen",
         publishAudio: audioEnabled.value,
@@ -446,24 +458,20 @@ const startScreenSharing = () => {
 
     videoEnabled.value = false;
 
-    screenPublisher.value.once("accessAllowed", () => {
+    screenPublisher.value.on("accessAllowed", () => {
+        session.value.unpublish(publisher.value);
+        screenPublisher.value.stream
+            .getMediaStream()
+            .getVideoTracks()[0]
+            .addEventListener("ended", () => {
+                stopScreenSharing();
+            });
         sessionScreen.value.publish(screenPublisher.value);
-        screenPublisher.value.stream.getMediaStream().getVideoTracks()[0].addEventListener("ended", () => {
-            stopScreenSharing();
-        });
     });
 
-    sessionScreen.value.on("signal:hand", (event) => {
-        const user = JSON.parse(event.data);
-        hands.value.push(user.username);
-        hands.value = [...new Set(hands.value)]
-    });
-
-    screenPublisher.value.once('accessDenied', () => {
+    screenPublisher.value.on("accessDenied", () => {
         stopScreenSharing();
     });
-
-    session.value.unpublish(publisher.value);
 };
 
 // Остановка публикации экрана
@@ -471,6 +479,7 @@ const stopScreenSharing = () => {
     if (!screenPublisher.value) return;
     sessionScreen.value.unpublish(screenPublisher.value);
     screenPublisher.value = null;
+    videoContainer.value.innerHTML = ''
 
     videoEnabled.value = true;
     publisher.value = OV.initPublisher(videoContainer.value, {
@@ -498,5 +507,11 @@ onMounted(() => {
     session.value = OV.initSession();
     sessionScreen.value = OVScreen.initSession();
     joinSession();
+});
+onBeforeUnmount(() => {
+    if (session.value) {
+        session.value.disconnect();
+        sessionScreen.value.disconnect();
+    }
 });
 </script>
