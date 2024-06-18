@@ -9,6 +9,7 @@ use App\Models\Answer;
 use App\Models\Answerlog;
 use App\Models\Question;
 use App\Models\Studgroup;
+use App\Models\Test;
 use App\Models\Testlog;
 use App\Models\Videoconference;
 use App\Policies\TeacherPolicy;
@@ -101,13 +102,21 @@ class VideoconferenceController extends Controller
             if ($curDate < $nowDate) {
                 abort(422, 'Нельзя редактировать уже прошедшее назначение.');
             }
+            // Проверяем, была ли существующая дата мероприятия изменена на прошлую
+            if ($curDate > $newDate) {
+                throw ValidationException::withMessages([
+                    'date' => 'Переносить мероприятие на более раннюю дату нельзя'
+                ]);
+            }
         }
 
         $this->validateStudgroups($request);
+        $this->validateTest($request);
     }
     protected function beforeStore(Request $request, $assignment)
     {
         $this->validateStudgroups($request);
+        $this->validateTest($request);
     }
 
     private function validateStudgroups(Request $request)
@@ -118,6 +127,17 @@ class VideoconferenceController extends Controller
         if ($totalStudents > 100) {
             throw ValidationException::withMessages([
                 'studgroups' => "Общее количество студентов во всех группах не может превышать 100. Текущее количество: {$totalStudents}.",
+            ]);
+        }
+    }
+
+    private function validateTest(Request $request)
+    {
+        $testId = $request->input('test_id', []);
+        $test = Test::where('id', $testId)->first();
+        if(empty($test->settings->question_ids)){
+            throw ValidationException::withMessages([
+                'test_id' => "Неправильные настройки используемого теста: необходимо использовать тест с предустановленными вопросами.",
             ]);
         }
     }
