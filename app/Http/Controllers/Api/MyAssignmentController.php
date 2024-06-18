@@ -50,7 +50,7 @@ class MyAssignmentController extends Controller
         if ($request->has('date')) {
             $date = Carbon::parse($request->date)
                 ->timezone('Europe/Moscow')
-                ->format('d.m.Y');
+                ->format('Y-m-d\TH:m:s');
 
             $query->whereHas('assignment', function (Builder $query) use ($date) {
                 $query->whereDate('date', $date);

@@ -1,13 +1,16 @@
 <template>
     <div class="buttons-group mb-2">
-        <Button
-            v-for="item in items"
-            :key="item[idField]"
-            :label="item[label]"
-            outlined
-            :severity="activeId && activeId === item[idField] ? '' : 'secondary'"
-            @click="toggleItem(item[idField])"
-        />
+        <template v-if="activeId">
+            <Button
+                v-for="item in items"
+                :key="item[idField]"
+                :label="item[label]"
+                outlined
+                :severity="activeId && activeId === item[idField] ? '' : 'secondary'"
+                @click="toggleItem(item[idField])"
+            />            
+        </template>
+
         <a v-if="addRoute" :href="route(addRoute)">
             <Button :label="'Добавить ' + labels[labelgroup].case[3]" severity="success" icon="pi pi-plus" />
         </a>
