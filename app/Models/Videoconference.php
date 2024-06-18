@@ -81,7 +81,7 @@ class Videoconference extends Model
 
     public function files()
     {
-        return $this->belongsTo(File::class);
+        return $this->hasMany(File::class, 'videoconference_id', 'id');
     }
     
     public function user()

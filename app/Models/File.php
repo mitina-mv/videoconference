@@ -15,6 +15,7 @@ class File extends Model
     protected $fillable = [
         'path',
         'videoconference_id',
+        'name',
     ];
 
 }

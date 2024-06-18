@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AnswerController;
 use App\Http\Controllers\Api\AssignmentController;
 use App\Http\Controllers\Api\AssignmentTestlogController;
 use App\Http\Controllers\Api\DisciplineController;
+use App\Http\Controllers\Api\FileController;
 use App\Http\Controllers\Api\MyAssignmentController;
 use App\Http\Controllers\Api\MyVideoconferenceController;
 use App\Http\Controllers\Api\QuestionController;
@@ -68,4 +69,7 @@ Route::group(['as' => 'api.'], function() {
     Route::post('/my-assignments/{testlog_id}/save', [MyAssignmentController::class, 'saveAnswer'])->name('my-assignments.saveAnswer');
     
     Orion::resource('my-videoconferences', MyVideoconferenceController::class)->except(['batchStore', 'batchUpdate', 'store', 'update', 'destroy', 'restore', 'batchRestore', 'batchDestroy']);
+
+    Route::post('/upload', [FileController::class, 'upload']);
+    Route::post('/delete-file', [FileController::class, 'delete']);
 });
