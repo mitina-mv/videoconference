@@ -9,11 +9,10 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
+import VueCookies from 'vue-cookies'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
-const token = import.meta.env.TOKEN_APP
 
-axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -29,6 +28,7 @@ createInertiaApp({
         return createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
+            .use(VueCookies)
             .component('font-awesome-icon', FontAwesomeIcon)
             .use(PrimeVue)
             .use(ToastService)
@@ -38,3 +38,19 @@ createInertiaApp({
         color: 'var(--primary-color)',
     },
 });
+
+function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }

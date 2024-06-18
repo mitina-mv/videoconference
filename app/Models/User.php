@@ -33,6 +33,7 @@ class User extends Authenticatable
         'role_id',
         'studgroup_id',
         'is_verify',
+        'token',
     ];
 
     /**
