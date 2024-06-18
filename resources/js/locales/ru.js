@@ -187,7 +187,7 @@ export default {
                 },
                 {
                     id: "permission_switch_questions",
-                    name: "Разрешено переклюать вопрос",
+                    name: "Разрешено переключать вопрос",
                     type: "bool",
                     default: false,
                 },

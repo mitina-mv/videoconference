@@ -17,7 +17,7 @@ const tableColumns = [
     {
         code: "name",
         style: {
-            width: "20%",
+            width: "15%",
         },
         sort: true,
         title: labels.test_fields.name.title,
@@ -27,7 +27,7 @@ const tableColumns = [
         title: labels.test_fields.description.title,
         sort: false,
         style: {
-            width: "20%",
+            width: "15%",
         },
     },
     {

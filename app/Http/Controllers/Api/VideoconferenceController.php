@@ -93,7 +93,7 @@ class VideoconferenceController extends Controller
             $nowDate = new Carbon();
 
             if ($newDate < $nowDate) {
-                abort(422, 'Дата мероприятия не может быть позже текущей даты');
+                abort(422, 'Дата мероприятия не может быть раньше текущей даты');
             }
 
             $curDate = new Carbon($assignment->date);
@@ -115,6 +115,16 @@ class VideoconferenceController extends Controller
     }
     protected function beforeStore(Request $request, $assignment)
     {
+        if ($request->has('date')) {
+            $date = new Carbon($request->input('date'));
+            $nowDate = (new Carbon())->addMinute(5);
+
+            if ($date < $nowDate) {
+                throw ValidationException::withMessages([
+                    'date' => 'Нельзя назначать конференцию на прошедшую или текущую дату.'
+                ]);
+            }
+        }
         $this->validateStudgroups($request);
         $this->validateTest($request);
     }
