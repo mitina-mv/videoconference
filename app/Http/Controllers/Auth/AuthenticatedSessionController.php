@@ -33,7 +33,13 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
-
+        if(!auth()->user()->token) {
+            $token = auth()->user()->createToken(uniqid());
+            auth()->user()->update([
+                'token' => $token->plainTextToken
+            ]);
+        }
+        
         return redirect()->intended(RouteServiceProvider::HOME);
     }
 

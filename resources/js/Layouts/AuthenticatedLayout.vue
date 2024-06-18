@@ -10,6 +10,9 @@ import { Link } from "@inertiajs/vue3";
 import labels from "@/locales/ru.js";
 import Toast from "primevue/toast";
 
+const token = usePage().props.auth.user.token
+axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+
 const showingNavigationDropdown = ref(false);
 const links = [
     {

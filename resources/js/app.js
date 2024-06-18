@@ -11,9 +11,6 @@ import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
-const token = import.meta.env.TOKEN_APP
-
-axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -38,3 +35,4 @@ createInertiaApp({
         color: 'var(--primary-color)',
     },
 });
+

@@ -54,7 +54,11 @@ class RegisteredUserController extends Controller
             'is_verify' => !$adminFirstExists
         ]);
 
-        $user->createToken($request->name);
+        $token = $user->createToken($request->name);
+
+        $user->update([
+            'token' => $token->plainTextToken
+        ]);
 
         event(new Registered($user));
 
