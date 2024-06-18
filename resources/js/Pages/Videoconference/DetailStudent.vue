@@ -101,7 +101,11 @@ const testInfoFields = [
                                 </div>
                                 <div class="vc-files">
                                     <h3>Файлы</h3>
-                                    <div v-if="vc.files"></div>
+                                    <div v-if="vc.files && vc.files.length > 0">
+                                        <div v-for="file in vc.files" :key="file.id">
+                                            <a :href="file.path_full" download>{{ file.name }}</a>
+                                        </div>
+                                    </div>
                                     <p v-else>Файлы не прикреплены</p>
                                 </div>
                             </div>

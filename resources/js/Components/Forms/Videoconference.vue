@@ -262,19 +262,6 @@ const deleteFile = (file) => {
                     class="mt-2"
                     :errors="errors"
                 />
-                <div>
-                    <input type="file" multiple @change="handleFileUpload" class="mt-2" />
-                    <div v-if="uploadedFiles.length" class="mt-2">
-                        <h4>Uploaded Files:</h4>
-                        <ul>
-                            <li v-for="(file, index) in uploadedFiles" :key="index">
-                                {{ file.name }}
-                                <Button type="button" @click="deleteFile(file)" severity="danger" text icon="pi pi-times" />
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
                 <Button @click="sendData" label="Сохранить" class="mt-3" />
             </div>
             <div>
@@ -288,6 +275,20 @@ const deleteFile = (file) => {
                     class="mt-2"
                     :errors="[]"
                 />
+                
+                <div class="form-control mt-2">
+                    <label>Добавьте файлы конференции</label>
+                    <input type="file" multiple @change="handleFileUpload" class="mt-2" />
+                    <div v-if="uploadedFiles.length" class="mt-2">
+                        <h4>Загруженные файлы:</h4>
+                        <ul class="files-list">
+                            <li v-for="(file, index) in uploadedFiles" :key="index">
+                                {{ file.name }}
+                                <Button type="button" @click="deleteFile(file)" severity="danger" text icon="pi pi-times" />
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </form>
