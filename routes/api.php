@@ -72,4 +72,6 @@ Route::group(['as' => 'api.'], function() {
 
     Route::post('/upload', [FileController::class, 'upload']);
     Route::post('/delete-file', [FileController::class, 'delete']);
+    Route::post('/upload-image', [QuestionController::class, 'upload']);
+    Route::post('/delete-image', [QuestionController::class, 'deleteImage']);
 });
