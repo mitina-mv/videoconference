@@ -7,6 +7,7 @@ use App\Models\Question;
 use App\Policies\TeacherPolicy;
 use App\Policies\TruePolicy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
 use Orion\Http\Controllers\Controller;
 use Orion\Http\Requests\Request as Request;
 
@@ -36,5 +37,42 @@ class QuestionController extends Controller
     public function filterableBy() : array
     {
         return ['theme.discipline_id', 'theme_id', 'user_id', 'is_private'];
+    }
+
+    public function upload(Request $request)
+    {
+        $question_id = $request->input('question_id');
+        $files = $request->file('files');
+
+        $question = Question::where('id', $question_id )->first();
+
+        if (!$question) {
+            return response()->json(['message' => 'не найден вопрос'], 404);
+        }
+
+        if ($question->path) {
+            Storage::disk('public')->delete($question->path);
+        }
+
+        $question->update([
+            'path' => $files[0]->store('uploads', 'public'),
+        ]);
+
+        return response()->json(['file' => $question->path_full]);
+    }
+    public function deleteImage(Request $request)
+    {
+        $question_id = $request->input('question_id');
+        $question = Question::where('id', $question_id )->first();
+
+        if (!$question) {
+            return response()->json(['message' => 'не найден вопрос'], 404);
+        }
+
+        if ($question->path) {
+            Storage::disk('public')->delete($question->path);
+        }
+
+        return response()->json(['message' => 'Файл успешно удален']);
     }
 }

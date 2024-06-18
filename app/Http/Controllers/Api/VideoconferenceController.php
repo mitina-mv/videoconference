@@ -41,7 +41,7 @@ class VideoconferenceController extends Controller
 
     public function includes(): array
     {
-        return ['assignment', 'assignment.test', 'assignment.test.theme', 'studgroups',];
+        return ['assignment', 'assignment.test', 'assignment.test.theme', 'studgroups', 'files'];
     }
 
     public function filterableBy(): array
@@ -143,12 +143,15 @@ class VideoconferenceController extends Controller
 
     private function validateTest(Request $request)
     {
-        $testId = $request->input('test_id', []);
-        $test = Test::where('id', $testId)->first();
-        if(empty($test->settings->question_ids)){
-            throw ValidationException::withMessages([
-                'test_id' => "Неправильные настройки используемого теста: необходимо использовать тест с предустановленными вопросами.",
-            ]);
+        if ($request->has('test_id') && $request->test_id) {
+            $testId = $request->input('test_id', []);
+            $test = Test::where('id', $testId)->first();
+
+            if(empty($test->settings->question_ids)){
+                throw ValidationException::withMessages([
+                    'test_id' => "Неправильные настройки используемого теста: необходимо использовать тест с предустановленными вопросами.",
+                ]);
+            }
         }
     }
 

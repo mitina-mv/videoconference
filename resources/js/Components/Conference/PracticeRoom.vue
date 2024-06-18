@@ -105,6 +105,7 @@
 
         <!-- Карточка с вопросом -->
         <div v-if="currentQuestion" class="question-card">
+            <img :src="currentQuestion.path_full" v-if="currentQuestion.path_full" class="main-image">
             <h3 class="mb-2">{{ currentQuestion.text }}</h3>
             <div v-if="currentQuestion.type === 'single'">
                 <div

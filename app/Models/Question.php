@@ -6,6 +6,7 @@ use App\Http\Service\ComplexityCalculatorService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Question extends Model
 {
@@ -19,13 +20,14 @@ class Question extends Model
         'user_id',
         'theme_id',
         'type', // 'single', 'multiple', 'text'
-        'mark'
+        'mark',
+        'path'
     ];
     public $timestamps = false;
     protected $table = 'questions';
     protected $primaryKey = 'id';
 
-    protected $appends = ['correct_answers', 'complexity_percent'];
+    protected $appends = ['correct_answers', 'complexity_percent', 'path_full'];
 
     public function getCorrectAnswersAttribute()
     {
@@ -42,6 +44,11 @@ class Question extends Model
             $p = '-';
         }
         return $p;
+    }
+
+    public function getPathFullAttribute()
+    {
+        return $this->path ? asset(Storage::url($this->path)) : null;
     }
         
     public function user()

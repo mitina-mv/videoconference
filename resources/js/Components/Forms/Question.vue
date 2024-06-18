@@ -80,6 +80,8 @@ const answerField = {
     },
 };
 
+const uploadedFile = ref(props?.data?.path_full || null)
+
 onMounted(() => {
     if (props.data && props.data.answers) {
         answersData.value = props.data.answers;
@@ -253,6 +255,43 @@ const saveAnswers = () => {
         });
 };
 
+const handleFileUpload = (event) => {
+    if (!id.value) {
+        toastService.showErrorToast("Ошибка", "Сначала сохраните вопрос.");
+        return;
+    }
+
+    const files = event.target.files;
+
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+        formData.append('files[]', files[i]);
+    }
+    formData.append('question_id', id.value);
+
+    axios.post('/api/upload-image', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    }).then(response => {
+        uploadedFile.value = response.data.file;
+        event.target.value = ''
+        toastService.showSuccessToast("Загрузка картинки", "картинка успешно загружена!");
+    }).catch(error => {
+        toastService.showErrorToast("Загрузка картинки", "ошибка при загрузке картинки.");
+    });
+}
+
+const deleteFile = () => {
+    axios.post('/api/delete-image', { question_id: id.value })
+        .then(response => {
+            uploadedFile.value = null;
+            toastService.showSuccessToast("Удаление картинки", "картинка успешно удалена!");
+        })
+        .catch(error => {
+            toastService.showErrorToast("Удаление картинки", "Ошибка при удалении картинки.");
+        });
+}
 
 watch(() => fieldData.value.discipline_id.value, filterThemes);
 </script>
@@ -260,9 +299,21 @@ watch(() => fieldData.value.discipline_id.value, filterThemes);
 <template>
     <form @submit.prevent="sendData" class="form d-grid gap-3 grid-col-2">
         <FormField v-for="(field, code) in fieldData"
-                :key="code"
-                :field="field"
-                :errors="errors" />
+            :key="code"
+            :field="field"
+            :errors="errors" />
+
+        <div class="form-control question-file-container">
+            <div v-if="uploadedFile">
+                <h4>Загруженный файл:</h4>
+                <div class="question-image-container">
+                    <img :src="uploadedFile">
+                    <Button type="button" @click="deleteFile" severity="danger" rounded outlined icon="pi pi-times" />
+                </div>
+            </div>
+            <label>Файл картинки</label>
+            <input type="file" @change="handleFileUpload" class="mt-2" accept="image/*" />
+        </div>
 
         <div class="form-footer mt-2">
             <Button @click="sendData" label="Сохранить"> </Button>
@@ -347,3 +398,31 @@ watch(() => fieldData.value.discipline_id.value, filterThemes);
         </div>
     </div>
 </template>
+
+<style scoped>
+.form {
+    align-items: start;
+}
+.question-file-container {
+    grid-row: 2 / 7;
+    grid-column: 2 / -1;
+}
+
+.question-image-container {
+    width: 300px;
+    height: 300px;
+    object-fit: contain;
+    position: relative;
+}
+.question-image-container image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.question-image-container  button.p-button {
+    position: absolute;
+    top: .5em;
+    right: .5em;
+}
+</style>

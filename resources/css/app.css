@@ -339,6 +339,11 @@ svg.w-20.h-20.fill-current.text-gray-500.guest-logo {
     display: grid;
     gap: .5em;
 }
+ul.files-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 .moderator-lecture-room {
     .room {
         position: relative;
@@ -605,6 +610,11 @@ svg.w-20.h-20.fill-current.text-gray-500.guest-logo {
         flex-direction: column;
         align-items: center;
     }
+}
+.question-card .main-image {
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
 }
 
 .test-body * {

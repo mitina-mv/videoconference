@@ -115,7 +115,7 @@ class VideoconferenceController extends Controller
                     ->with(['answers' => function ($query) {
                         $query->select('id', 'question_id', 'name');
                     }])
-                    ->select('id', 'text', 'type')
+                    ->select('id', 'text', 'type', 'path')
                     ->get()
                     ->each(function($row) {
                         $row->setHidden(['correct_answers']);

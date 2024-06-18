@@ -21,6 +21,7 @@ const errors = ref({});
 const labelgroup = "videoconferences_fields";
 const settingsData = ref({});
 const assignment_id = ref(props?.data?.assignment?.id || null);
+const uploadedFiles = ref(props?.data?.files || [])
 
 const fieldData = ref({
     name: {
@@ -84,8 +85,6 @@ onMounted(() => {
     if (assignment_id.value) {
         fieldData.value.test_id.value = props.data.assignment.test_id;
     }
-
-    console.log(fieldData.value);
 });
 
 const sendData = async () => {
@@ -209,6 +208,47 @@ const syncAssignmentTest = async () => {
         throw new Error("Не удалось сохранить тест для видеоконференции.");
     }
 };
+
+const handleFileUpload = (event) => {
+    if (!id.value) {
+        toastService.showErrorToast("Ошибка", "Сначала сохраните видеоконференцию.");
+        return;
+    }
+
+    const files = event.target.files;
+    if (uploadedFiles.value.length + files.length > 10) {
+        toastService.showErrorToast("Ошибка", "Максимальное количество файлов - 10.");
+        return;
+    }
+
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+        formData.append('files[]', files[i]);
+    }
+    formData.append('vc_id', id.value);
+
+    axios.post('/api/upload', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    }).then(response => {
+        uploadedFiles.value.push(...response.data.files);
+        event.target.value = ''
+        toastService.showSuccessToast("Загрузка файлов", "Файлы успешно загружены!");
+    }).catch(error => {
+        toastService.showErrorToast("Загрузка файлов", "Ошибка при загрузке файлов.");
+    });
+}
+const deleteFile = (file) => {
+    axios.post('/api/delete-file', { file, vc_id: id.value })
+        .then(response => {
+            uploadedFiles.value = uploadedFiles.value.filter(f => f.path !== file.path);
+            toastService.showSuccessToast("Удаление файла", "Файл успешно удален!");
+        })
+        .catch(error => {
+            toastService.showErrorToast("Удаление файла", "Ошибка при удалении файла.");
+        });
+}
 </script>
 
 <template>
@@ -235,6 +275,20 @@ const syncAssignmentTest = async () => {
                     class="mt-2"
                     :errors="[]"
                 />
+                
+                <div class="form-control mt-2">
+                    <label>Добавьте файлы конференции</label>
+                    <input type="file" multiple @change="handleFileUpload" class="mt-2" />
+                    <div v-if="uploadedFiles.length" class="mt-2">
+                        <h4>Загруженные файлы:</h4>
+                        <ul class="files-list">
+                            <li v-for="(file, index) in uploadedFiles" :key="index">
+                                {{ file.name }}
+                                <Button type="button" @click="deleteFile(file)" severity="danger" text icon="pi pi-times" />
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </form>
