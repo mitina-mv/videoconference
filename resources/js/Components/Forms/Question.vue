@@ -308,7 +308,7 @@ watch(() => fieldData.value.discipline_id.value, filterThemes);
                 <h4>Загруженный файл:</h4>
                 <div class="question-image-container">
                     <img :src="uploadedFile">
-                    <Button type="button" @click="deleteFile" severity="danger" text icon="pi pi-times" />
+                    <Button type="button" @click="deleteFile" severity="danger" rounded outlined icon="pi pi-times" />
                 </div>
             </div>
             <label>Файл картинки</label>

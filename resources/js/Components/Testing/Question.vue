@@ -1,5 +1,6 @@
 <template>
     <div class="test-body mb-4">
+        <img class="main-img" :src="question.path_full" v-if="question.path_full" :alt="'Картинка ' + question.text">
         <h3 class="mb-3">{{ question.text }}</h3>
         <div class="answers">
             <div v-if="question.type === 'single'">
@@ -50,3 +51,11 @@ const props = defineProps({
     answers: Object,
 });
 </script>
+
+<style scoped>
+.test-body .main-img {
+    width: 100%;
+    height: 400px;
+    object-fit: contain;
+}
+</style>

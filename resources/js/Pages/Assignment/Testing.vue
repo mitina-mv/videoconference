@@ -111,6 +111,7 @@ const sendAnswers = async () => {
             "Сохранение ответов",
             "Ответы успешно сохранены"
         );
+        window.location = route('report.student', {testlog_id: props.testlog_id})
     } catch (error) {
         toastService.showErrorToast(
             "Сохранение ответов",
