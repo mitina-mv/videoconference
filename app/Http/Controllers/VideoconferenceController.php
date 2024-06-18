@@ -191,7 +191,7 @@ class VideoconferenceController extends Controller
                 $calculator = new ComplexityCalculatorService();
 
                 // Расчет сложности темы
-                $themeId = $vc->assignment()->test()->theme_id;
+                $themeId = $vc->assignment->test->theme_id;
                 try {
                     $P_correct = $calculator->calculateThemeComplexity($themeId);
                 } catch (\Exception $e) {
@@ -201,7 +201,7 @@ class VideoconferenceController extends Controller
                 $threshold = env('THRESHOLD_COMPLEX_THEME', 70);
             
                 if ($P_correct < $threshold && empty($themeWarning)) {
-                    $themeName = $vc->assignment()->test()->theme->name;
+                    $themeName = $vc->assignment->test->theme->name;
                     $themeWarning = "Тема «{$themeName}» является сложной для студентов. Доля правильных ответов по теме составляет {$P_correct}%.";
                 }
             }
@@ -223,6 +223,7 @@ class VideoconferenceController extends Controller
             ]);
     
         } catch (\Exception $e) {
+            dd($e->getMessage());
             return $this->renderError('Не удалось подключиться к видеоконференции');
         }
     }

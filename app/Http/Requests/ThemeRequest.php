@@ -23,7 +23,7 @@ class ThemeRequest extends Request
         return [
             'name' => ['sometimes', 'string', 'max:255'],
             'discipline_id' => ['required', 'exists:disciplines,id', 'bail'],
-            'code' => ['nullable', 'string', 'max:255', 'unique:disciplines'],
+            'code' => ['nullable', 'string', 'max:255', 'unique:themes'],
         ];
     }
 
