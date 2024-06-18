@@ -44,7 +44,11 @@ class QuestionController extends Controller
         $question_id = $request->input('question_id');
         $files = $request->file('files');
 
+        dump($question_id, $request);
+
         $question = Question::where('id', $question_id )->first();
+        
+        dump($question);
 
         if (!$question) {
             return response()->json(['message' => 'не найден вопрос'], 404);
@@ -63,7 +67,7 @@ class QuestionController extends Controller
     public function deleteImage(Request $request)
     {
         $question_id = $request->input('question_id');
-        $question = Question::where('id', $question_id )->first();
+        $question = Question::where('id', $question_id)->first();
 
         if (!$question) {
             return response()->json(['message' => 'не найден вопрос'], 404);

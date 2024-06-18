@@ -81,19 +81,19 @@ class AssignmentController extends Controller
     public function beforeUpdate(Request $request, $assignment)
     {
         if ($request->has('date')) {
-            $newDate = new Carbon($request->input('date'));
-            $nowDate = new Carbon();
-
+            $newDate = Carbon::parse($request->input('date'), 'Europe/Moscow'); 
+            $nowDate = Carbon::now('Europe/Moscow');
+        
             if ($newDate < $nowDate) {
-                abort(422, 'Дата мероприятия не может быть позже текущей даты');
+                abort(422, 'Дата мероприятия не может быть раньше текущей даты');
             }
-
-            $curDate = new Carbon($assignment->date);
-
-            // Проверяем, была ли существующая дата мероприятия изменена на прошлую
+        
+            $curDate = Carbon::parse($assignment->date, 'Europe/Moscow');
             if ($curDate < $nowDate) {
                 abort(422, 'Нельзя редактировать уже прошедшее назначение.');
             }
+        
+            $request->merge(['date' => $newDate->setTimezone('UTC')->toDateTimeString()]);
         }
     }
 
