@@ -70,7 +70,7 @@ const activeYear = ref(null);
 const loadData = ref(false);
 
 onMounted(async () => {
-    if (years.value != null) {
+    if (years.value != null && years.value.length > 0) {
         years.value.map((item) => {
             item.label = item.year + ` (${item.count_test})`;
         });

@@ -68,7 +68,7 @@ class AssignmentController extends Controller
         ) {
             $date = Carbon::parse($filtersOld[$key]['value'])
                 ->timezone('Europe/Moscow')
-                ->format('d.m.Y');
+                ->format('Y-m-d\TH:m:s');
             $query->whereDate('date', $date);
         } else if ($request->has('year')) {
             $year = $request->input('year');

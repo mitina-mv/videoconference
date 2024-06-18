@@ -56,7 +56,7 @@ class MyVideoconferenceController extends Controller
         if ($request->has('date')) {
             $date = Carbon::parse($request->date)
                 ->timezone('Europe/Moscow')
-                ->format('d.m.Y');
+                ->format('Y-m-d\TH:m:s');
             $query->whereDate('date', $date);
         }
 
