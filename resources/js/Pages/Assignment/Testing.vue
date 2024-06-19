@@ -82,7 +82,6 @@ const setCurrentQuestion = (question) => {
 };
 
 const navigate = (index) => {
-    console.log(curQuestion.value);
     curQuestion.value = questions.value[index];
     curQuestionIndex.value = index;
 };

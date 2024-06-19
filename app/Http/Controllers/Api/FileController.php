@@ -16,8 +16,6 @@ class FileController extends Controller
         $uploadedFiles = [];
 
         $existingFiles = File::where('videoconference_id', $vc_id)->get()->toArray();
-
-        dump($existingFiles);
         
         if (count($existingFiles) + count($files) > 10) {
             return response()->json(['message' => 'Максимальное количество файлов - 10'], 400);

@@ -34,8 +34,6 @@ onMounted(() => {
                 // addToast(`Неудачно`)
             });
 
-        console.log(props.role);
-
         if (props.role == 2) {
             axios
                 .get("/api/users/" + id + "/studgroups")

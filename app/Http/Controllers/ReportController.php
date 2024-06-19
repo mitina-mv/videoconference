@@ -355,15 +355,15 @@ class ReportController extends Controller
             ->first();
 
         if (!$testlog) {
-            return $this->renderError('Reports/StudentDetail', 'Не найдено тестирование');
+            return $this->renderError('Reports/Teacher', 'Не найдено тестирование');
         }
 
         if (!$testlog->mark) {
-            return $this->renderError('Reports/StudentDetail', 'Студент не проходит этот тест');
+            return $this->renderError('Reports/Teacher', 'Студент не проходит этот тест');
         }
 
         if ($testlog->assignment->user_id != $user->id) {
-            return $this->renderError('Reports/StudentDetail', 'Вы не можете просматривать этот отчет');
+            return $this->renderError('Reports/Teacher', 'Вы не можете просматривать этот отчет');
         }
 
         $questions = [];
@@ -390,7 +390,7 @@ class ReportController extends Controller
             $questions[] = $item;
         }
 
-        return Inertia::render('Reports/StudentDetail', [
+        return Inertia::render('Reports/Teacher', [
             'test' => $testlog->assignment->test()->select('name')->first(),
             'testlog' => $testlog,
             'user' => $testlog->user()->first(),

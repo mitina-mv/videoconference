@@ -97,7 +97,6 @@ const sendData = async () => {
     let data = prepareData();
     data.settings = prepareData(settingsData.value);
 
-    console.log(data);
     try {
         let response;
 

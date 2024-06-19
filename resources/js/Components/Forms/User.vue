@@ -58,7 +58,6 @@ const teachStudgroups = ref(props?.data?.studgroups || null)
 const errors = ref({});
 
 const sendData = () => {
-    console.log(fieldData.value);
     if (!fieldData.value.name || !fieldData.value.lastname || !fieldData.value.email) {
         console.error('Не все обязательные поля заполнены');
         return;
@@ -80,11 +79,9 @@ const sendData = () => {
         data: fieldData.value
     })
     .then(response => {
-        console.log('Данные успешно отправлены');
         if (fieldData.value.role_id === 2 && teachStudgroups.value) {
             axios.patch(`/api/users/${response.data.data.id}/studgroups/sync`, {resources: teachStudgroups.value})
                 .then(response => {
-                    console.log('Группы студентов успешно синхронизированы');
                     window.location = route('admin.index')
                 })
                 .catch(error => {

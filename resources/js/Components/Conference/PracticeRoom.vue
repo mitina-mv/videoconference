@@ -277,11 +277,9 @@ const prevPage = () => {
 };
 
 const joinSession = async () => {
-    console.log(props.token);
     try {
         session.value.on("connectionCreated", (event) => {
             const connection = event.connection;
-            console.log('connection', connection);
             const data = JSON.parse(connection.data);
             if(data.user_id == props.user.id) return;
 
