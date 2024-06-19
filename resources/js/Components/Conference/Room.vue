@@ -180,7 +180,6 @@ const chatMessage = ref("");
 const displayChatPanel = ref(false);
 
 const joinSession = async () => {
-    console.log(props.token);
     try {
         session.value.on("streamCreated", ({stream}) => {
             videoContainer.value.innerHTML = ''

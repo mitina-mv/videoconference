@@ -64,7 +64,6 @@ const settingsData = ref({
 
 onBeforeMount(() => {
     let settings = props?.data?.settings || {};
-    console.log(settings);
 
     labels.test_fields.settings.values.forEach((item) => {
         settingsData.value[item.id] = {

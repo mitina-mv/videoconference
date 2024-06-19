@@ -95,8 +95,6 @@ const updateVisible = (value) => {
 const sendData = () => {
     emit('saveItem', data.value);
     data.value = JSON.parse(JSON.stringify(dataNull));
-    console.log(data.value);
-    console.log(dataNull);
     
     updateVisible(false);
 };

@@ -233,8 +233,6 @@ const saveAnswers = () => {
         requests.push(
             axios.patch('/api/answers/batch', {resources: existingAnswers})
                 .then(response => {
-                    console.log(newAnswers, existingAnswers);
-
                 })
         );
     }

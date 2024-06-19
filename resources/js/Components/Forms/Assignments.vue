@@ -71,7 +71,6 @@ const sendData = async () => {
         }
 
         if (response.data.data.id) {
-            console.log(response.data.data.id);
             id.value = response.data.data.id;
             await syncStudgroups();
         }
