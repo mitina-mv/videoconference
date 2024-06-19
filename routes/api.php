@@ -35,7 +35,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::group(['as' => 'api.', 'middleware' => ['auth', 'auth:sanctum']], function() {
+Route::group(['as' => 'api.', 'middleware' => ['auth:sanctum', 'auth']], function() {
     Orion::resource('users', UserController::class)->withSoftDeletes();
     Orion::belongsToManyResource('users', 'studgroups', UserStudgroupsController::class);
     Orion::resource('studgroups', StudgroupController::class)->withSoftDeletes();

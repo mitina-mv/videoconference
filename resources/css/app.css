@@ -641,6 +641,10 @@ ul.files-list li {
     -moz-border-radius: 6px;
     -ms-border-radius: 6px;
     -o-border-radius: 6px;
+    max-height: 80vh;
+    height: fit-content;
+    overflow: hidden;
+    overflow-y: auto;
 }
 .question-list header {
     background: var(--surface-200);

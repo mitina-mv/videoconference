@@ -54,6 +54,9 @@ const disciplines = ref(props?.disciplines || null);
 const activeDiscipline = ref(null);
 
 onMounted(async () => {
+    if(disciplines.value && disciplines.value.length > 0) {
+        activeDiscipline.value = disciplines.value[0].id
+    }
     await fetchData();
 });
 

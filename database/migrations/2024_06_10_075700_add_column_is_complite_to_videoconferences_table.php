@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('videoconferences', function (Blueprint $table) {
-            $table->boolean('is_old')->default(false);
+            $table->boolean('is_completed')->default(false);
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('videoconferences', function (Blueprint $table) {
-            $table->dropColumn('is_old');
+            $table->dropColumn('is_completed');
         });
     }
 };
