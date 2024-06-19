@@ -223,7 +223,6 @@ class VideoconferenceController extends Controller
             ]);
     
         } catch (\Exception $e) {
-            dd($e->getMessage());
             return $this->renderError('Не удалось подключиться к видеоконференции');
         }
     }
