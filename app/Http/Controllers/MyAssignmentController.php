@@ -100,6 +100,7 @@ class MyAssignmentController extends Controller
                 }
             }
         } catch (Exception $e) {
+            dump($e->getMessage());
             return $this->renderError('Не удалось назначить тестирование.');
         }
 
