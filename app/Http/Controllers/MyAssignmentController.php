@@ -55,7 +55,7 @@ class MyAssignmentController extends Controller
         if($testSettings['fixed_questions']) {
             $questions = $testSettings['question_ids'];
             if($testSettings['is_random']) {
-                $questions = shuffle($questions);
+                shuffle($questions);
             }
         } else {
             $questions = Question::where('theme_id', $test->theme_id)
@@ -100,13 +100,12 @@ class MyAssignmentController extends Controller
                 }
             }
         } catch (Exception $e) {
-            dump($e->getMessage());
             return $this->renderError('Не удалось назначить тестирование.');
         }
 
         $questionsPublish = Question::whereIn('id', $questions)
             ->with(['answers' => function ($query) {
-                $query->select('id', 'question_id', 'name');
+                $query->select('id', 'question_id', 'name')->inRandomOrder();
             }])
             ->select('id', 'text', 'type', 'path')
             ->get()
