@@ -179,8 +179,8 @@ class ReportController extends Controller
 
             // рассчет вовлеченности
             $a = $metrics->count_check == 0 ? 1 : $student_actions['count_check'] / $metrics->count_check;
-            $c = $vc->messages == null ? 1 : $student_actions['count_message'] / env('COUNT_MESSAGES_PERFECT');
-            $h = $student_actions['count_hand'] / env('COUNT_HAND_PERFECT');
+            $c = $vc->messages == null ? 1 : $student_actions['count_message'] / env('COUNT_MESSAGES_PERFECT', 20);
+            $h = $student_actions['count_hand'] / env('COUNT_HAND_PERFECT', 5);
 
             $students[$user_id] = [
                 'full_name' => $student->full_name,
