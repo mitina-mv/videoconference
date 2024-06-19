@@ -216,14 +216,13 @@ class VideoconferenceController extends Controller
                 'type' => $vc->settings->type,
                 'messages' => $vc->messages,
                 'questions' => $questions,
-                'backLink' => 'videoconferences.index',
+                'backLink' =>  $vc->user_id == $user->id ? 'videoconferences.index' : 'videoconferences.my',
                 'settings' => $vc->settings,
                 'themeWarning' => $themeWarning,
                 'testlog' => empty($testlog) ? null : $testlog->id
             ]);
     
         } catch (\Exception $e) {
-            dd($e->getMessage());
             return $this->renderError('Не удалось подключиться к видеоконференции');
         }
     }
