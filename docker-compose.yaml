@@ -1,0 +1,56 @@
+version: "3"
+
+services:
+  php:
+    container_name: conference-php
+    build:
+      context: docker
+    volumes:
+      - ${PWD}:/app
+    working_dir: /app
+    depends_on:
+      - db
+    restart: always
+    networks:
+      - conference-network
+  db:
+    container_name: conference-db
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    restart: always
+    ports:
+      - ${PG_PORT}:5432
+    networks:
+      - conference-network
+    volumes:
+      - conference-data:/var/lib/postgresql/data
+  nginx:
+    container_name: conference-nginx
+    image: nginx:alpine
+    working_dir: /app
+    volumes:
+      - ${PWD}:/app
+      - ${PWD}/docker/conf.d:/etc/nginx/conf.d
+      - ${PWD}/docker/nginx.conf:/etc/nginx/nginx.conf
+      - ${PWD}/live/otisnth.ru/:/etc/nginx/ssl/
+    ports:
+      - ${NGINX_PORT}:443
+    depends_on:
+      - php
+    restart: always
+    networks:
+      - conference-network
+  node:
+    container_name: conference-node
+    image: node:alpine
+    working_dir: /app
+    volumes:
+      - ${PWD}:/app
+networks:
+  conference-network:
+    driver: bridge
+volumes:
+  conference-data:
